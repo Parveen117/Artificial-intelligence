@@ -30,11 +30,14 @@ from dataclasses import asdict
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
-from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
+try:  # package execution
+    from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
+except ImportError:  # direct script execution
+    from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
 
-SERVICE_VERSION = "1.0.0"
+SERVICE_VERSION = "1.0.1"
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = BASE_DIR / "certificate_schema_v1.json"
 
