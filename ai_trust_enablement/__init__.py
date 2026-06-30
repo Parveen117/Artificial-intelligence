@@ -15,6 +15,14 @@ from .panini_nyaya_claim_verifier import (
     PramanaResult,
     DerivationState,
 )
+from .paninian_meta_engine import (
+    derive,
+    derive_many,
+    compact_trace,
+    DerivedRule,
+    RuleMetadata,
+)
+from .paninian_certificate_adapter import enrich_report
 
 __all__ = [
     "AIHallucinationRecognitionEngine",
@@ -28,4 +36,10 @@ __all__ = [
     "ClaimVerificationReport",
     "PramanaResult",
     "DerivationState",
+    "derive",
+    "derive_many",
+    "compact_trace",
+    "DerivedRule",
+    "RuleMetadata",
+    "enrich_report",
 ]
