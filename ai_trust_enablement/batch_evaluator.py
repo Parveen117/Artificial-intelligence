@@ -14,9 +14,12 @@ import argparse
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, List
 
-from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, canonical_json, sha256_json
+try:  # package execution
+    from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, canonical_json, sha256_json
+except ImportError:  # direct script execution
+    from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, canonical_json, sha256_json
 
 
 def read_jsonl(path: Path) -> List[Dict]:
