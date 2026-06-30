@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-recognition-certificate-v1.schema.json",
+  "title": "AI Recognition Certificate v1",
+  "type": "object",
+  "required": [
+    "version",
+    "certificate_type",
+    "device",
+    "event",
+    "reference_signature",
+    "current_signature",
+    "recognition_state",
+    "seam_memory",
+    "technical_action",
+    "certificate_hash"
+  ],
+  "properties": {
+    "version": {"type": "string"},
+    "certificate_type": {"type": "string", "const": "AI_RECOGNITION_CERTIFICATE"},
+    "device": {
+      "type": "object",
+      "required": ["engine", "model_id", "tokenizer_version"],
+      "properties": {
+        "engine": {"type": "string"},
+        "model_id": {"type": "string"},
+        "tokenizer_version": {"type": "string"}
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_index", "timestamp_unix", "prompt_hash"],
+      "properties": {
+        "event_index": {"type": "integer"},
+        "timestamp_unix": {"type": "integer"},
+        "prompt_hash": {"type": "string"}
+      }
+    },
+    "reference_signature": {"$ref": "#/$defs/state_signature"},
+    "current_signature": {"$ref": "#/$defs/state_signature"},
+    "recognition_state": {
+      "type": "object",
+      "required": [
+        "phase_value",
+        "scale_value",
+        "seam_memory_value",
+        "raw_residue",
+        "seam_compensation",
+        "testing_footprint",
+        "open_residue",
+        "classification",
+        "technical_action"
+      ],
+      "properties": {
+        "phase_value": {"type": "number", "minimum": 0},
+        "scale_value": {"type": "number", "minimum": 0},
+        "seam_memory_value": {"type": "integer", "minimum": 0},
+        "unsupported_entity_count": {"type": "integer", "minimum": 0},
+        "unsupported_number_count": {"type": "integer", "minimum": 0},
+        "unsupported_sentence_count": {"type": "integer", "minimum": 0},
+        "negation_shift": {"type": "number", "minimum": 0},
+        "raw_residue": {"type": "number", "minimum": 0},
+        "seam_compensation": {"type": "number", "minimum": 0},
+        "testing_footprint": {"type": "number", "minimum": 0},
+        "open_residue": {"type": "number", "minimum": 0},
+        "classification": {"type": "string", "enum": ["RECOGNITION", "BOUNDED_RESIDUE", "ACTIONABLE_RESIDUE"]},
+        "technical_action": {"type": "string", "enum": ["COMMIT_OUTPUT", "FLAG_FOR_REVIEW", "DEFER_AND_REGENERATE_WITH_RETRIEVAL"]},
+        "unsupported_spans": {"type": "array", "items": {"type": "string"}},
+        "entropy_capacity": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["entropy", "effective_temperature", "capacity_v", "lambda_v", "confidence_collapse"],
+              "properties": {
+                "entropy": {"type": "number"},
+                "effective_temperature": {"type": "number"},
+                "capacity_v": {"type": "number"},
+                "lambda_v": {"type": "number"},
+                "confidence_collapse": {"type": "boolean"}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "seam_memory": {
+      "type": "object",
+      "required": ["k", "unsupported_entities", "unsupported_numbers"],
+      "properties": {
+        "k": {"type": "integer", "minimum": 0},
+        "unsupported_entities": {"type": "array", "items": {"type": "string"}},
+        "unsupported_numbers": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "technical_action": {
+      "type": "object",
+      "required": ["action", "classification"],
+      "properties": {
+        "action": {"type": "string"},
+        "classification": {"type": "string"}
+      }
+    },
+    "certificate_hash": {"type": "string"}
+  },
+  "$defs": {
+    "state_signature": {
+      "type": "object",
+      "required": [
+        "signature_hash",
+        "token_count",
+        "content_token_count",
+        "unique_content_token_count",
+        "numbers",
+        "entities",
+        "negator_count",
+        "phase_hash"
+      ],
+      "properties": {
+        "signature_hash": {"type": "string"},
+        "token_count": {"type": "integer", "minimum": 0},
+        "content_token_count": {"type": "integer", "minimum": 0},
+        "unique_content_token_count": {"type": "integer", "minimum": 0},
+        "numbers": {"type": "array", "items": {"type": "string"}},
+        "entities": {"type": "array", "items": {"type": "string"}},
+        "negator_count": {"type": "integer", "minimum": 0},
+        "phase_hash": {"type": "string"}
+      }
+    }
+  }
+}
