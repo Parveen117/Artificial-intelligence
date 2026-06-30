@@ -5,6 +5,10 @@ This folder provides a concrete enablement implementation for AI hallucination a
 ## Files
 
 - `ai_hallucination_recognition_engine.py` - complete deterministic implementation.
+- `certificate_schema_v1.json` - machine-readable JSON schema for the recognition certificate.
+- `sample_cases.jsonl` - deterministic grounded, hallucinated, dosage-error, and bounded-paraphrase cases.
+- `batch_evaluator.py` - evaluates JSONL cases and writes certificate JSONL plus a summary.
+- `run_enablement_tests.py` - no-dependency assertion tests for the implementation.
 
 ## Concrete engineering definitions
 
@@ -78,6 +82,21 @@ python ai_trust_enablement/ai_hallucination_recognition_engine.py \
   --out certificate.json
 ```
 
+Run the deterministic sample suite:
+
+```bash
+python ai_trust_enablement/batch_evaluator.py \
+  --input ai_trust_enablement/sample_cases.jsonl \
+  --output ai_trust_enablement/batch_certificates.jsonl \
+  --summary ai_trust_enablement/batch_summary.json
+```
+
+Run the no-dependency tests:
+
+```bash
+python ai_trust_enablement/run_enablement_tests.py
+```
+
 ## Why this improves enablement and definiteness
 
 This is not merely a broad claim saying “apply a recognition operator.” The recognition operator is concretely implemented as a state-signature comparison. The signature includes phase/order residue, scale/support residue, and seam-memory residue. The output is a certificate containing concrete fields and a deterministic hash.
@@ -91,3 +110,13 @@ That is far more definite than the earlier abstract wording. Tiny miracle, reall
 ## Subject-matter eligibility hook
 
 The implementation is tied to a practical computer task: detecting unreliable generated output from a model answer, producing a machine-readable certificate, and triggering a technical action such as commit, flag, defer, or regenerate. The output is not a mental judgment; it is a structured runtime record and control signal.
+
+## Prosecution-useful anchors
+
+This folder now supports three things the provisional needs badly:
+
+1. A working implementation, not just equations.
+2. A step-by-step AI hallucination walkthrough from input to certificate.
+3. A concrete glossary that maps invented terms into engineering fields.
+
+The strongest bridge into claim language is the state signature: `phase_value`, `scale_value`, and `seam_memory_value`. The strongest bridge into eligibility is the generated certificate plus technical action.
