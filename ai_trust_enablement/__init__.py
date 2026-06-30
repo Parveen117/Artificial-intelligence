@@ -29,6 +29,11 @@ from .claim_frame_kernel import (
     FrameMatch,
     FrameClosureReport,
 )
+from .fusion_certificate_engine import (
+    FusionCertificateEngine,
+    FusionCertificate,
+    FusionDecision,
+)
 
 __all__ = [
     "AIHallucinationRecognitionEngine",
@@ -52,4 +57,7 @@ __all__ = [
     "ClaimFrame",
     "FrameMatch",
     "FrameClosureReport",
+    "FusionCertificateEngine",
+    "FusionCertificate",
+    "FusionDecision",
 ]
