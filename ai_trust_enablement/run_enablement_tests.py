@@ -11,17 +11,14 @@ No pytest, no external packages, no ceremonial dependency bonfire.
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from pathlib import Path
 
-from ai_hallucination_recognition_engine import (
-    AIHallucinationRecognitionEngine,
-    build_signature,
-    demo,
-    entropy_capacity_from_logits,
-    sha256_json,
-)
-from batch_evaluator import evaluate_cases
+try:  # package execution
+    from .ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
+    from .batch_evaluator import evaluate_cases
+except ImportError:  # direct script execution
+    from ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
+    from batch_evaluator import evaluate_cases
 
 
 def test_signature_has_concrete_fields() -> None:
