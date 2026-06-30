@@ -23,6 +23,12 @@ from .paninian_meta_engine import (
     RuleMetadata,
 )
 from .paninian_certificate_adapter import enrich_report
+from .claim_frame_kernel import (
+    ClaimFrameKernel,
+    ClaimFrame,
+    FrameMatch,
+    FrameClosureReport,
+)
 
 __all__ = [
     "AIHallucinationRecognitionEngine",
@@ -42,4 +48,8 @@ __all__ = [
     "DerivedRule",
     "RuleMetadata",
     "enrich_report",
+    "ClaimFrameKernel",
+    "ClaimFrame",
+    "FrameMatch",
+    "FrameClosureReport",
 ]
