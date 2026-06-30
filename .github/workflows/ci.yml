@@ -1,0 +1,22 @@
+name: ai-trust-enable-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile
+        run: python -m compileall ai_trust_enablement
+      - name: Run enablement tests
+        run: python ai_trust_enablement/run_enablement_tests.py
+      - name: Run batch evaluator
+        run: python ai_trust_enablement/batch_evaluator.py --input ai_trust_enablement/sample_cases.jsonl --output ai_trust_enablement/batch_certificates.jsonl --summary ai_trust_enablement/batch_summary.json
