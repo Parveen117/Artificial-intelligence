@@ -24,6 +24,7 @@ try:  # package execution
     from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from .ecl_commit_adapter import ECLCommitAdapter
     from .future_arrow_operator import FutureArrowConfig, FutureArrowOperator
+    from .lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
     from .monti_operator import MontiOperator, MontiOperatorConfig
     from .release_controller import ReleaseController
     from .retrieval_resolution_engine import RetrievalResolutionEngine
@@ -32,6 +33,7 @@ except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from ecl_commit_adapter import ECLCommitAdapter
     from future_arrow_operator import FutureArrowConfig, FutureArrowOperator
+    from lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
     from monti_operator import MontiOperator, MontiOperatorConfig
     from release_controller import ReleaseController
     from retrieval_resolution_engine import RetrievalResolutionEngine
@@ -76,7 +78,7 @@ class RateLimiter:
 
 
 class AITrustHandler(BaseHTTPRequestHandler):
-    server_version = "AITrustEnablementHTTP/1.4"
+    server_version = "AITrustEnablementHTTP/1.5"
     engine = AIHallucinationRecognitionEngine()
     rate_limiter = RateLimiter(env_int("AI_TRUST_RATE_LIMIT_PER_MIN", 120))
 
@@ -123,6 +125,10 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/v1/resolve":
                 result = self._handle_resolve(payload)
+                json_response(self, HTTPStatus.OK, result)
+                return
+            if self.path == "/v1/lambda-laplace":
+                result = self._handle_lambda_laplace(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
             if self.path == "/v1/monti":
@@ -233,6 +239,50 @@ class AITrustHandler(BaseHTTPRequestHandler):
         result["service_version"] = SERVICE_VERSION
         return result
 
+    def _handle_lambda_laplace(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        config = LambdaLaplaceConfig(
+            dt=float(payload.get("dt", 1.0)),
+            alpha=float(payload.get("alpha", 0.15)),
+            beta=float(payload.get("beta", 0.10)),
+            seam_threshold=float(payload.get("seam_threshold", 0.18)),
+            stress_threshold=float(payload.get("stress_threshold", 0.45)),
+            gap_threshold=float(payload.get("gap_threshold", 0.08)),
+            heat_time=float(payload.get("heat_time", 1.0)),
+        )
+        operator = LambdaLaplaceOperator(config)
+        metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+        if "lambda_p_series" in payload:
+            cert = operator.evaluate_series(
+                lambda_p_series=payload["lambda_p_series"],
+                lambda_v_series=payload.get("lambda_v_series"),
+                skew_intensity_series=payload.get("skew_intensity_series"),
+                entropy_potential_series=payload.get("entropy_potential_series"),
+                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "lambda-laplace-model")),
+                event_index=int(payload.get("event_index", 1)),
+                metadata=metadata,
+            )
+        elif "certificates" in payload:
+            certificates = payload.get("certificates")
+            if not isinstance(certificates, list) or not all(isinstance(item, dict) for item in certificates):
+                raise ValueError("certificates_must_be_array_of_objects")
+            cert = operator.evaluate_certificates(
+                certificates=certificates,
+                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "lambda-laplace-model")),
+                event_index=int(payload.get("event_index", 1)),
+                metadata=metadata,
+            )
+        else:
+            raise ValueError("missing_lambda_p_series_or_certificates")
+        result = asdict(cert)
+        result["service_version"] = SERVICE_VERSION
+        if bool(payload.get("commit_to_ecl", False)):
+            ecl_commit = ECLCommitAdapter(payload.get("ledger_path") or None).commit_certificate(
+                result,
+                source_type="AI_LAMBDA_LAPLACE_CERTIFICATE",
+            )
+            result["ecl_finality_commit"] = ecl_commit.to_dict()
+        return result
+
     def _handle_monti(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         config = MontiOperatorConfig(
             dt=float(payload.get("dt", 1.0)),
@@ -279,7 +329,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
 
     def _handle_future_arrow(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         config = FutureArrowConfig(
-            delta_t=float(payload.get("delta_t", payload.get("delta_t", 1.0))),
+            delta_t=float(payload.get("delta_t", 1.0)),
             entropy_weight=float(payload.get("entropy_weight", 0.45)),
             layer_weight=float(payload.get("layer_weight", 0.25)),
             anchor_weight=float(payload.get("anchor_weight", 0.20)),
