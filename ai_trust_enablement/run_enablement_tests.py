@@ -12,16 +12,19 @@ from __future__ import annotations
 
 import json
 import tempfile
+from dataclasses import asdict
 from pathlib import Path
 
 try:  # package execution
     from .ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
     from .batch_evaluator import evaluate_cases
     from .ecl_commit_adapter import ECLCommitAdapter
+    from .monti_operator import MontiOperator, MontiOperatorConfig
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
     from batch_evaluator import evaluate_cases
     from ecl_commit_adapter import ECLCommitAdapter
+    from monti_operator import MontiOperator, MontiOperatorConfig
 
 
 def test_signature_has_concrete_fields() -> None:
@@ -92,6 +95,28 @@ def test_ecl_finality_commit_adapter() -> None:
     assert verify["checked"] == 2
 
 
+def test_monti_operator_detects_winding_transition() -> None:
+    operator = MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20))
+    cert = asdict(operator.evaluate_series(
+        lambda_p_series=[0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
+        skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
+        model_id="test-monti",
+    ))
+    assert cert["certificate_type"] == "AI_TOPOLOGICAL_MEMORY_CERTIFICATE"
+    assert cert["transition"]["transition_detected"] is True
+    assert cert["transition"]["delta_nu"] >= 1
+    assert cert["technical_action"]["action"] == "HOLD_AND_COMMIT_MEMORY_TRANSITION"
+    assert len(cert["certificate_hash"]) == 64
+
+
+def test_monti_operator_stable_sector() -> None:
+    operator = MontiOperator(MontiOperatorConfig(threshold=10.0))
+    cert = asdict(operator.evaluate_series(lambda_p_series=[0.00, 0.02, 0.03, 0.04, 0.05], model_id="test-monti-stable"))
+    assert cert["transition"]["transition_detected"] is False
+    assert cert["transition"]["delta_nu"] == 0
+    assert cert["technical_action"]["action"] == "CONTINUE_MONITORING"
+
+
 def main() -> None:
     tests = [
         test_signature_has_concrete_fields,
@@ -99,6 +124,8 @@ def main() -> None:
         test_entropy_capacity_collapse_path,
         test_batch_cases,
         test_ecl_finality_commit_adapter,
+        test_monti_operator_detects_winding_transition,
+        test_monti_operator_stable_sector,
     ]
     passed = []
     for test in tests:
