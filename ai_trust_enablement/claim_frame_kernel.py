@@ -21,9 +21,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import re
-from collections import Counter
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -44,11 +42,9 @@ STOPWORDS = {
     "must", "should", "using", "only", "supplied", "context", "answer", "what",
     "where", "when", "why", "how", "does", "do", "did",
 }
-
 NEGATORS = {"not", "no", "never", "none", "without", "false", "incorrect", "cannot", "can't", "doesn't", "didn't"}
 MODAL_WORDS = {"must", "should", "may", "can", "could", "would", "recommended", "required", "optional"}
 SOURCE_WORDS = {"according", "says", "states", "reported", "source", "label", "context", "evidence"}
-
 RELATION_ALIASES: Dict[str, Tuple[str, ...]] = {
     "located_in": ("located", "situated", "based", "found", "in"),
     "completed_in": ("completed", "finished", "built", "constructed"),
@@ -59,7 +55,6 @@ RELATION_ALIASES: Dict[str, Tuple[str, ...]] = {
     "prevents": ("prevent", "prevents", "blocks", "inhibits"),
     "equals": ("is", "are", "was", "were", "means", "equals"),
 }
-
 CANONICAL_TERMS = {
     "dc": "direct_current",
     "direct": "direct_current",
@@ -162,19 +157,18 @@ def tokenize(text: str) -> List[str]:
     return [m.group(0).lower() for m in TOKEN_RE.finditer(text)]
 
 
-def content_tokens(text: str) -> List[str]:
-    return [canonical_token(t) for t in tokenize(text) if t not in STOPWORDS]
-
-
 def canonical_token(token: str) -> str:
     return CANONICAL_TERMS.get(token.lower(), token.lower())
+
+
+def content_tokens(text: str) -> List[str]:
+    return [canonical_token(t) for t in tokenize(text) if t not in STOPWORDS]
 
 
 def sentence_units(text: str) -> List[str]:
     raw = [s.strip() for s in SENTENCE_RE.findall(text) if s.strip()]
     units: List[str] = []
     for s in raw:
-        # Split conservative compound claims when both sides contain relation hints.
         parts = re.split(r"\b(?:;| and )\b", s)
         if len(parts) > 1 and sum(_has_relation_hint(p) for p in parts) >= 2:
             units.extend(p.strip(" .") + "." for p in parts if p.strip())
@@ -185,7 +179,8 @@ def sentence_units(text: str) -> List[str]:
 
 def _has_relation_hint(text: str) -> bool:
     ts = set(tokenize(text))
-    return bool(ts & set().union(*[set(v) for v in RELATION_ALIASES.values()]))
+    rel_words = set().union(*[set(v) for v in RELATION_ALIASES.values()])
+    return bool(ts & rel_words)
 
 
 def extract_entities(text: str) -> Tuple[str, ...]:
@@ -210,15 +205,14 @@ def detect_relation(text: str) -> str:
 
 
 def extract_time(text: str) -> Tuple[str, ...]:
-    nums = extract_numbers(text)
-    time_words = []
-    for n in nums:
-        if len(n.split(".")[0]) == 4 or n in {"daily", "weekly", "monthly"}:
-            time_words.append(n)
+    out: List[str] = []
+    for n in extract_numbers(text):
+        if len(n.split(".")[0]) == 4:
+            out.append(n)
     for t in tokenize(text):
         if t in {"daily", "weekly", "monthly", "yearly", "today", "tomorrow", "yesterday"}:
-            time_words.append(canonical_token(t))
-    return tuple(sorted(set(time_words)))
+            out.append(canonical_token(t))
+    return tuple(sorted(set(out)))
 
 
 def extract_modality(text: str) -> Tuple[str, ...]:
@@ -226,13 +220,11 @@ def extract_modality(text: str) -> Tuple[str, ...]:
 
 
 def extract_source(text: str) -> Tuple[str, ...]:
-    ts = tokenize(text)
-    return tuple(sorted(set(t for t in ts if t in SOURCE_WORDS)))
+    return tuple(sorted(set(t for t in tokenize(text) if t in SOURCE_WORDS)))
 
 
 def extract_location(text: str, relation: str, entities: Sequence[str]) -> Tuple[str, ...]:
     if relation == "located_in":
-        # Use final entity or capitalized location-like token as location candidate.
         if len(entities) >= 2:
             return (entities[-1],)
         for m in re.finditer(r"\bin\s+([A-Z][A-Za-z0-9_-]+)", text):
@@ -242,13 +234,7 @@ def extract_location(text: str, relation: str, entities: Sequence[str]) -> Tuple
 
 def split_subject_object(text: str, relation: str, entities: Sequence[str], numbers: Sequence[str]) -> Tuple[str, str]:
     c_tokens = content_tokens(text)
-    if entities:
-        subject = entities[0]
-    elif c_tokens:
-        subject = c_tokens[0]
-    else:
-        subject = ""
-
+    subject = entities[0] if entities else (c_tokens[0] if c_tokens else "")
     obj = ""
     if relation == "located_in" and len(entities) >= 2:
         obj = entities[-1]
@@ -257,7 +243,9 @@ def split_subject_object(text: str, relation: str, entities: Sequence[str], numb
     elif relation == "made_of":
         lower = text.lower()
         if " of " in lower:
-            obj = content_tokens(text.split(" of ", 1)[1])[0] if content_tokens(text.split(" of ", 1)[1]) else ""
+            rhs = text.split(" of ", 1)[1]
+            rhs_tokens = content_tokens(rhs)
+            obj = rhs_tokens[0] if rhs_tokens else ""
         elif c_tokens:
             obj = c_tokens[-1]
     elif relation == "converts_to" and c_tokens:
@@ -337,7 +325,7 @@ def compare_field(field: str, claim_value: Any, evidence_value: Any) -> FieldCom
         evidence_set = set(evidence_value or ())
         if not claim_set:
             return FieldComparison(field, claim_value, evidence_value, "not_claimed", 1.0)
-        if claim_set and claim_set.issubset(evidence_set):
+        if claim_set.issubset(evidence_set):
             return FieldComparison(field, claim_value, evidence_value, "match", 1.0)
         if claim_set & evidence_set:
             return FieldComparison(field, claim_value, evidence_value, "partial", 0.55)
@@ -357,9 +345,6 @@ def compare_field(field: str, claim_value: Any, evidence_value: Any) -> FieldCom
 
 
 class ClaimFrameKernel:
-    def __init__(self) -> None:
-        pass
-
     def verify(self, context: str, prompt: str, answer: str) -> FrameClosureReport:
         evidence_frames = frames_from_text(context, "E")
         claim_frames = frames_from_text(answer, "C")
@@ -371,7 +356,7 @@ class ClaimFrameKernel:
             residues.append(match.residue)
         open_residue = sum(residues) / len(residues) if residues else 0.0
         payload = {
-            "version": "1.0.0",
+            "version": "1.0.1",
             "engine": "ClaimFrameKernel",
             "context_hash": sha256_text(context),
             "prompt_hash": sha256_text(prompt),
@@ -394,7 +379,7 @@ class ClaimFrameKernel:
         best_scores, best_ev = scored[0]
         comparisons = self._field_comparisons(claim, best_ev)
         classification, reason_tags = self._classify(comparisons, best_scores)
-        residue = self._residue(classification, comparisons, best_scores)
+        residue = self._residue(classification, best_scores)
         confidence = max(0.0, min(1.0, 1.0 - residue if classification.startswith("SUPPORTED") else max(best_scores.get("contradiction", 0.0), residue)))
         return self._make_match(claim, best_ev, classification, residue, best_scores, comparisons, tuple(reason_tags), confidence)
 
@@ -412,9 +397,7 @@ class ClaimFrameKernel:
         return {"direct": direct, "frame": frame, "analogy": analogy, "contradiction": contradiction, "total": total}
 
     def _field_comparisons(self, claim: ClaimFrame, ev: ClaimFrame) -> Tuple[FieldComparison, ...]:
-        fields = [
-            "subject", "relation", "object", "quantity", "time", "location", "modality", "negation", "source"
-        ]
+        fields = ["subject", "relation", "object", "quantity", "time", "location", "modality", "negation", "source"]
         return tuple(compare_field(field, getattr(claim, field), getattr(ev, field)) for field in fields)
 
     def _contradiction_score(self, claim: ClaimFrame, ev: ClaimFrame) -> float:
@@ -431,7 +414,6 @@ class ClaimFrameKernel:
 
     def _classify(self, comparisons: Sequence[FieldComparison], scores: Dict[str, float]) -> Tuple[str, List[str]]:
         by_field = {c.field: c for c in comparisons}
-        tags: List[str] = []
         if by_field["quantity"].status == "mismatch" and by_field["quantity"].claim_value:
             return CONTRADICTED_NUMBER, ["quantity_mismatch"]
         if by_field["negation"].status == "mismatch":
@@ -450,7 +432,7 @@ class ClaimFrameKernel:
             return UNSUPPORTED_SOURCE, ["source_not_grounded"]
         return UNCERTAIN_ROUTE_CONFLICT, ["insufficient_route_closure"]
 
-    def _residue(self, classification: str, comparisons: Sequence[FieldComparison], scores: Dict[str, float]) -> float:
+    def _residue(self, classification: str, scores: Dict[str, float]) -> float:
         if classification.startswith("SUPPORTED"):
             return max(0.0, 1.0 - scores["total"])
         if classification.startswith("CONTRADICTED"):
@@ -468,6 +450,7 @@ class ClaimFrameKernel:
         reason_tags: Sequence[str],
         confidence: Optional[float] = None,
     ) -> FrameMatch:
+        comparison_dicts = tuple(asdict(c) for c in comparisons)
         payload = {
             "claim_frame_id": claim.frame_id,
             "evidence_frame_id": ev.frame_id if ev else None,
@@ -475,10 +458,14 @@ class ClaimFrameKernel:
             "confidence": confidence if confidence is not None else max(0.0, 1.0 - residue),
             "residue": residue,
             "route_scores": scores,
-            "field_comparisons": tuple(comparisons),
+            "field_comparisons": comparison_dicts,
             "reason_tags": tuple(reason_tags),
         }
-        return FrameMatch(match_hash=sha256_json(payload), **payload)
+        return FrameMatch(
+            match_hash=sha256_json(payload),
+            field_comparisons=tuple(comparisons),
+            **{k: v for k, v in payload.items() if k != "field_comparisons"},
+        )
 
 
 def demo() -> Dict[str, Any]:
