@@ -20,12 +20,14 @@ try:  # package execution
     from .batch_evaluator import evaluate_cases
     from .ecl_commit_adapter import ECLCommitAdapter
     from .future_arrow_operator import FutureArrowConfig, FutureArrowOperator
+    from .lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
     from .monti_operator import MontiOperator, MontiOperatorConfig
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
     from batch_evaluator import evaluate_cases
     from ecl_commit_adapter import ECLCommitAdapter
     from future_arrow_operator import FutureArrowConfig, FutureArrowOperator
+    from lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
     from monti_operator import MontiOperator, MontiOperatorConfig
 
 
@@ -210,6 +212,42 @@ def test_future_arrow_ecl_commit() -> None:
     assert commit["entropy_delta"] > 0
 
 
+def test_lambda_laplace_detects_seam_signature() -> None:
+    cert = asdict(LambdaLaplaceOperator(LambdaLaplaceConfig(seam_threshold=0.10, stress_threshold=0.60)).evaluate_series(
+        lambda_p_series=[0.00, 0.10, 0.22, 0.37, 0.54, 0.73, 0.95],
+        lambda_v_series=[0.00, 0.05, 0.09, 0.12, 0.18, 0.22, 0.30],
+        skew_intensity_series=[0.0, 0.2, 0.2, 0.4, 0.6, 0.8, 0.9],
+        entropy_potential_series=[0.01, 0.04, 0.08, 0.13, 0.20, 0.27, 0.35],
+        model_id="test-lambda-laplace",
+    ))
+    assert cert["certificate_type"] == "AI_LAMBDA_LAPLACE_CERTIFICATE"
+    assert cert["engine"] == "LambdaLaplaceOperator"
+    assert cert["analysis"]["classification"] == "LAMBDA_SEAM_SIGNATURE"
+    assert cert["analysis"]["feeds_monti"] is True
+    assert cert["technical_action"]["action"] == "FEED_SEAM_SIGNAL_TO_MONTI"
+    assert len(cert["certificate_hash"]) == 64
+
+
+def test_lambda_laplace_ecl_commit() -> None:
+    cert = asdict(LambdaLaplaceOperator(LambdaLaplaceConfig(seam_threshold=0.10, stress_threshold=0.60)).evaluate_series(
+        lambda_p_series=[0.00, 0.10, 0.22, 0.37, 0.54, 0.73, 0.95],
+        lambda_v_series=[0.00, 0.05, 0.09, 0.12, 0.18, 0.22, 0.30],
+        skew_intensity_series=[0.0, 0.2, 0.2, 0.4, 0.6, 0.8, 0.9],
+        entropy_potential_series=[0.01, 0.04, 0.08, 0.13, 0.20, 0.27, 0.35],
+        model_id="test-lambda-laplace-ecl",
+    ))
+    with tempfile.TemporaryDirectory() as tmp:
+        commit = ECLCommitAdapter(Path(tmp) / "lambda_laplace_ecl.jsonl").commit_certificate(
+            cert,
+            source_type="AI_LAMBDA_LAPLACE_CERTIFICATE",
+        ).to_dict()
+
+    assert commit["source_type"] == "AI_LAMBDA_LAPLACE_CERTIFICATE"
+    assert commit["classification"] == cert["analysis"]["classification"]
+    assert commit["action"] == cert["technical_action"]["action"]
+    assert commit["entropy_delta"] > 0
+
+
 def main() -> None:
     tests = [
         test_signature_has_concrete_fields,
@@ -223,6 +261,8 @@ def main() -> None:
         test_ecl_adapter_reads_monti_transition_classification,
         test_future_arrow_projects_probability_cone,
         test_future_arrow_ecl_commit,
+        test_lambda_laplace_detects_seam_signature,
+        test_lambda_laplace_ecl_commit,
     ]
     passed = []
     for test in tests:
