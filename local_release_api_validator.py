@@ -15,6 +15,7 @@ from typing import Any, Dict, List
 HOST = "127.0.0.1"
 PORT = 8099
 BASE_URL = f"http://{HOST}:{PORT}"
+EXPECTED_SERVICE_VERSION = "1.2.0"
 
 
 CASES: List[Dict[str, Any]] = [
@@ -114,7 +115,7 @@ def validate_case(case: Dict[str, Any]) -> Dict[str, Any]:
         "visible_required": contains_all(visible, case.get("required_visible_substrings", [])),
         "visible_forbidden": contains_none(visible, case.get("forbidden_visible_substrings", [])),
         "release_hash": isinstance(cert.get("release_hash"), str) and len(cert.get("release_hash", "")) == 64,
-        "service_version": cert.get("service_version") == "1.1.0",
+        "service_version": cert.get("service_version") == EXPECTED_SERVICE_VERSION,
     }
     if "expected_retrieval_requests" in case:
         checks["retrieval_count"] = request_count == case["expected_retrieval_requests"]
@@ -153,6 +154,7 @@ def main() -> None:
         health = wait_for_server()
         version = get_json("/version")
         endpoint_ok = "POST /v1/release" in version.get("endpoints", [])
+        version_ok = version.get("version") == EXPECTED_SERVICE_VERSION
         results = [validate_case(case) for case in CASES]
         bad_request = post_json("/v1/release", {"context": "x"}, expected_status=400)
         bad_request_ok = bad_request.get("error") == "bad_request"
@@ -160,6 +162,9 @@ def main() -> None:
             "suite": "local_release_api_validator_v1",
             "health_ok": bool(health.get("ok")),
             "endpoint_ok": endpoint_ok,
+            "version_ok": version_ok,
+            "expected_service_version": EXPECTED_SERVICE_VERSION,
+            "actual_service_version": version.get("version"),
             "bad_request_ok": bad_request_ok,
             "case_count": len(results),
             "pass_count": sum(1 for r in results if r["ok"]),
@@ -167,11 +172,11 @@ def main() -> None:
             "results": results,
             "ledger_path": str(ledger_path),
         }
-        summary["ok"] = summary["health_ok"] and summary["endpoint_ok"] and summary["bad_request_ok"] and summary["fail_count"] == 0
+        summary["ok"] = summary["health_ok"] and summary["endpoint_ok"] and summary["version_ok"] and summary["bad_request_ok"] and summary["fail_count"] == 0
         (out_dir / "release_api_validation_summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
         print("\nLOCAL RELEASE API VALIDATION V1")
         print("=" * 88)
-        print(f"health_ok={summary['health_ok']} endpoint_ok={summary['endpoint_ok']} bad_request_ok={summary['bad_request_ok']}")
+        print(f"health_ok={summary['health_ok']} endpoint_ok={summary['endpoint_ok']} version_ok={summary['version_ok']} bad_request_ok={summary['bad_request_ok']}")
         for r in results:
             print(f"{r['case_id'][:36]:36} {str(r['ok']):5} {r['actual_action']}")
         print("-" * 88)
