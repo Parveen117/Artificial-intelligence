@@ -34,8 +34,21 @@ class ClosureReport:
 
 
 class RNKEClosureEngine:
-    version = "1.0.0"
+    version = "1.1.0"
     name = "RNKEClosureEngine"
+
+    FAIL_KEYS = (
+        "contract_fail",
+        "closure_fail",
+        "smoke_fail",
+        "benchmark_fail",
+        "repair_fail",
+        "resolution_fail",
+        "release_fail",
+        "release_api_fail",
+        "resolution_api_fail",
+        "adversarial_fail",
+    )
 
     def check_service(self, health: Dict[str, Any], version_doc: Dict[str, Any]) -> ClosureReport:
         items: List[ClosureItem] = []
@@ -56,9 +69,15 @@ class RNKEClosureEngine:
         items: List[ClosureItem] = []
         if summary.get("ok") is not True:
             items.append(ClosureItem("SUMMARY_NOT_OK", "ok", True, summary.get("ok"), "HIGH"))
-        for key in ["contract_fail", "release_api_fail", "resolution_api_fail"]:
-            if int(summary.get(key, 0) or 0) != 0:
+        for key in self.FAIL_KEYS:
+            if key in summary and int(summary.get(key, 0) or 0) != 0:
                 items.append(ClosureItem("LAYER_FAIL_COUNT", key, 0, summary.get(key), "HIGH"))
+        if summary.get("compile_ok") is False:
+            items.append(ClosureItem("COMPILE_OPEN", "compile_ok", True, False, "HIGH"))
+        if summary.get("contract_ok") is False:
+            items.append(ClosureItem("CONTRACT_OPEN", "contract_ok", True, False, "HIGH"))
+        if summary.get("closure_ok") is False:
+            items.append(ClosureItem("CLOSURE_OPEN", "closure_ok", True, False, "HIGH"))
         if summary.get("ledger_chain_ok") is False:
             items.append(ClosureItem("LEDGER_CHAIN", "ledger_chain_ok", True, False, "HIGH"))
         return self._report(items, {"summary": stable_hash(summary)})
