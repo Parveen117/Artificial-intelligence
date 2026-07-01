@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-CI Proof Pack v3
+CI Proof Pack v4
 ================
 
 Fresh-clone proof runner for the AI Trust Enablement stack.
 
-v3 adds the release-controller validator to the full-stack proof. The repository
-now checks not only detection, repair, retrieval, adversarial cases, baselines,
-and ledger continuity, but also whether the final answer-release layer behaves
-correctly.
+v4 adds the live release API validator. The repository now checks not only the
+Python release controller, but also the deployed HTTP endpoint POST /v1/release.
 """
 
 from __future__ import annotations
@@ -33,7 +31,7 @@ except ImportError:
     from local_smoke_suite import ensure_dir, evaluate_case, load_cases, print_table, write_summary
 
 
-PROOF_PACK_VERSION = "3.0.0"
+PROOF_PACK_VERSION = "4.0.0"
 DEFAULT_BENCHMARK = Path("ai_trust_enablement") / "benchmark_cases_v1.json"
 FULL_STACK_VALIDATOR = Path("local_full_stack_validator.py")
 FULL_STACK_OUTPUT_DIR = Path("local_full_stack_outputs")
@@ -98,7 +96,7 @@ def read_json_if_present(path: Path) -> Dict[str, Any]:
 
 
 def copy_full_stack_artifacts(output_dir: Path) -> Dict[str, Any]:
-    artifact_dir = output_dir / "full_stack_validator_v3"
+    artifact_dir = output_dir / "full_stack_validator_v4"
     ensure_dir(artifact_dir)
     copied = []
     for extra in [
@@ -108,6 +106,7 @@ def copy_full_stack_artifacts(output_dir: Path) -> Dict[str, Any]:
         "local_repair_validation_outputs",
         "local_resolution_validation_outputs",
         "local_release_controller_outputs",
+        "local_release_api_outputs",
         "local_adversarial_outputs_v1",
         "local_baseline_outputs",
         "local_adversarial_baseline_outputs_v1",
@@ -125,7 +124,7 @@ def copy_full_stack_artifacts(output_dir: Path) -> Dict[str, Any]:
 def run_full_stack_validator(output_dir: Path) -> Dict[str, Any]:
     if not FULL_STACK_VALIDATOR.exists():
         return {
-            "name": "full_stack_validator_v3",
+            "name": "full_stack_validator_v4",
             "ok": False,
             "returncode": 127,
             "stdout": "",
@@ -133,7 +132,7 @@ def run_full_stack_validator(output_dir: Path) -> Dict[str, Any]:
             "summary": {"exists": False},
             "artifacts": {"copied": []},
         }
-    command = run_command("full_stack_validator_v3", [sys.executable, str(FULL_STACK_VALIDATOR)])
+    command = run_command("full_stack_validator_v4", [sys.executable, str(FULL_STACK_VALIDATOR)])
     summary = read_json_if_present(FULL_STACK_OUTPUT_DIR / "full_stack_summary.json")
     artifacts = copy_full_stack_artifacts(output_dir)
     command["summary"] = summary
@@ -144,7 +143,7 @@ def run_full_stack_validator(output_dir: Path) -> Dict[str, Any]:
 
 def write_proof_markdown(output_dir: Path, proof: Dict[str, Any]) -> None:
     lines = [
-        "# CI Proof Pack v3",
+        "# CI Proof Pack v4",
         "",
         f"Status: **{'PASS' if proof['ok'] else 'FAIL'}**",
         f"Proof hash: `{proof['proof_hash']}`",
@@ -166,13 +165,13 @@ def write_proof_markdown(output_dir: Path, proof: Dict[str, Any]) -> None:
 
     full_stack = proof["full_stack_validator"]
     full_stack_status = "PASS" if full_stack.get("ok") else "FAIL"
-    lines.append(f"- full_stack_validator_v3: `{full_stack_status}`")
+    lines.append(f"- full_stack_validator_v4: `{full_stack_status}`")
 
     fs = full_stack.get("summary", {}) or {}
     if fs.get("exists"):
         lines.extend([
             "",
-            "## Full-stack validator v3",
+            "## Full-stack validator v4",
             "",
             f"- Overall OK: `{fs.get('ok')}`",
             f"- Smoke: `{fs.get('smoke_pass')}` pass, `{fs.get('smoke_fail')}` fail",
@@ -180,6 +179,7 @@ def write_proof_markdown(output_dir: Path, proof: Dict[str, Any]) -> None:
             f"- Repair validation: `{fs.get('repair_pass')}` pass, `{fs.get('repair_fail')}` fail",
             f"- Retrieval resolution: `{fs.get('resolution_pass')}` pass, `{fs.get('resolution_fail')}` fail",
             f"- Release controller: `{fs.get('release_pass')}` pass, `{fs.get('release_fail')}` fail",
+            f"- Release API: `{fs.get('release_api_pass')}` pass, `{fs.get('release_api_fail')}` fail",
             f"- Adversarial benchmark: `{fs.get('adversarial_pass')}` pass, `{fs.get('adversarial_fail')}` fail",
             f"- Baseline comparison: fusion `{fs.get('baseline_fusion_pass')}`, naive `{fs.get('baseline_naive_pass')}`",
             f"- Adversarial baseline: fusion `{fs.get('adversarial_baseline_fusion_pass')}`, naive `{fs.get('adversarial_baseline_naive_pass')}`",
@@ -238,7 +238,7 @@ def build_proof(output_dir: Path, benchmark_cases: Path) -> Dict[str, Any]:
     ]
     full_stack = run_full_stack_validator(output_dir)
     proof_payload = {
-        "proof_pack": "ci_proof_pack_v3",
+        "proof_pack": "ci_proof_pack_v4",
         "version": PROOF_PACK_VERSION,
         "timestamp_unix": int(time.time()),
         "environment": {
@@ -264,7 +264,7 @@ def build_proof(output_dir: Path, benchmark_cases: Path) -> Dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run CI Proof Pack v3 for the AI trust stack")
+    parser = argparse.ArgumentParser(description="Run CI Proof Pack v4 for the AI trust stack")
     parser.add_argument("--out-dir", default="ci_proof_outputs")
     parser.add_argument("--benchmark-cases", default=str(DEFAULT_BENCHMARK))
     parser.add_argument("--strict", action="store_true", help="exit with code 1 if any gate fails")
