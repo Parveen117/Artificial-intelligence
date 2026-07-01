@@ -1,4 +1,4 @@
-name: CI Proof Pack v4
+name: CI Proof Pack v5
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   proof-pack:
-    name: Fresh clone release API proof pack
+    name: Fresh clone release and resolution API proof pack
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
 
-      - name: Run CI Proof Pack v4
+      - name: Run CI Proof Pack v5
         run: |
           python -m ai_trust_enablement.ci_proof_pack --strict --out-dir ci_proof_outputs
 
@@ -35,5 +35,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-proof-pack-v4
+          name: ci-proof-pack-v5
           path: ci_proof_outputs/
