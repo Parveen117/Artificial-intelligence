@@ -15,10 +15,12 @@ local_adversarial_baseline_outputs_v1/
 local_baseline_outputs/
 local_benchmark_outputs/
 local_full_stack_outputs/
+local_release_api_outputs/
 local_repair_outputs/
 local_repair_validation_outputs/
 local_resolution_validation_outputs/
 local_run_outputs/
+ci_proof_outputs/
 
 # Local generated demo artifacts
 claim_repair_demo.json
@@ -26,5 +28,9 @@ fusion_certificate.json
 retrieval_demo_plan.json
 retrieval_resolution_supported.json
 retrieval_resolution_contradicted.json
+release_certificate.json
+release_controller_demo_certificate.json
+release_controller_demo_ledger.jsonl
+release_controller_demo_ledger_report.md
 local_evidence_ledger.jsonl
 local_evidence_ledger_report.md
