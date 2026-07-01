@@ -467,8 +467,13 @@ class ClaimFrameKernel:
 
     def _classify(self, comparisons: Sequence[FieldComparison], scores: Dict[str, float]) -> Tuple[str, List[str]]:
         by_field = {c.field: c for c in comparisons}
-        if by_field["quantity"].status == "mismatch" and by_field["quantity"].claim_value:
-            return CONTRADICTED_NUMBER, ["quantity_mismatch"]
+        quantity_cmp = by_field["quantity"]
+        if quantity_cmp.status == "mismatch" and quantity_cmp.claim_value:
+            # If evidence has a different number, this is a contradiction.
+            # If evidence has no number at all, the numeric claim is unsupported, not contradicted.
+            if quantity_cmp.evidence_value:
+                return CONTRADICTED_NUMBER, ["quantity_mismatch"]
+            return UNCERTAIN_ROUTE_CONFLICT, ["quantity_not_grounded"]
         if by_field["negation"].status == "mismatch":
             return CONTRADICTED_NEGATION, ["negation_mismatch"]
         if scores.get("entity_contradiction", 0.0) >= 0.70:

@@ -206,10 +206,32 @@ class FusionCertificateEngine:
     def _action_from_risk(self, risk: float, reasons: Sequence[str], route_agreement: float) -> Tuple[str, str]:
         joined = "|".join(reasons)
         contradiction_present = "contradiction" in joined or "contradicted" in joined
+
+        # Strong contradiction is supported by the semantic frame layer.
+        # Weak contradiction may come from coarse claim-level matching while the frame layer
+        # says the evidence is silent or uncertain. Silent evidence should route to retrieval,
+        # not block as false.
+        strong_frame_contradiction = "frame_contradicted" in joined
+        weak_or_silent_contradiction = (
+            contradiction_present
+            and not strong_frame_contradiction
+            and ("uncertain" in joined or "unsupported" in joined or "route_conflict" in joined)
+        )
+
+        if strong_frame_contradiction and risk >= 0.38:
+            return FINAL_BLOCK, "CONTRADICTION_BLOCK"
+
+        if weak_or_silent_contradiction:
+            if risk >= 0.50:
+                return FINAL_RETRIEVE, "EVIDENCE_INSUFFICIENT"
+            return FINAL_REVIEW, "BOUNDED_REVIEW"
+
         if contradiction_present and risk >= 0.38:
             return FINAL_BLOCK, "CONTRADICTION_BLOCK"
+
         if contradiction_present:
             return FINAL_RETRIEVE, "CONTRADICTION_REQUIRES_EVIDENCE_RECHECK"
+
         if not reasons and risk < 0.18:
             return FINAL_COMMIT, "CERTIFIED_GROUNDED"
         if risk >= 0.72:

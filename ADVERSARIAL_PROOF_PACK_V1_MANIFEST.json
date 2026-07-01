@@ -1,0 +1,19 @@
+{
+  "created_utc": "2026-07-01T08:49:39+00:00",
+  "files": {
+    "ADVERSARIAL_PROOF_PACK_V1_REPORT.md": "5b53babbaec978a53702c7f208d64765882aca2e928d323941c776cdc3eb5391",
+    "ai_trust_enablement/claim_frame_kernel.py": "c3cf83c81a8c66da390a5b7a821866811b1bdf0995aa3d690735f58ab3e8defa",
+    "ai_trust_enablement/fusion_certificate_engine.py": "4d9beece6f23849811925254b33e5a8fb1cbc56a3f1722391a8d83ed978d873a",
+    "local_adversarial_baseline_comparison_v1.py": "9f429e43cb5daef02eb04da80429682910bd316a9ff026c8c82c8af43347a2c6",
+    "local_adversarial_baseline_outputs_v1/adversarial_baseline_report.md": "77706f8fff49d58ca6d5017423c788bf74600a8d646a39724f693b3ce0e982d7",
+    "local_adversarial_cases_v1.json": "f8f31e73ef91ce910710c6d2f8122f61a9978c8f4d05003a1ecafed60eae5a6f",
+    "local_adversarial_outputs_v1/local_smoke_summary.md": "2b723ced7f65a56787049129c1538eda84e7decf31363a109c72ba81c667eede"
+  },
+  "key_rule": "Frame-confirmed contradiction blocks; claim-level contradiction with frame uncertainty routes to evidence retrieval.",
+  "name": "Adversarial Proof Pack v1",
+  "status": "ADVERSARIAL_15_OF_15",
+  "validation": {
+    "adversarial_detection": "15/15",
+    "summary_hash": "e94c61740310f7f600bdb93e7463c3efaae7e69c40364daf028ca6b6f438b5f0"
+  }
+}
