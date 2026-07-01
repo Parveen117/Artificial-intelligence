@@ -247,16 +247,23 @@ class ECLCommitAdapter:
 
     @staticmethod
     def _extract_classification(certificate: Dict[str, Any]) -> str:
-        if "recognition_state" in certificate:
-            return str(certificate.get("recognition_state", {}).get("classification", "UNKNOWN"))
-        if "transition" in certificate and isinstance(certificate.get("transition"), dict):
-            return str(certificate.get("transition", {}).get("classification", "UNKNOWN"))
+        # Topological certificates may carry both transition and recognition-like
+        # state blocks. Prefer the explicit transition classification so the ECL
+        # proof records the sector result, not an unrelated fallback. Apparently
+        # even dictionaries need constitutional law now.
+        transition = certificate.get("transition")
+        if isinstance(transition, dict) and transition.get("classification"):
+            return str(transition.get("classification"))
+        recognition = certificate.get("recognition_state")
+        if isinstance(recognition, dict) and recognition.get("classification"):
+            return str(recognition.get("classification"))
         if "release_action" in certificate:
             return str(certificate.get("release_action"))
         if "final_release_action" in certificate:
             return str(certificate.get("final_release_action"))
-        if "fusion_decision" in certificate:
-            return str(certificate.get("fusion_decision", {}).get("final_action", "UNKNOWN"))
+        fusion = certificate.get("fusion_decision")
+        if isinstance(fusion, dict):
+            return str(fusion.get("final_action", "UNKNOWN"))
         return "UNKNOWN"
 
     @staticmethod
