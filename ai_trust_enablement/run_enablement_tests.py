@@ -117,6 +117,24 @@ def test_monti_operator_stable_sector() -> None:
     assert cert["technical_action"]["action"] == "CONTINUE_MONITORING"
 
 
+def test_ecl_adapter_reads_monti_transition_classification() -> None:
+    operator = MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20))
+    cert = asdict(operator.evaluate_series(
+        lambda_p_series=[0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
+        skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
+        model_id="test-monti-ecl",
+    ))
+    with tempfile.TemporaryDirectory() as tmp:
+        commit = ECLCommitAdapter(Path(tmp) / "monti_ecl.jsonl").commit_certificate(
+            cert,
+            source_type="AI_TOPOLOGICAL_MEMORY_CERTIFICATE",
+        ).to_dict()
+
+    assert commit["classification"] == "TOPOLOGICAL_MEMORY_TRANSITION"
+    assert commit["action"] == "HOLD_AND_COMMIT_MEMORY_TRANSITION"
+    assert commit["source_type"] == "AI_TOPOLOGICAL_MEMORY_CERTIFICATE"
+
+
 def main() -> None:
     tests = [
         test_signature_has_concrete_fields,
@@ -126,6 +144,7 @@ def main() -> None:
         test_ecl_finality_commit_adapter,
         test_monti_operator_detects_winding_transition,
         test_monti_operator_stable_sector,
+        test_ecl_adapter_reads_monti_transition_classification,
     ]
     passed = []
     for test in tests:
