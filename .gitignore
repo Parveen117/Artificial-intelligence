@@ -1,37 +1,30 @@
-# Jupyter temporary files
-.ipynb_checkpoints/
-
-# Python cache files
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*.egg-info/
+.pytest_cache/
 
-# Virtual environments
-venv/
-.env/
-ENV/
-env/
+# Jupyter
+.ipynb_checkpoints/
+Untitled.ipynb
 
-# Secret environment/config files
-.env
-*.env
-credentials.py
-secrets.py
+# Local generated outputs
+local_*_outputs/
+local_adversarial_outputs_v1/
+local_adversarial_baseline_outputs_v1/
+local_baseline_outputs/
+local_benchmark_outputs/
+local_full_stack_outputs/
+local_repair_outputs/
+local_repair_validation_outputs/
+local_resolution_validation_outputs/
+local_run_outputs/
 
-# Logs and temporary files
-*.log
-*.tmp
-tmp/
-temp/
-
-# OS/system files
-.DS_Store
-Thumbs.db
-
-# Large generated data files
-*.csv
-*.xlsx
-*.parquet
-*.db
-*.sqlite
+# Local generated demo artifacts
+claim_repair_demo.json
+fusion_certificate.json
+retrieval_demo_plan.json
+retrieval_resolution_supported.json
+retrieval_resolution_contradicted.json
+local_evidence_ledger.jsonl
+local_evidence_ledger_report.md
