@@ -2,8 +2,8 @@
 """
 ECL finality bridge for AI Trust Enablement.
 
-This module turns AI recognition, repair, release, or retrieval-resolution
-certificates into append-only finality commits.
+This module turns AI recognition, repair, release, retrieval-resolution, or
+Monti topological-memory certificates into append-only finality commits.
 
 It intentionally avoids importing the separate ECL repository at runtime. The
 record shape mirrors the ECL/IEL idea: an external certificate becomes a state
@@ -249,6 +249,8 @@ class ECLCommitAdapter:
     def _extract_classification(certificate: Dict[str, Any]) -> str:
         if "recognition_state" in certificate:
             return str(certificate.get("recognition_state", {}).get("classification", "UNKNOWN"))
+        if "transition" in certificate and isinstance(certificate.get("transition"), dict):
+            return str(certificate.get("transition", {}).get("classification", "UNKNOWN"))
         if "release_action" in certificate:
             return str(certificate.get("release_action"))
         if "final_release_action" in certificate:
