@@ -182,6 +182,11 @@ def main() -> None:
     ))
 
     runs.append(run_cmd(
+        "release_controller_validator",
+        [sys.executable, "local_release_controller_validator.py"]
+    ))
+
+    runs.append(run_cmd(
         "adversarial_benchmark",
         [
             sys.executable,
@@ -210,6 +215,7 @@ def main() -> None:
     benchmark_summary = read_summary(root / "local_benchmark_outputs" / "local_smoke_summary.json")
     repair_summary = read_summary(root / "local_repair_validation_outputs" / "repair_validation_summary.json")
     resolution_summary = read_summary(root / "local_resolution_validation_outputs" / "resolution_validation_summary.json")
+    release_summary = read_summary(root / "local_release_controller_outputs" / "release_controller_validation_summary.json")
     adversarial_summary = read_summary(root / "local_adversarial_outputs_v1" / "local_smoke_summary.json")
 
     baseline_path = root / "local_baseline_outputs" / "baseline_comparison_summary.json"
@@ -219,7 +225,7 @@ def main() -> None:
     adversarial_baseline_summary = json.loads(adversarial_baseline_path.read_text(encoding="utf-8")) if adversarial_baseline_path.exists() else {}
 
     final = {
-        "suite": "local_full_stack_validator_v2",
+        "suite": "local_full_stack_validator_v3",
         "compile_ok": runs[0]["ok"],
         "smoke_pass": smoke_summary["pass_count"],
         "smoke_fail": smoke_summary["fail_count"],
@@ -229,6 +235,8 @@ def main() -> None:
         "repair_fail": repair_summary["fail_count"],
         "resolution_pass": resolution_summary["pass_count"],
         "resolution_fail": resolution_summary["fail_count"],
+        "release_pass": release_summary["pass_count"],
+        "release_fail": release_summary["fail_count"],
         "adversarial_pass": adversarial_summary["pass_count"],
         "adversarial_fail": adversarial_summary["fail_count"],
         "baseline_naive_pass": baseline_summary.get("naive_pass"),
@@ -246,6 +254,7 @@ def main() -> None:
         and final["benchmark_fail"] == 0
         and final["repair_fail"] == 0
         and final["resolution_fail"] == 0
+        and final["release_fail"] == 0
         and final["adversarial_fail"] == 0
         and final["ledger_chain_ok"]
         and baseline_summary.get("fusion_pass") == 10
@@ -259,7 +268,7 @@ def main() -> None:
     )
 
     lines = [
-        "# Local Full Stack Validation Report v2",
+        "# Local Full Stack Validation Report v3",
         "",
         f"Overall OK: `{final['ok']}`",
         "",
@@ -270,6 +279,7 @@ def main() -> None:
         f"| Detection benchmark | {final['benchmark_pass']} | {final['benchmark_fail']} fail |",
         f"| Repair validation | {final['repair_pass']} | {final['repair_fail']} fail |",
         f"| Retrieval resolution | {final['resolution_pass']} | {final['resolution_fail']} fail |",
+        f"| Release controller | {final['release_pass']} | {final['release_fail']} fail |",
         f"| Adversarial benchmark | {final['adversarial_pass']} | {final['adversarial_fail']} fail |",
         f"| Baseline comparison | Fusion {final['baseline_fusion_pass']} | Naive {final['baseline_naive_pass']} |",
         f"| Adversarial baseline | Fusion {final['adversarial_baseline_fusion_pass']} | Naive {final['adversarial_baseline_naive_pass']} |",
@@ -288,13 +298,14 @@ def main() -> None:
     report_md.write_text("\n".join(lines), encoding="utf-8")
 
     print()
-    print("LOCAL FULL STACK VALIDATION V2")
+    print("LOCAL FULL STACK VALIDATION V3")
     print("=" * 94)
     print(f"Compile OK: {final['compile_ok']}")
     print(f"Smoke: {final['smoke_pass']} pass, {final['smoke_fail']} fail")
     print(f"Detection benchmark: {final['benchmark_pass']} pass, {final['benchmark_fail']} fail")
     print(f"Repair validation: {final['repair_pass']} pass, {final['repair_fail']} fail")
     print(f"Retrieval resolution: {final['resolution_pass']} pass, {final['resolution_fail']} fail")
+    print(f"Release controller: {final['release_pass']} pass, {final['release_fail']} fail")
     print(f"Adversarial benchmark: {final['adversarial_pass']} pass, {final['adversarial_fail']} fail")
     print(f"Baseline comparison: fusion {final['baseline_fusion_pass']}, naive {final['baseline_naive_pass']}")
     print(f"Adversarial baseline: fusion {final['adversarial_baseline_fusion_pass']}, naive {final['adversarial_baseline_naive_pass']}")
