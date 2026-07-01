@@ -1,0 +1,39 @@
+name: CI Proof Pack v1
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  proof-pack:
+    name: Fresh clone proof pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Run CI Proof Pack v1
+        run: |
+          python -m ai_trust_enablement.ci_proof_pack --strict --out-dir ci_proof_outputs
+
+      - name: Upload proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-proof-pack-v1
+          path: ci_proof_outputs/
