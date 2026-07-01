@@ -120,23 +120,6 @@ def heat_trace_proxy(eigenvalues: Sequence[float], heat_time: float) -> float:
     return sum(math.exp(-t * abs(float(value))) for value in eigenvalues)
 
 
-def _entropy_series_from_certificates(certificates: Sequence[Dict[str, Any]]) -> List[float]:
-    values: List[float] = []
-    for index, certificate in enumerate(certificates):
-        if not isinstance(certificate, dict):
-            raise ValueError(f"certificate_{index}_must_be_object")
-        recognition = certificate.get("recognition_state", {}) if isinstance(certificate.get("recognition_state", {}), dict) else {}
-        value = recognition.get("open_residue")
-        if not isinstance(value, (int, float)):
-            value = recognition.get("entropy")
-        if not isinstance(value, (int, float)):
-            value = recognition.get("phase_value")
-        if not isinstance(value, (int, float)):
-            raise ValueError(f"certificate_{index}_has_no_entropy_like_value")
-        values.append(float(value))
-    return _as_float_series(values, "entropy_potential_series")
-
-
 def lambda_series_from_certificates(certificates: Sequence[Dict[str, Any]]) -> Dict[str, List[float]]:
     if not isinstance(certificates, Sequence) or isinstance(certificates, (str, bytes)):
         raise ValueError("certificates_must_be_array")
@@ -216,15 +199,15 @@ class LambdaLaplaceOperator:
         seam_score = clamp(mean_abs(branch_gap_series) + 0.25 * mean_abs(skew) + 0.10 * max_abs(entropy_grad))
         diffusion_stress = clamp(max_abs(lambda_laplace_series) / (1.0 + max_abs(lambda_laplace_series)))
         spectral_gap_proxy = clamp(1.0 / (1.0 + variance(lambda_laplace_series) + mean_abs(branch_gap_series)))
-        half_integer_seam_score = clamp(abs(round(2.0 * seam_score) / 2.0 - seam_score) * 2.0)
-        # In this engineering proxy, lower distance-to-half means stronger half-integer trace signature.
-        half_integer_trace_strength = clamp(1.0 - half_integer_seam_score)
+        half_integer_distance = clamp(abs(round(2.0 * seam_score) / 2.0 - seam_score) * 2.0)
+        # Strong only when there is actual seam content and it sits near a half-integer heat-trace band.
+        half_integer_trace_strength = clamp(seam_score * (1.0 - half_integer_distance))
         eigen_proxy = [abs(value) + branch_gap_series[index] + 0.05 * abs(skew[index]) for index, value in enumerate(lambda_laplace_series)]
         heat_trace = heat_trace_proxy(eigen_proxy, cfg.heat_time)
         normalized_heat_trace = heat_trace / max(1, n)
         graph_cycle_entropy = clamp(mean_abs(skew) / (1.0 + mean_abs(skew)) + 0.25 * mean_abs(branch_gap_series))
 
-        seam_detected = bool(seam_score >= cfg.seam_threshold or half_integer_trace_strength >= 0.70)
+        seam_detected = bool(seam_score >= cfg.seam_threshold or half_integer_trace_strength >= 0.18)
         stress_detected = bool(diffusion_stress >= cfg.stress_threshold)
         gap_weak = bool(spectral_gap_proxy <= cfg.gap_threshold)
 
