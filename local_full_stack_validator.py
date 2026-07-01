@@ -19,9 +19,15 @@ def run_cmd(name: str, cmd: List[str]) -> Dict[str, Any]:
 
 def read_summary(path: Path) -> Dict[str, Any]:
     if not path.exists():
-        return {"exists": False, "pass_count": 0, "fail_count": 999}
+        return {"exists": False, "pass_count": 0, "fail_count": 999, "ok": False}
     data = json.loads(path.read_text(encoding="utf-8"))
-    return {"exists": True, "pass_count": data.get("pass_count", data.get("passed", 0)), "fail_count": data.get("fail_count", data.get("failed", 0)), "raw": data}
+    return {
+        "exists": True,
+        "pass_count": data.get("pass_count", data.get("passed", 1 if data.get("ok") else 0)),
+        "fail_count": data.get("fail_count", data.get("failed", 0 if data.get("ok") else 1)),
+        "ok": bool(data.get("ok", data.get("fail_count", 1) == 0)),
+        "raw": data,
+    }
 
 
 def first_present(data: Dict[str, Any], keys: List[str], default: Any = None) -> Any:
@@ -45,9 +51,9 @@ def regenerate_ledger(root: Path, out_dir: Path) -> Dict[str, Any]:
             context=case["context"],
             prompt=case.get("prompt", "Answer using only the supplied context."),
             answer=case["answer"],
-            model_id="full-stack-validator-v5",
+            model_id="full-stack-validator-v6",
         ))
-        raw_entry = ledger.append_repair_certificate(cert, model_id="full-stack-validator-v5")
+        raw_entry = ledger.append_repair_certificate(cert, model_id="full-stack-validator-v6")
         entry = asdict(raw_entry) if hasattr(raw_entry, "__dataclass_fields__") else dict(raw_entry)
         rows.append({
             "case_id": case["case_id"],
@@ -70,6 +76,7 @@ def main() -> None:
 
     runs = []
     runs.append(run_cmd("compile", [sys.executable, "-m", "compileall", "ai_trust_enablement"]))
+    runs.append(run_cmd("contract_check", [sys.executable, "local_contract_check.py"]))
     runs.append(run_cmd("smoke_suite", [sys.executable, "-m", "ai_trust_enablement.local_smoke_suite", "--out-dir", "local_run_outputs"]))
     runs.append(run_cmd("detection_benchmark", [sys.executable, "-m", "ai_trust_enablement.local_smoke_suite", "--cases", "local_benchmark_cases.json", "--out-dir", "local_benchmark_outputs"]))
     runs.append(run_cmd("repair_validator", [sys.executable, "local_repair_validator.py"]))
@@ -83,6 +90,7 @@ def main() -> None:
 
     ledger_summary = regenerate_ledger(root, out_dir)
 
+    contract_summary = read_summary(root / "local_contract_outputs" / "contract_summary.json")
     smoke_summary = read_summary(root / "local_run_outputs" / "local_smoke_summary.json")
     benchmark_summary = read_summary(root / "local_benchmark_outputs" / "local_smoke_summary.json")
     repair_summary = read_summary(root / "local_repair_validation_outputs" / "repair_validation_summary.json")
@@ -98,8 +106,10 @@ def main() -> None:
     adversarial_baseline_summary = json.loads(adversarial_baseline_path.read_text(encoding="utf-8")) if adversarial_baseline_path.exists() else {}
 
     final = {
-        "suite": "local_full_stack_validator_v5",
+        "suite": "local_full_stack_validator_v6",
         "compile_ok": runs[0]["ok"],
+        "contract_ok": contract_summary["ok"],
+        "contract_pass": contract_summary["pass_count"], "contract_fail": contract_summary["fail_count"],
         "smoke_pass": smoke_summary["pass_count"], "smoke_fail": smoke_summary["fail_count"],
         "benchmark_pass": benchmark_summary["pass_count"], "benchmark_fail": benchmark_summary["fail_count"],
         "repair_pass": repair_summary["pass_count"], "repair_fail": repair_summary["fail_count"],
@@ -115,15 +125,11 @@ def main() -> None:
         "command_results": runs,
     }
     final["ok"] = (
-        final["compile_ok"]
-        and final["smoke_fail"] == 0
-        and final["benchmark_fail"] == 0
-        and final["repair_fail"] == 0
-        and final["resolution_fail"] == 0
-        and final["release_fail"] == 0
-        and final["release_api_fail"] == 0
-        and final["resolution_api_fail"] == 0
-        and final["adversarial_fail"] == 0
+        final["compile_ok"] and final["contract_ok"]
+        and final["smoke_fail"] == 0 and final["benchmark_fail"] == 0
+        and final["repair_fail"] == 0 and final["resolution_fail"] == 0
+        and final["release_fail"] == 0 and final["release_api_fail"] == 0
+        and final["resolution_api_fail"] == 0 and final["adversarial_fail"] == 0
         and final["ledger_chain_ok"]
         and baseline_summary.get("fusion_pass") == 10
         and adversarial_baseline_summary.get("fusion_pass") == 15
@@ -132,9 +138,10 @@ def main() -> None:
     (out_dir / "full_stack_summary.json").write_text(json.dumps(final, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
 
     lines = [
-        "# Local Full Stack Validation Report v5", "", f"Overall OK: `{final['ok']}`", "",
+        "# Local Full Stack Validation Report v6", "", f"Overall OK: `{final['ok']}`", "",
         "| Layer | Pass | Fail / Status |", "|---|---:|---|",
         f"| Compile | {1 if final['compile_ok'] else 0} | {'OK' if final['compile_ok'] else 'FAIL'} |",
+        f"| Service contract | {final['contract_pass']} | {final['contract_fail']} fail |",
         f"| Smoke suite | {final['smoke_pass']} | {final['smoke_fail']} fail |",
         f"| Detection benchmark | {final['benchmark_pass']} | {final['benchmark_fail']} fail |",
         f"| Repair validation | {final['repair_pass']} | {final['repair_fail']} fail |",
@@ -154,9 +161,10 @@ def main() -> None:
     report_md.write_text("\n".join(lines), encoding="utf-8")
 
     print()
-    print("LOCAL FULL STACK VALIDATION V5")
+    print("LOCAL FULL STACK VALIDATION V6")
     print("=" * 94)
     print(f"Compile OK: {final['compile_ok']}")
+    print(f"Service contract: {final['contract_pass']} pass, {final['contract_fail']} fail")
     print(f"Smoke: {final['smoke_pass']} pass, {final['smoke_fail']} fail")
     print(f"Detection benchmark: {final['benchmark_pass']} pass, {final['benchmark_fail']} fail")
     print(f"Repair validation: {final['repair_pass']} pass, {final['repair_fail']} fail")
