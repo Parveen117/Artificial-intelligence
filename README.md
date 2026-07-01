@@ -9,6 +9,7 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 - open-residue classification into `RECOGNITION`, `BOUNDED_RESIDUE`, or `ACTIONABLE_RESIDUE`,
 - machine-readable certificates and JSON schema,
 - HTTP API service with health/version/schema/evaluate/batch endpoints,
+- answer release, repair, retrieval-resolution, and ECL-style finality commit support,
 - Docker and docker-compose deployment files,
 - no-dependency regression tests.
 
@@ -36,11 +37,34 @@ docker run --rm -p 8080:8080 ai-trust-enable:latest
 
 Set `AI_TRUST_API_TOKEN` before exposing the service beyond localhost. The internet remains a swamp with JSON support.
 
+## ECL finality bridge
+
+The AI Trust stack can now seal recognition, repair, release, or retrieval-resolution certificates into an append-only ECL-style finality ledger.
+
+```python
+from dataclasses import asdict
+from ai_trust_enablement.ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine
+from ai_trust_enablement.ecl_commit_adapter import ECLCommitAdapter
+
+engine = AIHallucinationRecognitionEngine()
+certificate = asdict(engine.evaluate(
+    reference_text="The Eiffel Tower is located in Paris. It was completed in 1889.",
+    prompt="Answer using only the supplied context.",
+    answer="The Eiffel Tower is located in Berlin. It was completed in 1789.",
+))
+
+commit = ECLCommitAdapter().commit_certificate(certificate)
+print(commit.to_dict())
+```
+
+This creates a chained finality record with certificate hash, proposal hash, positive entropy delta, previous commit pointer, and commit hash. See `docs/ECL_FINALITY_INTEGRATION.md`.
+
 ## Documentation
 
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
+- `docs/ECL_FINALITY_INTEGRATION.md` - AI certificate to ECL-style finality commit bridge.
 
 ## Status
 
