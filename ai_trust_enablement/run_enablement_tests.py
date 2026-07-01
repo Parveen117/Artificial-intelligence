@@ -19,11 +19,13 @@ try:  # package execution
     from .ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
     from .batch_evaluator import evaluate_cases
     from .ecl_commit_adapter import ECLCommitAdapter
+    from .future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from .monti_operator import MontiOperator, MontiOperatorConfig
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
     from batch_evaluator import evaluate_cases
     from ecl_commit_adapter import ECLCommitAdapter
+    from future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from monti_operator import MontiOperator, MontiOperatorConfig
 
 
@@ -156,6 +158,57 @@ def test_ecl_adapter_reads_monti_transition_classification() -> None:
     assert commit["source_type"] == "AI_TOPOLOGICAL_MEMORY_CERTIFICATE"
 
 
+def test_future_arrow_projects_probability_cone() -> None:
+    monti = asdict(MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20)).evaluate_series(
+        lambda_p_series=[0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
+        skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
+        model_id="test-future-monti",
+    ))
+    recognition = {
+        "recognition_state": {
+            "classification": "ACTIONABLE_RESIDUE",
+            "open_residue": 0.42,
+            "phase_value": 1.18,
+            "scale_value": 0.22,
+        },
+        "seam_memory": {"k": 2},
+    }
+    future = asdict(FutureArrowOperator(FutureArrowConfig(delta_t=2.0, nsl_strength=0.25)).project(
+        recognition_certificate=recognition,
+        monti_certificate=monti,
+        entropy_potential=0.45,
+        statistical_layer=0.60,
+        anchor_constraints=["prime_anchor:recognition"],
+        model_id="test-future-arrow",
+    ))
+
+    assert future["certificate_type"] == "AI_FUTURE_ARROW_CERTIFICATE"
+    assert future["engine"] == "FutureArrowOperator"
+    assert len(future["certificate_hash"]) == 64
+    assert 0.0 <= future["future_cone"]["probability_of_sector_jump"] <= 1.0
+    assert abs(sum(future["future_cone"]["distribution"].values()) - 1.0) < 1e-9
+    assert future["forecast"]["classification"] in future["future_cone"]["distribution"]
+
+
+def test_future_arrow_ecl_commit() -> None:
+    future = asdict(FutureArrowOperator(FutureArrowConfig(delta_t=1.5, nsl_strength=0.20)).project(
+        entropy_potential=0.50,
+        statistical_layer=0.55,
+        anchor_constraints=["prime_anchor:a", "prime_anchor:b"],
+        model_id="test-future-ecl",
+    ))
+    with tempfile.TemporaryDirectory() as tmp:
+        commit = ECLCommitAdapter(Path(tmp) / "future_ecl.jsonl").commit_certificate(
+            future,
+            source_type="AI_FUTURE_ARROW_CERTIFICATE",
+        ).to_dict()
+
+    assert commit["source_type"] == "AI_FUTURE_ARROW_CERTIFICATE"
+    assert len(commit["certificate_hash"]) == 64
+    assert commit["action"] in {"CONTINUE_MONITORING", "WATCH_CURVATURE_STRESS_CONE", "PREPARE_TO_HOLD_AND_RECHECK_MONTI", "CONTINUE_WITH_ANCHOR_CONSTRAINTS"}
+    assert commit["entropy_delta"] > 0
+
+
 def main() -> None:
     tests = [
         test_signature_has_concrete_fields,
@@ -167,6 +220,8 @@ def main() -> None:
         test_monti_operator_curvature_stress_without_sector_jump,
         test_monti_operator_stable_sector,
         test_ecl_adapter_reads_monti_transition_classification,
+        test_future_arrow_projects_probability_cone,
+        test_future_arrow_ecl_commit,
     ]
     passed = []
     for test in tests:
