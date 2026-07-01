@@ -204,6 +204,7 @@ def test_future_arrow_ecl_commit() -> None:
         ).to_dict()
 
     assert commit["source_type"] == "AI_FUTURE_ARROW_CERTIFICATE"
+    assert commit["classification"] == future["forecast"]["classification"]
     assert len(commit["certificate_hash"]) == 64
     assert commit["action"] in {"CONTINUE_MONITORING", "WATCH_CURVATURE_STRESS_CONE", "PREPARE_TO_HOLD_AND_RECHECK_MONTI", "CONTINUE_WITH_ANCHOR_CONSTRAINTS"}
     assert commit["entropy_delta"] > 0
