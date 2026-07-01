@@ -1,4 +1,4 @@
-.PHONY: test run demo batch panini claims frames fusion docker-build docker-run
+.PHONY: test run demo batch panini claims frames fusion smoke docker-build docker-run
 
 test:
 	python ai_trust_enablement/run_enablement_tests.py
@@ -24,6 +24,9 @@ frames:
 
 fusion:
 	python ai_trust_enablement/fusion_certificate_engine.py --demo --out fusion_certificate.json
+
+smoke:
+	python ai_trust_enablement/local_smoke_suite.py --out-dir local_run_outputs
 
 docker-build:
 	docker build -t ai-trust-enable:latest .
