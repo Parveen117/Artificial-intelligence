@@ -108,7 +108,7 @@ class FusionCertificateEngine:
         frame_report = asdict(self.frame_engine.verify(context, prompt, answer))
         decision = self._decide(answer_cert, claim_report, paninian_report, frame_report)
         payload = {
-            "version": "1.0.1",
+            "version": "1.0.2",
             "engine": "FusionCertificateEngine",
             "context_hash": sha256_text(context),
             "prompt_hash": sha256_text(prompt),
@@ -210,11 +210,13 @@ class FusionCertificateEngine:
             return FINAL_BLOCK, "CONTRADICTION_BLOCK"
         if contradiction_present:
             return FINAL_RETRIEVE, "CONTRADICTION_REQUIRES_EVIDENCE_RECHECK"
+        if not reasons and risk < 0.18:
+            return FINAL_COMMIT, "CERTIFIED_GROUNDED"
         if risk >= 0.72:
             return FINAL_REGENERATE, "HIGH_HALLUCINATION_RISK"
         if risk >= 0.50:
             return FINAL_RETRIEVE, "EVIDENCE_INSUFFICIENT"
-        if risk >= 0.28 or route_agreement < 0.75:
+        if risk >= 0.28 or route_agreement < 0.55:
             return FINAL_REVIEW, "BOUNDED_REVIEW"
         return FINAL_COMMIT, "CERTIFIED_GROUNDED"
 
