@@ -4,8 +4,8 @@ AI Trust Enablement HTTP service.
 
 A no-dependency deployment server for the AI trust stack. Endpoint names and
 service version are imported from service_contract.py so API tests and server
-behavior stay closed under one shared contract. Amazing, we taught software not
-to argue with its own paperwork.
+behavior stay closed under one shared contract. A rare outbreak of paperwork
+behaving itself.
 """
 
 from __future__ import annotations
@@ -23,6 +23,7 @@ from typing import Any, Dict, List
 try:  # package execution
     from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from .ecl_commit_adapter import ECLCommitAdapter
+    from .future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from .monti_operator import MontiOperator, MontiOperatorConfig
     from .release_controller import ReleaseController
     from .retrieval_resolution_engine import RetrievalResolutionEngine
@@ -30,6 +31,7 @@ try:  # package execution
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from ecl_commit_adapter import ECLCommitAdapter
+    from future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from monti_operator import MontiOperator, MontiOperatorConfig
     from release_controller import ReleaseController
     from retrieval_resolution_engine import RetrievalResolutionEngine
@@ -74,7 +76,7 @@ class RateLimiter:
 
 
 class AITrustHandler(BaseHTTPRequestHandler):
-    server_version = "AITrustEnablementHTTP/1.3"
+    server_version = "AITrustEnablementHTTP/1.4"
     engine = AIHallucinationRecognitionEngine()
     rate_limiter = RateLimiter(env_int("AI_TRUST_RATE_LIMIT_PER_MIN", 120))
 
@@ -125,6 +127,10 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/v1/monti":
                 result = self._handle_monti(payload)
+                json_response(self, HTTPStatus.OK, result)
+                return
+            if self.path == "/v1/future-arrow":
+                result = self._handle_future_arrow(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
             json_response(self, HTTPStatus.NOT_FOUND, {"error": "not_found", "path": self.path})
@@ -241,6 +247,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
         if "lambda_p_series" in payload:
             cert = operator.evaluate_series(
                 lambda_p_series=payload["lambda_p_series"],
+                lambda_v_series=payload.get("lambda_v_series"),
                 skew_intensity_series=skew,
                 model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "monti-model")),
                 event_index=int(payload.get("event_index", 1)),
@@ -266,6 +273,46 @@ class AITrustHandler(BaseHTTPRequestHandler):
             ecl_commit = ECLCommitAdapter(payload.get("ledger_path") or None).commit_certificate(
                 result,
                 source_type="AI_TOPOLOGICAL_MEMORY_CERTIFICATE",
+            )
+            result["ecl_finality_commit"] = ecl_commit.to_dict()
+        return result
+
+    def _handle_future_arrow(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        config = FutureArrowConfig(
+            delta_t=float(payload.get("delta_t", payload.get("delta_t", 1.0))),
+            entropy_weight=float(payload.get("entropy_weight", 0.45)),
+            layer_weight=float(payload.get("layer_weight", 0.25)),
+            anchor_weight=float(payload.get("anchor_weight", 0.20)),
+            monti_weight=float(payload.get("monti_weight", 0.55)),
+            nsl_strength=float(payload.get("nsl_strength", payload.get("nsl", 0.0))),
+            jump_threshold=float(payload.get("jump_threshold", 0.62)),
+            stress_threshold=float(payload.get("stress_threshold", 0.38)),
+        )
+        operator = FutureArrowOperator(config)
+        state = payload.get("state") if isinstance(payload.get("state"), dict) else {}
+        recognition_certificate = payload.get("recognition_certificate") if isinstance(payload.get("recognition_certificate"), dict) else None
+        monti_certificate = payload.get("monti_certificate") if isinstance(payload.get("monti_certificate"), dict) else None
+        anchor_constraints = payload.get("anchor_constraints")
+        if anchor_constraints is not None and not isinstance(anchor_constraints, list):
+            raise ValueError("anchor_constraints_must_be_array")
+        metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+        cert = operator.project(
+            state=state,
+            recognition_certificate=recognition_certificate,
+            monti_certificate=monti_certificate,
+            entropy_potential=payload.get("entropy_potential"),
+            statistical_layer=payload.get("statistical_layer"),
+            anchor_constraints=anchor_constraints,
+            model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "future-arrow-model")),
+            event_index=int(payload.get("event_index", 1)),
+            metadata=metadata,
+        )
+        result = asdict(cert)
+        result["service_version"] = SERVICE_VERSION
+        if bool(payload.get("commit_to_ecl", False)):
+            ecl_commit = ECLCommitAdapter(payload.get("ledger_path") or None).commit_certificate(
+                result,
+                source_type="AI_FUTURE_ARROW_CERTIFICATE",
             )
             result["ecl_finality_commit"] = ecl_commit.to_dict()
         return result
