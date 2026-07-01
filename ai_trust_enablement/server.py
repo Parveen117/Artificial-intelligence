@@ -2,21 +2,10 @@
 """
 AI Trust Enablement HTTP service.
 
-A no-dependency deployment server for the AI trust stack. It exposes:
-    GET  /healthz
-    GET  /version
-    GET  /schema
-    POST /v1/evaluate
-    POST /v1/batch
-    POST /v1/release
-    POST /v1/resolve
-
-Security controls included without external packages:
-    - optional bearer token auth via AI_TRUST_API_TOKEN
-    - request body size limit via AI_TRUST_MAX_BODY_BYTES
-    - simple per-client rate limit via AI_TRUST_RATE_LIMIT_PER_MIN
-
-For real production exposure, put this behind TLS and a hardened reverse proxy.
+A no-dependency deployment server for the AI trust stack. Endpoint names and
+service version are imported from service_contract.py so API tests and server
+behavior stay closed under one shared contract. Amazing, we taught software not
+to argue with its own paperwork.
 """
 
 from __future__ import annotations
@@ -35,12 +24,13 @@ try:  # package execution
     from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from .release_controller import ReleaseController
     from .retrieval_resolution_engine import RetrievalResolutionEngine
+    from .service_contract import SERVICE_NAME, SERVICE_VERSION, health_payload, version_payload
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from release_controller import ReleaseController
     from retrieval_resolution_engine import RetrievalResolutionEngine
+    from service_contract import SERVICE_NAME, SERVICE_VERSION, health_payload, version_payload
 
-SERVICE_VERSION = "1.2.0"
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = BASE_DIR / "certificate_schema_v1.json"
 
@@ -92,7 +82,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
         if not self._rate_limit_ok():
             return
         if self.path == "/healthz":
-            json_response(self, HTTPStatus.OK, {"ok": True, "service": "ai-trust-enable", "version": SERVICE_VERSION})
+            json_response(self, HTTPStatus.OK, health_payload())
             return
         if self.path == "/version":
             json_response(self, HTTPStatus.OK, self._version_payload())
@@ -140,21 +130,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
             json_response(self, HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "internal_error", "message": detail})
 
     def _version_payload(self) -> Dict[str, Any]:
-        return {
-            "service": "ai-trust-enable",
-            "version": SERVICE_VERSION,
-            "engine": "AIHallucinationRecognitionEngine+ReleaseController+RetrievalResolutionEngine",
-            "schema": "AI_RECOGNITION_CERTIFICATE/v1",
-            "endpoints": [
-                "GET /healthz",
-                "GET /version",
-                "GET /schema",
-                "POST /v1/evaluate",
-                "POST /v1/batch",
-                "POST /v1/release",
-                "POST /v1/resolve",
-            ],
-        }
+        return version_payload()
 
     def _rate_limit_ok(self) -> bool:
         client = self.client_address[0] if self.client_address else "unknown"
@@ -293,7 +269,7 @@ def run() -> None:
     host = os.getenv("AI_TRUST_HOST", "0.0.0.0")
     port = env_int("AI_TRUST_PORT", 8080)
     server = ThreadingHTTPServer((host, port), AITrustHandler)
-    print(json.dumps({"service": "ai-trust-enable", "version": SERVICE_VERSION, "host": host, "port": port}, sort_keys=True))
+    print(json.dumps({"service": SERVICE_NAME, "version": SERVICE_VERSION, "host": host, "port": port}, sort_keys=True))
     server.serve_forever()
 
 
