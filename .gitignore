@@ -16,6 +16,7 @@ local_baseline_outputs/
 local_benchmark_outputs/
 local_full_stack_outputs/
 local_release_api_outputs/
+local_resolution_api_outputs/
 local_repair_outputs/
 local_repair_validation_outputs/
 local_resolution_validation_outputs/
