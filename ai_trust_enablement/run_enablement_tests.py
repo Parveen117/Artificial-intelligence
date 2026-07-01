@@ -103,15 +103,33 @@ def test_monti_operator_detects_winding_transition() -> None:
         model_id="test-monti",
     ))
     assert cert["certificate_type"] == "AI_TOPOLOGICAL_MEMORY_CERTIFICATE"
+    assert cert["engine"] == "MontiOperatorSpectralWinding"
+    assert cert["transition"]["classification"] == "TOPOLOGICAL_MEMORY_TRANSITION"
     assert cert["transition"]["transition_detected"] is True
+    assert cert["transition"]["primary_trigger"] == "spectral_winding_jump"
     assert cert["transition"]["delta_nu"] >= 1
-    assert cert["technical_action"]["action"] == "HOLD_AND_COMMIT_MEMORY_TRANSITION"
+    assert cert["spectral_state"]["spectral_flow"] == cert["transition"]["delta_nu"]
+    assert cert["technical_action"]["action"] == "HOLD_AND_COMMIT_TOPOLOGICAL_JUMP"
     assert len(cert["certificate_hash"]) == 64
+
+
+def test_monti_operator_curvature_stress_without_sector_jump() -> None:
+    operator = MontiOperator(MontiOperatorConfig(threshold=0.01, alpha=0.0, beta=0.0))
+    cert = asdict(operator.evaluate_series(
+        lambda_p_series=[0.00, 0.03, 0.20, 0.24, 0.26],
+        model_id="test-monti-stress",
+    ))
+    assert cert["transition"]["classification"] == "CURVATURE_STRESS_WITHOUT_SECTOR_JUMP"
+    assert cert["transition"]["transition_detected"] is False
+    assert cert["transition"]["delta_nu"] == 0
+    assert cert["monti_state"]["curvature_stress"] is True
+    assert cert["technical_action"]["action"] == "FLAG_CURVATURE_STRESS"
 
 
 def test_monti_operator_stable_sector() -> None:
     operator = MontiOperator(MontiOperatorConfig(threshold=10.0))
     cert = asdict(operator.evaluate_series(lambda_p_series=[0.00, 0.02, 0.03, 0.04, 0.05], model_id="test-monti-stable"))
+    assert cert["transition"]["classification"] == "STABLE_TOPOLOGICAL_SECTOR"
     assert cert["transition"]["transition_detected"] is False
     assert cert["transition"]["delta_nu"] == 0
     assert cert["technical_action"]["action"] == "CONTINUE_MONITORING"
@@ -124,6 +142,9 @@ def test_ecl_adapter_reads_monti_transition_classification() -> None:
         skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
         model_id="test-monti-ecl",
     ))
+    # Simulate a mixed certificate where a recognition-like block exists but the
+    # topological transition block should dominate the ECL finality label.
+    cert["recognition_state"] = {"classification": "UNKNOWN"}
     with tempfile.TemporaryDirectory() as tmp:
         commit = ECLCommitAdapter(Path(tmp) / "monti_ecl.jsonl").commit_certificate(
             cert,
@@ -131,7 +152,7 @@ def test_ecl_adapter_reads_monti_transition_classification() -> None:
         ).to_dict()
 
     assert commit["classification"] == "TOPOLOGICAL_MEMORY_TRANSITION"
-    assert commit["action"] == "HOLD_AND_COMMIT_MEMORY_TRANSITION"
+    assert commit["action"] == "HOLD_AND_COMMIT_TOPOLOGICAL_JUMP"
     assert commit["source_type"] == "AI_TOPOLOGICAL_MEMORY_CERTIFICATE"
 
 
@@ -143,6 +164,7 @@ def main() -> None:
         test_batch_cases,
         test_ecl_finality_commit_adapter,
         test_monti_operator_detects_winding_transition,
+        test_monti_operator_curvature_stress_without_sector_jump,
         test_monti_operator_stable_sector,
         test_ecl_adapter_reads_monti_transition_classification,
     ]
