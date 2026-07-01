@@ -2,13 +2,13 @@
 """
 AI Trust Enablement HTTP service.
 
-A no-dependency deployment server for the AIHallucinationRecognitionEngine.
-It exposes:
+A no-dependency deployment server for the AI trust stack. It exposes:
     GET  /healthz
     GET  /version
     GET  /schema
     POST /v1/evaluate
     POST /v1/batch
+    POST /v1/release
 
 Security controls included without external packages:
     - optional bearer token auth via AI_TRUST_API_TOKEN
@@ -16,8 +16,6 @@ Security controls included without external packages:
     - simple per-client rate limit via AI_TRUST_RATE_LIMIT_PER_MIN
 
 For real production exposure, put this behind TLS and a hardened reverse proxy.
-Civilization has learned this the hard way, usually after someone exposed port 80
-with the confidence of a toddler holding scissors.
 """
 
 from __future__ import annotations
@@ -34,10 +32,12 @@ from typing import Any, Dict, List
 
 try:  # package execution
     from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
+    from .release_controller import ReleaseController
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
+    from release_controller import ReleaseController
 
-SERVICE_VERSION = "1.0.1"
+SERVICE_VERSION = "1.1.0"
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = BASE_DIR / "certificate_schema_v1.json"
 
@@ -77,12 +77,11 @@ class RateLimiter:
 
 
 class AITrustHandler(BaseHTTPRequestHandler):
-    server_version = "AITrustEnablementHTTP/1.0"
+    server_version = "AITrustEnablementHTTP/1.1"
     engine = AIHallucinationRecognitionEngine()
     rate_limiter = RateLimiter(env_int("AI_TRUST_RATE_LIMIT_PER_MIN", 120))
 
     def log_message(self, fmt: str, *args: Any) -> None:
-        # Avoid logging prompts/answers. Only standard request metadata is logged.
         client = self.client_address[0] if self.client_address else "unknown"
         print(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} {client} {fmt % args}")
 
@@ -119,6 +118,10 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 result = self._handle_batch(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
+            if self.path == "/v1/release":
+                result = self._handle_release(payload)
+                json_response(self, HTTPStatus.OK, result)
+                return
             json_response(self, HTTPStatus.NOT_FOUND, {"error": "not_found", "path": self.path})
         except ValueError as exc:
             json_response(self, HTTPStatus.BAD_REQUEST, {"error": "bad_request", "message": str(exc)})
@@ -133,9 +136,16 @@ class AITrustHandler(BaseHTTPRequestHandler):
         return {
             "service": "ai-trust-enable",
             "version": SERVICE_VERSION,
-            "engine": "AIHallucinationRecognitionEngine",
+            "engine": "AIHallucinationRecognitionEngine+ReleaseController",
             "schema": "AI_RECOGNITION_CERTIFICATE/v1",
-            "endpoints": ["GET /healthz", "GET /version", "GET /schema", "POST /v1/evaluate", "POST /v1/batch"],
+            "endpoints": [
+                "GET /healthz",
+                "GET /version",
+                "GET /schema",
+                "POST /v1/evaluate",
+                "POST /v1/batch",
+                "POST /v1/release",
+            ],
         }
 
     def _rate_limit_ok(self) -> bool:
@@ -171,10 +181,13 @@ class AITrustHandler(BaseHTTPRequestHandler):
             raise ValueError("json_body_must_be_object")
         return payload
 
-    def _handle_evaluate(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _required_text_fields(self, payload: Dict[str, Any]) -> None:
         for field in ["context", "prompt", "answer"]:
             if field not in payload or not isinstance(payload[field], str):
                 raise ValueError(f"missing_or_invalid_{field}")
+
+    def _handle_evaluate(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        self._required_text_fields(payload)
         logits = payload.get("logits")
         if logits is not None:
             if not isinstance(logits, list) or not all(isinstance(x, (int, float)) for x in logits):
@@ -186,6 +199,19 @@ class AITrustHandler(BaseHTTPRequestHandler):
             model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "model-under-test")),
             logits=logits,
             event_index=int(payload.get("event_index", 1)),
+        )
+        result = asdict(cert)
+        result["service_version"] = SERVICE_VERSION
+        return result
+
+    def _handle_release(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        self._required_text_fields(payload)
+        ledger_path = os.getenv("AI_TRUST_RELEASE_LEDGER_PATH", "") or None
+        cert = ReleaseController(ledger_path).evaluate(
+            context=payload["context"],
+            prompt=payload["prompt"],
+            answer=payload["answer"],
+            model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "release-model")),
         )
         result = asdict(cert)
         result["service_version"] = SERVICE_VERSION
