@@ -9,6 +9,7 @@ A no-dependency deployment server for the AI trust stack. It exposes:
     POST /v1/evaluate
     POST /v1/batch
     POST /v1/release
+    POST /v1/resolve
 
 Security controls included without external packages:
     - optional bearer token auth via AI_TRUST_API_TOKEN
@@ -33,11 +34,13 @@ from typing import Any, Dict, List
 try:  # package execution
     from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from .release_controller import ReleaseController
+    from .retrieval_resolution_engine import RetrievalResolutionEngine
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
     from release_controller import ReleaseController
+    from retrieval_resolution_engine import RetrievalResolutionEngine
 
-SERVICE_VERSION = "1.1.0"
+SERVICE_VERSION = "1.2.0"
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = BASE_DIR / "certificate_schema_v1.json"
 
@@ -77,7 +80,7 @@ class RateLimiter:
 
 
 class AITrustHandler(BaseHTTPRequestHandler):
-    server_version = "AITrustEnablementHTTP/1.1"
+    server_version = "AITrustEnablementHTTP/1.2"
     engine = AIHallucinationRecognitionEngine()
     rate_limiter = RateLimiter(env_int("AI_TRUST_RATE_LIMIT_PER_MIN", 120))
 
@@ -122,6 +125,10 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 result = self._handle_release(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
+            if self.path == "/v1/resolve":
+                result = self._handle_resolve(payload)
+                json_response(self, HTTPStatus.OK, result)
+                return
             json_response(self, HTTPStatus.NOT_FOUND, {"error": "not_found", "path": self.path})
         except ValueError as exc:
             json_response(self, HTTPStatus.BAD_REQUEST, {"error": "bad_request", "message": str(exc)})
@@ -136,7 +143,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
         return {
             "service": "ai-trust-enable",
             "version": SERVICE_VERSION,
-            "engine": "AIHallucinationRecognitionEngine+ReleaseController",
+            "engine": "AIHallucinationRecognitionEngine+ReleaseController+RetrievalResolutionEngine",
             "schema": "AI_RECOGNITION_CERTIFICATE/v1",
             "endpoints": [
                 "GET /healthz",
@@ -145,6 +152,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 "POST /v1/evaluate",
                 "POST /v1/batch",
                 "POST /v1/release",
+                "POST /v1/resolve",
             ],
         }
 
@@ -216,6 +224,33 @@ class AITrustHandler(BaseHTTPRequestHandler):
         result = asdict(cert)
         result["service_version"] = SERVICE_VERSION
         return result
+
+    def _handle_resolve(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        self._required_text_fields(payload)
+        retrieved = payload.get("retrieved_evidence")
+        if not isinstance(retrieved, list) or not all(isinstance(item, dict) for item in retrieved):
+            raise ValueError("retrieved_evidence_must_be_array_of_objects")
+        cert = RetrievalResolutionEngine().resolve(
+            context=payload["context"],
+            prompt=payload["prompt"],
+            answer=payload["answer"],
+            retrieved_evidence=retrieved,
+            model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "resolve-model")),
+        )
+        result = asdict(cert)
+        result["resolution_hash"] = result["certificate_hash"]
+        result["final_release_action"] = self._release_action_from_resolution(result)
+        result["service_version"] = SERVICE_VERSION
+        return result
+
+    def _release_action_from_resolution(self, resolution: Dict[str, Any]) -> str:
+        if int(resolution.get("unresolved_count", 0) or 0) > 0:
+            return "HOLD_FOR_RETRIEVAL"
+        if int(resolution.get("resolved_contradicted_count", 0) or 0) > 0:
+            return "DO_NOT_RELEASE"
+        if int(resolution.get("resolved_supported_count", 0) or 0) > 0:
+            return "RELEASE_REPAIRED"
+        return "NO_RETRIEVAL_NEEDED"
 
     def _handle_batch(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         cases = payload.get("cases")
