@@ -40,11 +40,12 @@ STOPWORDS = {
     "have", "in", "into", "is", "it", "its", "of", "on", "or", "that", "the",
     "this", "to", "was", "were", "with", "which", "who", "will", "can", "may",
     "must", "should", "using", "only", "supplied", "context", "answer", "what",
-    "where", "when", "why", "how", "does", "do", "did",
+    "where", "when", "why", "how", "does", "do", "did", "also",
 }
 NEGATORS = {"not", "no", "never", "none", "without", "false", "incorrect", "cannot", "can't", "doesn't", "didn't"}
 MODAL_WORDS = {"must", "should", "may", "can", "could", "would", "recommended", "required", "optional"}
 SOURCE_WORDS = {"according", "says", "states", "reported", "source", "label", "context", "evidence"}
+
 RELATION_ALIASES: Dict[str, Tuple[str, ...]] = {
     "located_in": ("located", "situated", "based", "found", "in"),
     "completed_in": ("completed", "finished", "built", "constructed"),
@@ -53,8 +54,12 @@ RELATION_ALIASES: Dict[str, Tuple[str, ...]] = {
     "converts_to": ("convert", "converts", "changes", "turns"),
     "causes": ("cause", "causes", "leads", "produces"),
     "prevents": ("prevent", "prevents", "blocks", "inhibits"),
+    "has_property": ("has", "have", "contains", "contain", "includes", "include", "stores", "store", "borrow"),
     "equals": ("is", "are", "was", "were", "means", "equals"),
 }
+
+STRICT_OBJECT_RELATIONS = {"located_in", "completed_in", "made_of", "dose_is", "converts_to"}
+
 CANONICAL_TERMS = {
     "dc": "direct_current",
     "direct": "direct_current",
@@ -250,6 +255,8 @@ def split_subject_object(text: str, relation: str, entities: Sequence[str], numb
             obj = c_tokens[-1]
     elif relation == "converts_to" and c_tokens:
         obj = c_tokens[-1]
+    elif relation == "has_property" and c_tokens:
+        obj = c_tokens[-1]
     elif c_tokens:
         obj = c_tokens[-1]
     return subject, obj
@@ -331,7 +338,8 @@ def compare_field(field: str, claim_value: Any, evidence_value: Any) -> FieldCom
             return FieldComparison(field, claim_value, evidence_value, "partial", 0.55)
         return FieldComparison(field, claim_value, evidence_value, "mismatch", 0.0)
     if isinstance(claim_value, bool):
-        return FieldComparison(field, claim_value, evidence_value, "match" if claim_value == evidence_value else "mismatch", 1.0 if claim_value == evidence_value else 0.0)
+        ok = claim_value == evidence_value
+        return FieldComparison(field, claim_value, evidence_value, "match" if ok else "mismatch", 1.0 if ok else 0.0)
     c = canonical_token(str(claim_value))
     e = canonical_token(str(evidence_value))
     if not c:
@@ -345,6 +353,9 @@ def compare_field(field: str, claim_value: Any, evidence_value: Any) -> FieldCom
 
 
 class ClaimFrameKernel:
+    def __init__(self) -> None:
+        pass
+
     def verify(self, context: str, prompt: str, answer: str) -> FrameClosureReport:
         evidence_frames = frames_from_text(context, "E")
         claim_frames = frames_from_text(answer, "C")
@@ -379,7 +390,7 @@ class ClaimFrameKernel:
         best_scores, best_ev = scored[0]
         comparisons = self._field_comparisons(claim, best_ev)
         classification, reason_tags = self._classify(comparisons, best_scores)
-        residue = self._residue(classification, best_scores)
+        residue = self._residue(classification, comparisons, best_scores)
         confidence = max(0.0, min(1.0, 1.0 - residue if classification.startswith("SUPPORTED") else max(best_scores.get("contradiction", 0.0), residue)))
         return self._make_match(claim, best_ev, classification, residue, best_scores, comparisons, tuple(reason_tags), confidence)
 
@@ -392,25 +403,41 @@ class ClaimFrameKernel:
         frame += 0.08 * compare_field("time", claim.time, ev.time).score
         frame += 0.08 * compare_field("negation", claim.negation, ev.negation).score
         analogy = jaccard(claim.qualifiers, ev.qualifiers)
-        contradiction = self._contradiction_score(claim, ev)
+        contradiction, entity_contradiction = self._contradiction_scores(claim, ev, direct)
         total = max(0.0, min(1.0, 0.35 * direct + 0.45 * frame + 0.20 * analogy - 0.35 * contradiction))
-        return {"direct": direct, "frame": frame, "analogy": analogy, "contradiction": contradiction, "total": total}
+        return {
+            "direct": direct,
+            "frame": frame,
+            "analogy": analogy,
+            "contradiction": contradiction,
+            "entity_contradiction": entity_contradiction,
+            "total": total,
+        }
 
     def _field_comparisons(self, claim: ClaimFrame, ev: ClaimFrame) -> Tuple[FieldComparison, ...]:
         fields = ["subject", "relation", "object", "quantity", "time", "location", "modality", "negation", "source"]
         return tuple(compare_field(field, getattr(claim, field), getattr(ev, field)) for field in fields)
 
-    def _contradiction_score(self, claim: ClaimFrame, ev: ClaimFrame) -> float:
+    def _contradiction_scores(self, claim: ClaimFrame, ev: ClaimFrame, direct: float) -> Tuple[float, float]:
         score = 0.0
+        entity_score = 0.0
+        relation_matches = claim.relation == ev.relation
+        subject_matches = bool(claim.subject and ev.subject and canonical_token(claim.subject) == canonical_token(ev.subject))
+        object_mismatch = bool(claim.object and ev.object and canonical_token(claim.object) != canonical_token(ev.object))
+        subject_mismatch = bool(claim.subject and ev.subject and canonical_token(claim.subject) != canonical_token(ev.subject))
         if claim.quantity and not set(claim.quantity).issubset(set(ev.quantity)):
             score = max(score, 1.0)
         if claim.negation != ev.negation:
             score = max(score, 0.95)
-        if claim.subject and ev.subject and canonical_token(claim.subject) != canonical_token(ev.subject) and claim.relation == ev.relation:
-            score = max(score, 0.55)
-        if claim.object and ev.object and canonical_token(claim.object) != canonical_token(ev.object) and claim.relation == ev.relation:
-            score = max(score, 0.85)
-        return score
+        if relation_matches and subject_mismatch and direct >= 0.42:
+            entity_score = max(entity_score, 0.70)
+        if relation_matches and object_mismatch:
+            if claim.relation in STRICT_OBJECT_RELATIONS:
+                entity_score = max(entity_score, 0.95)
+            elif subject_matches and direct >= 0.55:
+                entity_score = max(entity_score, 0.65)
+        score = max(score, entity_score)
+        return score, entity_score
 
     def _classify(self, comparisons: Sequence[FieldComparison], scores: Dict[str, float]) -> Tuple[str, List[str]]:
         by_field = {c.field: c for c in comparisons}
@@ -418,8 +445,8 @@ class ClaimFrameKernel:
             return CONTRADICTED_NUMBER, ["quantity_mismatch"]
         if by_field["negation"].status == "mismatch":
             return CONTRADICTED_NEGATION, ["negation_mismatch"]
-        if by_field["object"].status == "mismatch" and by_field["relation"].status == "match":
-            return CONTRADICTED_ENTITY, ["object_mismatch_under_same_relation"]
+        if scores.get("entity_contradiction", 0.0) >= 0.70:
+            return CONTRADICTED_ENTITY, ["strict_entity_or_object_mismatch"]
         if scores["total"] >= 0.82 and scores["contradiction"] == 0.0:
             return SUPPORTED_EXACT, ["field_closure"]
         if scores["total"] >= 0.62 and scores["contradiction"] < 0.3:
@@ -432,7 +459,7 @@ class ClaimFrameKernel:
             return UNSUPPORTED_SOURCE, ["source_not_grounded"]
         return UNCERTAIN_ROUTE_CONFLICT, ["insufficient_route_closure"]
 
-    def _residue(self, classification: str, scores: Dict[str, float]) -> float:
+    def _residue(self, classification: str, comparisons: Sequence[FieldComparison], scores: Dict[str, float]) -> float:
         if classification.startswith("SUPPORTED"):
             return max(0.0, 1.0 - scores["total"])
         if classification.startswith("CONTRADICTED"):
@@ -450,7 +477,6 @@ class ClaimFrameKernel:
         reason_tags: Sequence[str],
         confidence: Optional[float] = None,
     ) -> FrameMatch:
-        comparison_dicts = tuple(asdict(c) for c in comparisons)
         payload = {
             "claim_frame_id": claim.frame_id,
             "evidence_frame_id": ev.frame_id if ev else None,
@@ -458,14 +484,10 @@ class ClaimFrameKernel:
             "confidence": confidence if confidence is not None else max(0.0, 1.0 - residue),
             "residue": residue,
             "route_scores": scores,
-            "field_comparisons": comparison_dicts,
+            "field_comparisons": tuple(comparisons),
             "reason_tags": tuple(reason_tags),
         }
-        return FrameMatch(
-            match_hash=sha256_json(payload),
-            field_comparisons=tuple(comparisons),
-            **{k: v for k, v in payload.items() if k != "field_comparisons"},
-        )
+        return FrameMatch(match_hash=sha256_json(payload), **payload)
 
 
 def demo() -> Dict[str, Any]:
