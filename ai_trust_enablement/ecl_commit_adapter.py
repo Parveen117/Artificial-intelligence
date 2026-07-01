@@ -3,8 +3,8 @@
 ECL finality bridge for AI Trust Enablement.
 
 This module turns AI recognition, repair, release, retrieval-resolution, Monti
-topological-memory, or Future Arrow forecast certificates into append-only
-finality commits.
+topological-memory, Future Arrow forecast, or Lambda-Laplace analytic
+certificates into append-only finality commits.
 
 It intentionally avoids importing the separate ECL repository at runtime. The
 record shape mirrors the ECL/IEL idea: an external certificate becomes a state
@@ -248,11 +248,14 @@ class ECLCommitAdapter:
 
     @staticmethod
     def _extract_classification(certificate: Dict[str, Any]) -> str:
-        # Ordered by semantic layer: event classification first, forecast second,
-        # recognition state third. The bureaucracy of dictionaries continues.
+        # Ordered by semantic layer: event classification first, analytic/forecast
+        # certificates next, recognition state third. Bureaucracy, but make it JSON.
         transition = certificate.get("transition")
         if isinstance(transition, dict) and transition.get("classification"):
             return str(transition.get("classification"))
+        analysis = certificate.get("analysis")
+        if isinstance(analysis, dict) and analysis.get("classification"):
+            return str(analysis.get("classification"))
         forecast = certificate.get("forecast")
         if isinstance(forecast, dict) and forecast.get("classification"):
             return str(forecast.get("classification"))
