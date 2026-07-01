@@ -11,11 +11,12 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
 
+from ai_trust_enablement.service_contract import RELEASE_ENDPOINT, SERVICE_VERSION
+
 
 HOST = "127.0.0.1"
 PORT = 8099
 BASE_URL = f"http://{HOST}:{PORT}"
-EXPECTED_SERVICE_VERSION = "1.2.0"
 
 
 CASES: List[Dict[str, Any]] = [
@@ -115,7 +116,7 @@ def validate_case(case: Dict[str, Any]) -> Dict[str, Any]:
         "visible_required": contains_all(visible, case.get("required_visible_substrings", [])),
         "visible_forbidden": contains_none(visible, case.get("forbidden_visible_substrings", [])),
         "release_hash": isinstance(cert.get("release_hash"), str) and len(cert.get("release_hash", "")) == 64,
-        "service_version": cert.get("service_version") == EXPECTED_SERVICE_VERSION,
+        "service_version": cert.get("service_version") == SERVICE_VERSION,
     }
     if "expected_retrieval_requests" in case:
         checks["retrieval_count"] = request_count == case["expected_retrieval_requests"]
@@ -153,8 +154,8 @@ def main() -> None:
     try:
         health = wait_for_server()
         version = get_json("/version")
-        endpoint_ok = "POST /v1/release" in version.get("endpoints", [])
-        version_ok = version.get("version") == EXPECTED_SERVICE_VERSION
+        endpoint_ok = RELEASE_ENDPOINT in version.get("endpoints", [])
+        version_ok = version.get("version") == SERVICE_VERSION
         results = [validate_case(case) for case in CASES]
         bad_request = post_json("/v1/release", {"context": "x"}, expected_status=400)
         bad_request_ok = bad_request.get("error") == "bad_request"
@@ -163,7 +164,7 @@ def main() -> None:
             "health_ok": bool(health.get("ok")),
             "endpoint_ok": endpoint_ok,
             "version_ok": version_ok,
-            "expected_service_version": EXPECTED_SERVICE_VERSION,
+            "expected_service_version": SERVICE_VERSION,
             "actual_service_version": version.get("version"),
             "bad_request_ok": bad_request_ok,
             "case_count": len(results),
