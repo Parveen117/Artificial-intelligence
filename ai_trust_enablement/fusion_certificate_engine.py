@@ -108,7 +108,7 @@ class FusionCertificateEngine:
         frame_report = asdict(self.frame_engine.verify(context, prompt, answer))
         decision = self._decide(answer_cert, claim_report, paninian_report, frame_report)
         payload = {
-            "version": "1.0.0",
+            "version": "1.0.1",
             "engine": "FusionCertificateEngine",
             "context_hash": sha256_text(context),
             "prompt_hash": sha256_text(prompt),
@@ -205,9 +205,11 @@ class FusionCertificateEngine:
 
     def _action_from_risk(self, risk: float, reasons: Sequence[str], route_agreement: float) -> Tuple[str, str]:
         joined = "|".join(reasons)
-        if "contradiction" in joined or "contradicted" in joined:
-            if risk >= 0.55:
-                return FINAL_BLOCK, "CONTRADICTION_BLOCK"
+        contradiction_present = "contradiction" in joined or "contradicted" in joined
+        if contradiction_present and risk >= 0.38:
+            return FINAL_BLOCK, "CONTRADICTION_BLOCK"
+        if contradiction_present:
+            return FINAL_RETRIEVE, "CONTRADICTION_REQUIRES_EVIDENCE_RECHECK"
         if risk >= 0.72:
             return FINAL_REGENERATE, "HIGH_HALLUCINATION_RISK"
         if risk >= 0.50:
