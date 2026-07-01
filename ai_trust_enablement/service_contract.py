@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Dict, Tuple
 
 SERVICE_NAME = "ai-trust-enable"
-SERVICE_VERSION = "1.3.0"
+SERVICE_VERSION = "1.4.0"
 SCHEMA_ID = "AI_RECOGNITION_CERTIFICATE/v1"
-ENGINE_NAME = "AIHallucinationRecognitionEngine+ReleaseController+RetrievalResolutionEngine+MontiOperator"
+ENGINE_NAME = "AIHallucinationRecognitionEngine+ReleaseController+RetrievalResolutionEngine+MontiOperator+FutureArrowOperator"
 
 HEALTH_ENDPOINT = "GET /healthz"
 VERSION_ENDPOINT = "GET /version"
@@ -15,6 +15,7 @@ BATCH_ENDPOINT = "POST /v1/batch"
 RELEASE_ENDPOINT = "POST /v1/release"
 RESOLVE_ENDPOINT = "POST /v1/resolve"
 MONTI_ENDPOINT = "POST /v1/monti"
+FUTURE_ARROW_ENDPOINT = "POST /v1/future-arrow"
 
 ENDPOINTS: Tuple[str, ...] = (
     HEALTH_ENDPOINT,
@@ -25,6 +26,7 @@ ENDPOINTS: Tuple[str, ...] = (
     RELEASE_ENDPOINT,
     RESOLVE_ENDPOINT,
     MONTI_ENDPOINT,
+    FUTURE_ARROW_ENDPOINT,
 )
 
 
