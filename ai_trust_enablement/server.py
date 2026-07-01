@@ -22,11 +22,15 @@ from typing import Any, Dict, List
 
 try:  # package execution
     from .ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
+    from .ecl_commit_adapter import ECLCommitAdapter
+    from .monti_operator import MontiOperator, MontiOperatorConfig
     from .release_controller import ReleaseController
     from .retrieval_resolution_engine import RetrievalResolutionEngine
     from .service_contract import SERVICE_NAME, SERVICE_VERSION, health_payload, version_payload
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine, sha256_json
+    from ecl_commit_adapter import ECLCommitAdapter
+    from monti_operator import MontiOperator, MontiOperatorConfig
     from release_controller import ReleaseController
     from retrieval_resolution_engine import RetrievalResolutionEngine
     from service_contract import SERVICE_NAME, SERVICE_VERSION, health_payload, version_payload
@@ -70,7 +74,7 @@ class RateLimiter:
 
 
 class AITrustHandler(BaseHTTPRequestHandler):
-    server_version = "AITrustEnablementHTTP/1.2"
+    server_version = "AITrustEnablementHTTP/1.3"
     engine = AIHallucinationRecognitionEngine()
     rate_limiter = RateLimiter(env_int("AI_TRUST_RATE_LIMIT_PER_MIN", 120))
 
@@ -117,6 +121,10 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/v1/resolve":
                 result = self._handle_resolve(payload)
+                json_response(self, HTTPStatus.OK, result)
+                return
+            if self.path == "/v1/monti":
+                result = self._handle_monti(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
             json_response(self, HTTPStatus.NOT_FOUND, {"error": "not_found", "path": self.path})
@@ -217,6 +225,49 @@ class AITrustHandler(BaseHTTPRequestHandler):
         result["resolution_hash"] = result["certificate_hash"]
         result["final_release_action"] = self._release_action_from_resolution(result)
         result["service_version"] = SERVICE_VERSION
+        return result
+
+    def _handle_monti(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        config = MontiOperatorConfig(
+            dt=float(payload.get("dt", 1.0)),
+            alpha=float(payload.get("alpha", 0.10)),
+            beta=float(payload.get("beta", 0.10)),
+            threshold=float(payload.get("threshold", 0.75)),
+            topology_jump_threshold=int(payload.get("topology_jump_threshold", 1)),
+        )
+        operator = MontiOperator(config)
+        skew = payload.get("skew_intensity_series")
+        metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+        if "lambda_p_series" in payload:
+            cert = operator.evaluate_series(
+                lambda_p_series=payload["lambda_p_series"],
+                skew_intensity_series=skew,
+                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "monti-model")),
+                event_index=int(payload.get("event_index", 1)),
+                metadata=metadata,
+            )
+        elif "certificates" in payload:
+            certificates = payload.get("certificates")
+            if not isinstance(certificates, list) or not all(isinstance(item, dict) for item in certificates):
+                raise ValueError("certificates_must_be_array_of_objects")
+            cert = operator.evaluate_certificates(
+                certificates=certificates,
+                skew_intensity_series=skew,
+                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "monti-model")),
+                event_index=int(payload.get("event_index", 1)),
+                metadata=metadata,
+            )
+        else:
+            raise ValueError("missing_lambda_p_series_or_certificates")
+
+        result = asdict(cert)
+        result["service_version"] = SERVICE_VERSION
+        if bool(payload.get("commit_to_ecl", False)):
+            ecl_commit = ECLCommitAdapter(payload.get("ledger_path") or None).commit_certificate(
+                result,
+                source_type="AI_TOPOLOGICAL_MEMORY_CERTIFICATE",
+            )
+            result["ecl_finality_commit"] = ecl_commit.to_dict()
         return result
 
     def _release_action_from_resolution(self, resolution: Dict[str, Any]) -> str:
