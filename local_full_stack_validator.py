@@ -10,6 +10,7 @@ from typing import Any, Dict, List
 
 from ai_trust_enablement.claim_repair_engine import ClaimRepairEngine
 from ai_trust_enablement.evidence_ledger import EvidenceLedger, read_jsonl, verify_chain
+from ai_trust_enablement.rnke_closure_engine import RNKEClosureEngine
 
 
 def run_cmd(name: str, cmd: List[str]) -> Dict[str, Any]:
@@ -51,9 +52,9 @@ def regenerate_ledger(root: Path, out_dir: Path) -> Dict[str, Any]:
             context=case["context"],
             prompt=case.get("prompt", "Answer using only the supplied context."),
             answer=case["answer"],
-            model_id="full-stack-validator-v7",
+            model_id="full-stack-validator-v8",
         ))
-        raw_entry = ledger.append_repair_certificate(cert, model_id="full-stack-validator-v7")
+        raw_entry = ledger.append_repair_certificate(cert, model_id="full-stack-validator-v8")
         entry = asdict(raw_entry) if hasattr(raw_entry, "__dataclass_fields__") else dict(raw_entry)
         rows.append({
             "case_id": case["case_id"],
@@ -108,7 +109,7 @@ def main() -> None:
     adversarial_baseline_summary = json.loads(adversarial_baseline_path.read_text(encoding="utf-8")) if adversarial_baseline_path.exists() else {}
 
     final = {
-        "suite": "local_full_stack_validator_v7",
+        "suite": "local_full_stack_validator_v8",
         "compile_ok": runs[0]["ok"],
         "contract_ok": contract_summary["ok"],
         "contract_pass": contract_summary["pass_count"], "contract_fail": contract_summary["fail_count"],
@@ -139,14 +140,23 @@ def main() -> None:
         and adversarial_baseline_summary.get("fusion_pass") == 15
     )
 
+    pre_closure_summary = dict(final)
+    final_closure = asdict(RNKEClosureEngine().check_summary(pre_closure_summary))
+    final["final_closure_status"] = final_closure["status"]
+    final["final_closure_item_count"] = final_closure["item_count"]
+    final["final_closure_hash"] = final_closure["report_hash"]
+    final["final_closure_ok"] = final_closure["status"] == "CLOSED" and final_closure["item_count"] == 0
+    final["ok"] = bool(final["ok"] and final["final_closure_ok"])
+    (out_dir / "final_closure_certificate.json").write_text(json.dumps(final_closure, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
     (out_dir / "full_stack_summary.json").write_text(json.dumps(final, indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
 
     lines = [
-        "# Local Full Stack Validation Report v7", "", f"Overall OK: `{final['ok']}`", "",
+        "# Local Full Stack Validation Report v8", "", f"Overall OK: `{final['ok']}`", "",
         "| Layer | Pass | Fail / Status |", "|---|---:|---|",
         f"| Compile | {1 if final['compile_ok'] else 0} | {'OK' if final['compile_ok'] else 'FAIL'} |",
         f"| Service contract | {final['contract_pass']} | {final['contract_fail']} fail |",
         f"| RNKE closure | {final['closure_pass']} | {final['closure_fail']} fail |",
+        f"| Final proof closure | {1 if final['final_closure_ok'] else 0} | {final['final_closure_status']} items={final['final_closure_item_count']} |",
         f"| Smoke suite | {final['smoke_pass']} | {final['smoke_fail']} fail |",
         f"| Detection benchmark | {final['benchmark_pass']} | {final['benchmark_fail']} fail |",
         f"| Repair validation | {final['repair_pass']} | {final['repair_fail']} fail |",
@@ -158,6 +168,11 @@ def main() -> None:
         f"| Baseline comparison | Fusion {final['baseline_fusion_pass']} | Naive {final['baseline_naive_pass']} |",
         f"| Adversarial baseline | Fusion {final['adversarial_baseline_fusion_pass']} | Naive {final['adversarial_baseline_naive_pass']} |",
         f"| Evidence ledger | {final['ledger_entries']} entries | Chain OK: `{final['ledger_chain_ok']}` |",
+        "", "## Final Closure", "",
+        f"- Status: `{final['final_closure_status']}`",
+        f"- Item count: `{final['final_closure_item_count']}`",
+        f"- Closure hash: `{final['final_closure_hash']}`",
+        f"- Certificate: `local_full_stack_outputs/final_closure_certificate.json`",
         "", "## Command Status", "", "| Command | OK | Return Code |", "|---|---:|---:|",
     ]
     for r in runs:
@@ -166,11 +181,12 @@ def main() -> None:
     report_md.write_text("\n".join(lines), encoding="utf-8")
 
     print()
-    print("LOCAL FULL STACK VALIDATION V7")
+    print("LOCAL FULL STACK VALIDATION V8")
     print("=" * 94)
     print(f"Compile OK: {final['compile_ok']}")
     print(f"Service contract: {final['contract_pass']} pass, {final['contract_fail']} fail")
     print(f"RNKE closure: {final['closure_pass']} pass, {final['closure_fail']} fail")
+    print(f"Final proof closure: {final['final_closure_status']} items={final['final_closure_item_count']}")
     print(f"Smoke: {final['smoke_pass']} pass, {final['smoke_fail']} fail")
     print(f"Detection benchmark: {final['benchmark_pass']} pass, {final['benchmark_fail']} fail")
     print(f"Repair validation: {final['repair_pass']} pass, {final['repair_fail']} fail")
@@ -184,6 +200,7 @@ def main() -> None:
     print(f"Ledger: {final['ledger_entries']} entries, chain OK = {final['ledger_chain_ok']}")
     print("-" * 94)
     print(f"OVERALL OK = {final['ok']}")
+    print(f"Final closure certificate: {out_dir / 'final_closure_certificate.json'}")
     print(f"Report: {report_md}")
 
     if not final["ok"]:
