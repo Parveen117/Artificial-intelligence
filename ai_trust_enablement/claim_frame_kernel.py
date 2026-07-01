@@ -237,6 +237,32 @@ def extract_location(text: str, relation: str, entities: Sequence[str]) -> Tuple
     return tuple()
 
 
+def extract_conversion_object(text: str) -> str:
+    """Extract the target object in conversion claims such as 'converts X into Y'."""
+    lower = text.lower()
+    match = re.search(r"\b(?:into|to)\s+([^.;,]+)", text, flags=re.IGNORECASE)
+    if not match:
+        return ""
+    rhs = match.group(1).strip(" .")
+    raw_tokens = set(tokenize(rhs))
+    if raw_tokens & {"electrical", "electricity", "electric"}:
+        return "electrical_energy"
+    if "sound" in raw_tokens:
+        return "sound_energy"
+    if "heat" in raw_tokens or "thermal" in raw_tokens:
+        return "heat_energy"
+    if "light" in raw_tokens:
+        return "light_energy"
+    if "mechanical" in raw_tokens:
+        return "mechanical_energy"
+    if "chemical" in raw_tokens:
+        return "chemical_energy"
+    c_tokens = content_tokens(rhs)
+    if len(c_tokens) >= 2:
+        return "_".join(c_tokens[-2:])
+    return c_tokens[-1] if c_tokens else ""
+
+
 def split_subject_object(text: str, relation: str, entities: Sequence[str], numbers: Sequence[str]) -> Tuple[str, str]:
     c_tokens = content_tokens(text)
     subject = entities[0] if entities else (c_tokens[0] if c_tokens else "")
@@ -254,7 +280,7 @@ def split_subject_object(text: str, relation: str, entities: Sequence[str], numb
         elif c_tokens:
             obj = c_tokens[-1]
     elif relation == "converts_to" and c_tokens:
-        obj = c_tokens[-1]
+        obj = extract_conversion_object(text) or c_tokens[-1]
     elif relation == "has_property" and c_tokens:
         obj = c_tokens[-1]
     elif c_tokens:
@@ -484,7 +510,7 @@ class ClaimFrameKernel:
             "confidence": confidence if confidence is not None else max(0.0, 1.0 - residue),
             "residue": residue,
             "route_scores": scores,
-            "field_comparisons": tuple(comparisons),
+            "field_comparisons": tuple(asdict(c) for c in comparisons),
             "reason_tags": tuple(reason_tags),
         }
         return FrameMatch(match_hash=sha256_json(payload), **payload)

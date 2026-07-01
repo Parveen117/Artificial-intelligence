@@ -1,0 +1,121 @@
+[
+  {
+    "case_id": "grounded_school_library",
+    "description": "Exact grounded school library fact.",
+    "context": "The school library opens at 8 AM. Students may borrow two books at a time.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school library opens at 8 AM. Students may borrow two books at a time.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "unsupported_extra_facility",
+    "description": "Unsupported extra facility claim.",
+    "context": "The school library opens at 8 AM. Students may borrow two books at a time.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school library opens at 8 AM. Students may borrow two books at a time. The library has a robotics lab.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "wrong_opening_time",
+    "description": "Number/time contradiction.",
+    "context": "The school library opens at 8 AM. Students may borrow two books at a time.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school library opens at 10 AM. Students may borrow two books at a time.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "grounded_science_conversion",
+    "description": "Grounded science conversion paraphrase.",
+    "context": "A solar panel converts sunlight into electrical energy. A battery stores electrical energy for later use.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "A solar panel changes sunlight into electrical energy. A battery stores the electrical energy for later use.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "wrong_conversion_output",
+    "description": "Wrong conversion object.",
+    "context": "A solar panel converts sunlight into electrical energy.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "A solar panel converts sunlight into sound energy.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "negation_contradiction",
+    "description": "Negation contradiction.",
+    "context": "The medicine should be taken after meals.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The medicine should not be taken after meals.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "unsupported_medical_advice",
+    "description": "Unsupported medical advice added beyond evidence.",
+    "context": "The medicine should be taken after meals.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The medicine should be taken after meals. It also cures fever within one hour.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE",
+      "BLOCK_OUTPUT"
+    ]
+  },
+  {
+    "case_id": "entity_location_contradiction",
+    "description": "Location entity contradiction.",
+    "context": "The Red Fort is located in Delhi.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The Red Fort is located in Mumbai.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "exact_location_grounded",
+    "description": "Exact location grounded.",
+    "context": "The Red Fort is located in Delhi.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The Red Fort is located in Delhi.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "empty_context_claim",
+    "description": "Claim with no evidence.",
+    "context": "",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The Red Fort is located in Delhi.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE",
+      "BLOCK_OUTPUT"
+    ]
+  }
+]

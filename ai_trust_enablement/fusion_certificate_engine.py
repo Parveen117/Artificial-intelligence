@@ -216,6 +216,8 @@ class FusionCertificateEngine:
             return FINAL_REGENERATE, "HIGH_HALLUCINATION_RISK"
         if risk >= 0.50:
             return FINAL_RETRIEVE, "EVIDENCE_INSUFFICIENT"
+        if ("unsupported" in joined or "uncertain" in joined or "route_conflict" in joined) and risk >= 0.20:
+            return FINAL_REVIEW, "BOUNDED_REVIEW"
         if risk >= 0.28 or route_agreement < 0.55:
             return FINAL_REVIEW, "BOUNDED_REVIEW"
         return FINAL_COMMIT, "CERTIFIED_GROUNDED"
