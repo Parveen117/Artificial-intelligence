@@ -2,7 +2,7 @@
 
 This guide describes how to run the AI hallucination-recognition engine as a local service, Docker container, or installed Python package.
 
-The service is deployable as a first production-oriented v1. It is not a certified medical, legal, financial, or safety-critical decision system. Use it as a verification, gating, logging, and certificate layer. Humanity keeps trying to skip validation, and somehow the servers keep catching fire.
+The service is deployable as a first production-oriented v1. It is not a certified medical, legal, financial, or safety-critical decision system. Use it as a verification, gating, logging, certificate, release-control, Monti temporal-memory, and finality-sealing layer. Humanity keeps trying to skip validation, and somehow the servers keep catching fire.
 
 ## 1. Local run
 
@@ -25,6 +25,21 @@ Evaluate one answer:
 curl -s http://127.0.0.1:8080/v1/evaluate \
   -H 'Content-Type: application/json' \
   --data @examples/evaluate_request.json
+```
+
+Evaluate a Monti temporal-memory trajectory:
+
+```bash
+curl -s http://127.0.0.1:8080/v1/monti \
+  -H 'Content-Type: application/json' \
+  --data '{
+    "lambda_p_series": [0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
+    "skew_intensity_series": [0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
+    "alpha": 0.25,
+    "beta": 0.20,
+    "threshold": 0.45,
+    "commit_to_ecl": true
+  }'
 ```
 
 ## 2. Token-protected local service
@@ -69,6 +84,8 @@ docker compose up --build
 | `AI_TRUST_MAX_BATCH_CASES` | `50` | Max cases in `/v1/batch` |
 | `AI_TRUST_RATE_LIMIT_PER_MIN` | `120` | Simple per-client request limit |
 | `AI_TRUST_MODEL_ID` | `model-under-test` | Default model label in certificates |
+| `AI_TRUST_RELEASE_LEDGER_PATH` | empty | Optional release controller evidence ledger path |
+| `AI_TRUST_ECL_LEDGER_PATH` | `ai_trust_ecl_finality_ledger.jsonl` | Optional ECL-style finality ledger path |
 | `AI_TRUST_DEBUG` | empty | Set `1` only for local debugging |
 
 ## 5. API endpoints
@@ -124,6 +141,46 @@ Request:
 
 Response: summary counts plus one certificate per case.
 
+### `POST /v1/release`
+
+Evaluates answer safety, repair, retrieval need, and final release action.
+
+### `POST /v1/resolve`
+
+Closes the retrieval loop by checking retrieved evidence against unresolved claims.
+
+### `POST /v1/monti`
+
+Request with raw phase trajectory:
+
+```json
+{
+  "lambda_p_series": [0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
+  "skew_intensity_series": [0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
+  "alpha": 0.25,
+  "beta": 0.20,
+  "threshold": 0.45,
+  "commit_to_ecl": true
+}
+```
+
+Or with prior AI certificates:
+
+```json
+{
+  "certificates": [
+    {"recognition_state": {"phase_value": 0.02}},
+    {"recognition_state": {"phase_value": 0.24}},
+    {"recognition_state": {"phase_value": 0.49}},
+    {"recognition_state": {"phase_value": 1.02}}
+  ],
+  "threshold": 0.45,
+  "commit_to_ecl": true
+}
+```
+
+Response: an `AI_TOPOLOGICAL_MEMORY_CERTIFICATE`; when `commit_to_ecl` is true, the response also includes an `ecl_finality_commit`.
+
 ## 6. Production hardening checklist
 
 Before exposing outside localhost:
@@ -133,8 +190,9 @@ Before exposing outside localhost:
 - Set request size and batch limits appropriate to your environment.
 - Disable `AI_TRUST_DEBUG`.
 - Do not log full prompts or answers unless your privacy policy permits it.
-- Monitor classification counts, request latency, error rates, and certificate hashes.
-- Keep a dataset of known grounded and known unsupported outputs for regression checks.
+- Persist ECL finality ledgers on durable storage when using `commit_to_ecl`.
+- Monitor classification counts, Monti transitions, request latency, error rates, and certificate hashes.
+- Keep a dataset of known grounded, unsupported, stable-sector, and transition-sector outputs for regression checks.
 - Treat this as a decision-support/gating layer, not as a standalone truth oracle.
 
 ## 7. Integration pattern
@@ -145,9 +203,11 @@ A practical real-world architecture:
 User request
   -> LLM or AI model
   -> AI Trust Enablement Service
-  -> certificate
+  -> recognition / repair / release certificate
+  -> optional Monti temporal-memory certificate
+  -> optional ECL-style finality commit
   -> application policy gate
-  -> commit, flag, defer, retrieve, regenerate, or human review
+  -> commit, flag, defer, retrieve, regenerate, hold, or human review
 ```
 
-The service does not need to know the model internals. It can work with context, prompt, and answer. If logits are available, the optional confidence-collapse path can also be used.
+The service does not need to know the model internals. It can work with context, prompt, and answer. If logits are available, the optional confidence-collapse path can also be used. If repeated certificates or phase samples are available, the Monti path can detect temporal recognition-sector transitions.
