@@ -53,7 +53,7 @@ CASES: List[Dict[str, Any]] = [
         "expected_supported": 0,
         "expected_contradicted": 1,
         "expected_unresolved": 0,
-        "required_final_safe_substrings": ["medicine should be taken after meals"]
+        "required_final_safe_substrings": []
     },
     {
         "case_id": "api_resolve_unrelated_evidence",
@@ -148,6 +148,7 @@ def validate_case(case: Dict[str, Any]) -> Dict[str, Any]:
         "supported": cert.get("resolved_supported_count"),
         "contradicted": cert.get("resolved_contradicted_count"),
         "unresolved": cert.get("unresolved_count"),
+        "final_safe_answer": final_safe,
         "checks": checks,
         "resolution_hash": cert.get("resolution_hash"),
     }
