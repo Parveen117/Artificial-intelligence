@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-CI Proof Pack v1
+CI Proof Pack v2
 ================
 
 Fresh-clone proof runner for the AI Trust Enablement stack.
 
-The proof pack is intentionally boring: compile the package, run the default smoke
-suite, run the benchmark suite, write artifacts, and fail the process if a gate fails.
-Boring is good here. Boring is what reviewers can reproduce.
+v1 proved compile + smoke + benchmark. v2 adds the notebook-proven full-stack
+validator: repair validation, retrieval resolution, adversarial benchmark,
+baseline comparison, adversarial baseline comparison, and hash-chain evidence
+ledger validation.
+
+The point is simple: a clean GitHub runner should reproduce the same proof that
+was previously only visible in a local notebook.
 """
 
 from __future__ import annotations
@@ -15,8 +19,8 @@ from __future__ import annotations
 import argparse
 import compileall
 import json
-import os
 import platform
+import shutil
 import subprocess
 import sys
 import time
@@ -25,17 +29,18 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
 try:
-    from .fusion_certificate_engine import sha256_json
-    from .local_smoke_suite import SmokeCaseResult, ensure_dir, evaluate_case, load_cases, print_table, write_summary
-    from .fusion_certificate_engine import FusionCertificateEngine
+    from .fusion_certificate_engine import FusionCertificateEngine, sha256_json
+    from .local_smoke_suite import ensure_dir, evaluate_case, load_cases, print_table, write_summary
 except ImportError:
-    from fusion_certificate_engine import sha256_json
-    from local_smoke_suite import SmokeCaseResult, ensure_dir, evaluate_case, load_cases, print_table, write_summary
-    from fusion_certificate_engine import FusionCertificateEngine
+    from fusion_certificate_engine import FusionCertificateEngine, sha256_json
+    from local_smoke_suite import ensure_dir, evaluate_case, load_cases, print_table, write_summary
 
 
-PROOF_PACK_VERSION = "1.0.0"
+PROOF_PACK_VERSION = "2.0.0"
 DEFAULT_BENCHMARK = Path("ai_trust_enablement") / "benchmark_cases_v1.json"
+ROOT_BENCHMARK = Path("local_benchmark_cases.json")
+FULL_STACK_VALIDATOR = Path("local_full_stack_validator.py")
+FULL_STACK_OUTPUT_DIR = Path("local_full_stack_outputs")
 
 
 def git_value(args: Sequence[str]) -> str:
@@ -70,9 +75,84 @@ def run_case_suite(name: str, cases_path: Optional[Path], output_root: Path) -> 
     }
 
 
+def run_command(name: str, cmd: Sequence[str]) -> Dict[str, Any]:
+    result = subprocess.run(list(cmd), text=True, capture_output=True, check=False)
+    return {
+        "name": name,
+        "cmd": list(cmd),
+        "returncode": result.returncode,
+        "ok": result.returncode == 0,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+    }
+
+
+def read_json_if_present(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {"exists": False, "path": str(path)}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            data.setdefault("exists", True)
+            data.setdefault("path", str(path))
+            return data
+    except Exception as exc:
+        return {"exists": False, "path": str(path), "error": repr(exc)}
+    return {"exists": False, "path": str(path), "error": "JSON root is not an object"}
+
+
+def copy_full_stack_artifacts(output_dir: Path) -> Dict[str, Any]:
+    artifact_dir = output_dir / "full_stack_validator_v2"
+    ensure_dir(artifact_dir)
+    copied = []
+    if FULL_STACK_OUTPUT_DIR.exists():
+        dst = artifact_dir / FULL_STACK_OUTPUT_DIR.name
+        if dst.exists():
+            shutil.rmtree(dst)
+        shutil.copytree(FULL_STACK_OUTPUT_DIR, dst)
+        copied.append(str(dst))
+    for extra in [
+        "local_run_outputs",
+        "local_benchmark_outputs",
+        "local_repair_validation_outputs",
+        "local_resolution_validation_outputs",
+        "local_adversarial_outputs_v1",
+        "local_baseline_outputs",
+        "local_adversarial_baseline_outputs_v1",
+    ]:
+        src = Path(extra)
+        if src.exists():
+            dst = artifact_dir / src.name
+            if dst.exists():
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst)
+            copied.append(str(dst))
+    return {"artifact_dir": str(artifact_dir), "copied": copied}
+
+
+def run_full_stack_validator(output_dir: Path) -> Dict[str, Any]:
+    if not FULL_STACK_VALIDATOR.exists():
+        return {
+            "name": "full_stack_validator_v2",
+            "ok": False,
+            "returncode": 127,
+            "stdout": "",
+            "stderr": f"Missing {FULL_STACK_VALIDATOR}",
+            "summary": {"exists": False},
+            "artifacts": {"copied": []},
+        }
+    command = run_command("full_stack_validator_v2", [sys.executable, str(FULL_STACK_VALIDATOR)])
+    summary = read_json_if_present(FULL_STACK_OUTPUT_DIR / "full_stack_summary.json")
+    artifacts = copy_full_stack_artifacts(output_dir)
+    command["summary"] = summary
+    command["artifacts"] = artifacts
+    command["ok"] = bool(command["ok"] and summary.get("ok") is True)
+    return command
+
+
 def write_proof_markdown(output_dir: Path, proof: Dict[str, Any]) -> None:
     lines = [
-        "# CI Proof Pack v1",
+        "# CI Proof Pack v2",
         "",
         f"Status: **{'PASS' if proof['ok'] else 'FAIL'}**",
         f"Proof hash: `{proof['proof_hash']}`",
@@ -90,26 +170,42 @@ def write_proof_markdown(output_dir: Path, proof: Dict[str, Any]) -> None:
     ]
     for suite in proof["suites"]:
         status = "PASS" if suite["fail_count"] == 0 else "FAIL"
-        lines.extend(
-            [
-                f"- {suite['name']}: `{status}` ({suite['pass_count']}/{suite['case_count']} passed)",
-            ]
-        )
+        lines.append(f"- {suite['name']}: `{status}` ({suite['pass_count']}/{suite['case_count']} passed)")
+
+    full_stack = proof["full_stack_validator"]
+    full_stack_status = "PASS" if full_stack.get("ok") else "FAIL"
+    lines.append(f"- full_stack_validator_v2: `{full_stack_status}`")
+
+    fs = full_stack.get("summary", {}) or {}
+    if fs.get("exists"):
+        lines.extend([
+            "",
+            "## Full-stack validator v2",
+            "",
+            f"- Overall OK: `{fs.get('ok')}`",
+            f"- Smoke: `{fs.get('smoke_pass')}` pass, `{fs.get('smoke_fail')}` fail",
+            f"- Detection benchmark: `{fs.get('benchmark_pass')}` pass, `{fs.get('benchmark_fail')}` fail",
+            f"- Repair validation: `{fs.get('repair_pass')}` pass, `{fs.get('repair_fail')}` fail",
+            f"- Retrieval resolution: `{fs.get('resolution_pass')}` pass, `{fs.get('resolution_fail')}` fail",
+            f"- Adversarial benchmark: `{fs.get('adversarial_pass')}` pass, `{fs.get('adversarial_fail')}` fail",
+            f"- Baseline comparison: fusion `{fs.get('baseline_fusion_pass')}`, naive `{fs.get('baseline_naive_pass')}`",
+            f"- Adversarial baseline: fusion `{fs.get('adversarial_baseline_fusion_pass')}`, naive `{fs.get('adversarial_baseline_naive_pass')}`",
+            f"- Evidence ledger: `{fs.get('ledger_entries')}` entries, chain OK `{fs.get('ledger_chain_ok')}`",
+        ])
+
     lines.extend(["", "## Suite details", ""])
     for suite in proof["suites"]:
-        lines.extend(
-            [
-                f"### {suite['name']}",
-                "",
-                f"Cases: {suite['case_count']}",
-                f"Passed: {suite['pass_count']}",
-                f"Failed: {suite['fail_count']}",
-                f"Summary hash: `{suite['summary_hash']}`",
-                "",
-                "| Case | OK | Action | Classification | Risk | Confidence | Route agreement | Reasons |",
-                "|---|---:|---|---|---:|---:|---:|---|",
-            ]
-        )
+        lines.extend([
+            f"### {suite['name']}",
+            "",
+            f"Cases: {suite['case_count']}",
+            f"Passed: {suite['pass_count']}",
+            f"Failed: {suite['fail_count']}",
+            f"Summary hash: `{suite['summary_hash']}`",
+            "",
+            "| Case | OK | Action | Classification | Risk | Confidence | Route agreement | Reasons |",
+            "|---|---:|---|---|---:|---:|---:|---|",
+        ])
         for result in suite["results"]:
             reasons = ", ".join(result.get("dominant_reasons", []))
             lines.append(
@@ -118,6 +214,24 @@ def write_proof_markdown(output_dir: Path, proof: Dict[str, Any]) -> None:
                 f"{result['confidence']:.3f} | {result['route_agreement']:.3f} | {reasons} |"
             )
         lines.append("")
+
+    if not full_stack.get("ok"):
+        lines.extend([
+            "## Full-stack failure output",
+            "",
+            "### stdout",
+            "",
+            "```text",
+            full_stack.get("stdout", ""),
+            "```",
+            "",
+            "### stderr",
+            "",
+            "```text",
+            full_stack.get("stderr", ""),
+            "```",
+        ])
+
     with (output_dir / "CI_PROOF_PACK_REPORT.md").open("w", encoding="utf-8") as handle:
         handle.write("\n".join(lines))
 
@@ -129,8 +243,9 @@ def build_proof(output_dir: Path, benchmark_cases: Path) -> Dict[str, Any]:
         run_case_suite("smoke_default", None, output_dir),
         run_case_suite("benchmark_v1", benchmark_cases, output_dir),
     ]
+    full_stack = run_full_stack_validator(output_dir)
     proof_payload = {
-        "proof_pack": "ci_proof_pack_v1",
+        "proof_pack": "ci_proof_pack_v2",
         "version": PROOF_PACK_VERSION,
         "timestamp_unix": int(time.time()),
         "environment": {
@@ -145,8 +260,9 @@ def build_proof(output_dir: Path, benchmark_cases: Path) -> Dict[str, Any]:
         },
         "compile_ok": bool(compile_ok),
         "suites": suites,
+        "full_stack_validator": full_stack,
     }
-    proof_payload["ok"] = bool(compile_ok) and all(s["fail_count"] == 0 for s in suites)
+    proof_payload["ok"] = bool(compile_ok) and all(s["fail_count"] == 0 for s in suites) and bool(full_stack.get("ok"))
     proof_payload["proof_hash"] = sha256_json(proof_payload)
     with (output_dir / "ci_proof_pack_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(proof_payload, handle, indent=2, sort_keys=True, ensure_ascii=False)
@@ -155,7 +271,7 @@ def build_proof(output_dir: Path, benchmark_cases: Path) -> Dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run CI Proof Pack v1 for the AI trust stack")
+    parser = argparse.ArgumentParser(description="Run CI Proof Pack v2 for the AI trust stack")
     parser.add_argument("--out-dir", default="ci_proof_outputs")
     parser.add_argument("--benchmark-cases", default=str(DEFAULT_BENCHMARK))
     parser.add_argument("--strict", action="store_true", help="exit with code 1 if any gate fails")
