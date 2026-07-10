@@ -1,5 +1,7 @@
 # Artificial Intelligence Trust Enablement
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21300179.svg)](https://doi.org/10.5281/zenodo.21300179)
+
 This repository contains a deployable AI trust-enablement service for hallucination-residue evaluation, confidence-collapse detection, release control, certificate generation, ECL-style finality, Lambda-Laplace analytic diagnostics, topological-memory / winding-sector diagnostics, and Future Arrow forecasting.
 
 > **Patent status.** This repository is associated with inventor-controlled patent filings and related intellectual-property rights. Publication does not grant any patent license. See [`PATENT_NOTICE.md`](PATENT_NOTICE.md).
@@ -108,6 +110,10 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 - `COPYRIGHT_NOTICE.md` - copyright ownership and restriction notice.
 - `LICENSE` - all-rights-reserved repository license boundary.
 - `CITATION.cff` - citation metadata for academic and technical references.
+
+## Citation
+
+Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates* (Version 1.0.1). Zenodo. https://doi.org/10.5281/zenodo.21300179
 
 ## Status
 
