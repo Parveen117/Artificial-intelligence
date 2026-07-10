@@ -1,6 +1,6 @@
 # Artificial Intelligence Trust Enablement
 
-This repository contains a deployable AI hallucination-recognition, confidence-collapse, release-control, ECL-finality, Lambda-Laplace analytic, Monti topological-memory, and Future Arrow forecasting certificate service.
+This repository contains a deployable AI hallucination-recognition, confidence-collapse, release-control, ECL-finality, Lambda-Laplace analytic, Topological Memory topological-memory, and Future Arrow forecasting certificate service.
 
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
@@ -8,10 +8,10 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 - concrete state signatures with `phase_value`, `scale_value`, and `seam_memory_value`,
 - open-residue classification into `RECOGNITION`, `BOUNDED_RESIDUE`, or `ACTIONABLE_RESIDUE`,
 - Lambda-Laplace diffusion, seam, heat-trace, and spectral-gap diagnostics,
-- temporal Monti Operator diagnostics for winding-sector and memory-transition detection,
-- Future Arrow probability-cone forecasting after recognition or Monti events,
+- temporal Topological Memory Operator diagnostics for winding-sector and memory-transition detection,
+- Future Arrow probability-cone forecasting after recognition or Topological Memory events,
 - machine-readable certificates and JSON schema,
-- HTTP API service with health/version/schema/evaluate/batch/release/resolve/lambda-laplace/monti/future-arrow endpoints,
+- HTTP API service with health/version/schema/evaluate/batch/release/resolve/lambda-laplace/topological_memory/future-arrow endpoints,
 - answer release, repair, retrieval-resolution, and ECL-style finality commit support,
 - Docker and docker-compose deployment files,
 - no-dependency regression tests.
@@ -42,7 +42,7 @@ Set `AI_TRUST_API_TOKEN` before exposing the service beyond localhost.
 
 ## ECL finality bridge
 
-The AI Trust stack can seal recognition, repair, release, retrieval-resolution, Lambda-Laplace, Monti, or Future Arrow certificates into an append-only ECL-style finality ledger.
+The AI Trust stack can seal recognition, repair, release, retrieval-resolution, Lambda-Laplace, Topological Memory, or Future Arrow certificates into an append-only ECL-style finality ledger.
 
 ```python
 from dataclasses import asdict
@@ -86,20 +86,20 @@ curl -s http://127.0.0.1:8080/v1/lambda-laplace \
   }'
 ```
 
-Lambda-Laplace provides analytic seam evidence before Monti makes any topological jump claim. See `docs/LAMBDA_LAPLACE_INTEGRATION.md`.
+Lambda-Laplace provides analytic seam evidence before Topological Memory makes any topological jump claim. See `docs/LAMBDA_LAPLACE_INTEGRATION.md`.
 
-## Monti topological-memory layer
+## Topological Memory topological-memory layer
 
-The Monti Operator layer evaluates a phase trajectory, computes winding-sector movement, and emits an `AI_TOPOLOGICAL_MEMORY_CERTIFICATE` when the trajectory crosses a memory/sector seam.
+The Topological Memory Operator layer evaluates a phase trajectory, computes winding-sector movement, and emits an `AI_TOPOLOGICAL_MEMORY_CERTIFICATE` when the trajectory crosses a memory/sector seam.
 
 ```bash
-python ai_trust_enablement/monti_operator.py --demo
+python ai_trust_enablement/topological_memory_operator.py --demo
 ```
 
 HTTP example:
 
 ```bash
-curl -s http://127.0.0.1:8080/v1/monti \
+curl -s http://127.0.0.1:8080/v1/topological-memory \
   -H 'Content-Type: application/json' \
   --data '{
     "lambda_p_series": [0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
@@ -111,11 +111,11 @@ curl -s http://127.0.0.1:8080/v1/monti \
   }'
 ```
 
-This extends the service from one-answer hallucination detection to temporal recognition-drift detection. See `docs/MONTI_OPERATOR_INTEGRATION.md`.
+This extends the service from one-answer hallucination detection to temporal recognition-drift detection. See `docs/TOPOLOGICAL_MEMORY_OPERATOR_INTEGRATION.md`.
 
 ## Future Arrow forecasting layer
 
-The Future Arrow Operator projects the current recognition/Monti state forward into a probability-coated future cone and emits an `AI_FUTURE_ARROW_CERTIFICATE`.
+The Future Arrow Operator projects the current recognition/Topological Memory state forward into a probability-coated future cone and emits an `AI_FUTURE_ARROW_CERTIFICATE`.
 
 ```bash
 python ai_trust_enablement/future_arrow_operator.py --demo
@@ -136,7 +136,7 @@ curl -s http://127.0.0.1:8080/v1/future-arrow \
   }'
 ```
 
-Monti says what crossed. Future Arrow estimates where the recognition trajectory may go next. ECL can seal either actual events or forecast certificates. See `docs/FUTURE_ARROW_INTEGRATION.md`.
+Topological Memory says what crossed. Future Arrow estimates where the recognition trajectory may go next. ECL can seal either actual events or forecast certificates. See `docs/FUTURE_ARROW_INTEGRATION.md`.
 
 ## Documentation
 
@@ -145,9 +145,9 @@ Monti says what crossed. Future Arrow estimates where the recognition trajectory
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
 - `docs/ECL_FINALITY_INTEGRATION.md` - AI certificate to ECL-style finality commit bridge.
 - `docs/LAMBDA_LAPLACE_INTEGRATION.md` - Lambda-Laplace analytic diffusion and seam diagnostics.
-- `docs/MONTI_OPERATOR_INTEGRATION.md` - Monti Operator winding-sector memory diagnostics.
+- `docs/TOPOLOGICAL_MEMORY_OPERATOR_INTEGRATION.md` - Topological Memory Operator winding-sector memory diagnostics.
 - `docs/FUTURE_ARROW_INTEGRATION.md` - Future Arrow probability-cone forecasting.
 
 ## Status
 
-Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, Monti temporal memory diagnostics, Future Arrow forecasting, and integration into AI applications. It is not a standalone truth oracle and not a substitute for domain validation.
+Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, Topological Memory temporal memory diagnostics, Future Arrow forecasting, and integration into AI applications. It is not a standalone truth oracle and not a substitute for domain validation.

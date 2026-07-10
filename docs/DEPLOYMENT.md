@@ -2,7 +2,7 @@
 
 This guide describes how to run the AI hallucination-recognition engine as a local service, Docker container, or installed Python package.
 
-The service is deployable as a first production-oriented v1. It is not a certified medical, legal, financial, or safety-critical decision system. Use it as a verification, gating, logging, certificate, release-control, Monti temporal-memory, and finality-sealing layer. Humanity keeps trying to skip validation, and somehow the servers keep catching fire.
+The service is deployable as a first production-oriented v1. It is not a certified medical, legal, financial, or safety-critical decision system. Use it as a verification, gating, logging, certificate, release-control, Topological Memory temporal-memory, and finality-sealing layer. Humanity keeps trying to skip validation, and somehow the servers keep catching fire.
 
 ## 1. Local run
 
@@ -27,10 +27,10 @@ curl -s http://127.0.0.1:8080/v1/evaluate \
   --data @examples/evaluate_request.json
 ```
 
-Evaluate a Monti temporal-memory trajectory:
+Evaluate a Topological Memory temporal-memory trajectory:
 
 ```bash
-curl -s http://127.0.0.1:8080/v1/monti \
+curl -s http://127.0.0.1:8080/v1/topological-memory \
   -H 'Content-Type: application/json' \
   --data '{
     "lambda_p_series": [0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
@@ -149,7 +149,7 @@ Evaluates answer safety, repair, retrieval need, and final release action.
 
 Closes the retrieval loop by checking retrieved evidence against unresolved claims.
 
-### `POST /v1/monti`
+### `POST /v1/topological-memory`
 
 Request with raw phase trajectory:
 
@@ -191,7 +191,7 @@ Before exposing outside localhost:
 - Disable `AI_TRUST_DEBUG`.
 - Do not log full prompts or answers unless your privacy policy permits it.
 - Persist ECL finality ledgers on durable storage when using `commit_to_ecl`.
-- Monitor classification counts, Monti transitions, request latency, error rates, and certificate hashes.
+- Monitor classification counts, Topological Memory transitions, request latency, error rates, and certificate hashes.
 - Keep a dataset of known grounded, unsupported, stable-sector, and transition-sector outputs for regression checks.
 - Treat this as a decision-support/gating layer, not as a standalone truth oracle.
 
@@ -204,10 +204,10 @@ User request
   -> LLM or AI model
   -> AI Trust Enablement Service
   -> recognition / repair / release certificate
-  -> optional Monti temporal-memory certificate
+  -> optional Topological Memory temporal-memory certificate
   -> optional ECL-style finality commit
   -> application policy gate
   -> commit, flag, defer, retrieve, regenerate, hold, or human review
 ```
 
-The service does not need to know the model internals. It can work with context, prompt, and answer. If logits are available, the optional confidence-collapse path can also be used. If repeated certificates or phase samples are available, the Monti path can detect temporal recognition-sector transitions.
+The service does not need to know the model internals. It can work with context, prompt, and answer. If logits are available, the optional confidence-collapse path can also be used. If repeated certificates or phase samples are available, the Topological Memory path can detect temporal recognition-sector transitions.

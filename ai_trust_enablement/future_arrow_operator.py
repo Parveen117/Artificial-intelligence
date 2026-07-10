@@ -2,15 +2,15 @@
 """
 Future Arrow Operator for AI Trust Enablement.
 
-The Future Arrow layer projects the current recognition / Monti state forward
+The Future Arrow layer projects the current recognition / Topological Memory state forward
 into a probability-coated cone of likely future recognition sectors.
 
-It does not replace Monti. Monti asks whether a topological sector jump has
+It does not replace Topological Memory. Topological Memory asks whether a topological sector jump has
 occurred. Future Arrow asks what future sector-risk distribution follows from
 current entropy, statistical layering, anchors, and time shift.
 
 Design priority:
-  1. use Monti state when available as the topological context,
+  1. use Topological Memory state when available as the topological context,
   2. build a forward probability cone over stable / stress / jump / post-jump,
   3. tighten the cone when NSL symmetry and anchor constraints are supplied,
   4. emit a deterministic forecast certificate that can be ECL-sealed if needed.
@@ -33,7 +33,7 @@ class FutureArrowConfig:
     entropy_weight: float = 0.45
     layer_weight: float = 0.25
     anchor_weight: float = 0.20
-    monti_weight: float = 0.55
+    topological_memory_weight: float = 0.55
     nsl_strength: float = 0.0
     jump_threshold: float = 0.62
     stress_threshold: float = 0.38
@@ -84,27 +84,27 @@ def _number(value: Any, default: float = 0.0) -> float:
     return float(value) if isinstance(value, (int, float)) else float(default)
 
 
-def _extract_monti_features(monti_certificate: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-    if not isinstance(monti_certificate, dict):
+def _extract_topological_memory_features(topological_memory_certificate: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if not isinstance(topological_memory_certificate, dict):
         return {
             "available": False,
             "classification": "UNKNOWN",
             "delta_nu": 0,
             "spectral_flow": 0,
             "curvature_stress": False,
-            "max_abs_monti": 0.0,
+            "max_abs_curvature_signal": 0.0,
             "transition_detected": False,
         }
-    transition = monti_certificate.get("transition", {}) if isinstance(monti_certificate.get("transition", {}), dict) else {}
-    spectral = monti_certificate.get("spectral_state", {}) if isinstance(monti_certificate.get("spectral_state", {}), dict) else {}
-    monti_state = monti_certificate.get("monti_state", {}) if isinstance(monti_certificate.get("monti_state", {}), dict) else {}
+    transition = topological_memory_certificate.get("transition", {}) if isinstance(topological_memory_certificate.get("transition", {}), dict) else {}
+    spectral = topological_memory_certificate.get("spectral_state", {}) if isinstance(topological_memory_certificate.get("spectral_state", {}), dict) else {}
+    topological_state = topological_memory_certificate.get("topological_state", {}) if isinstance(topological_memory_certificate.get("topological_state", {}), dict) else {}
     return {
         "available": True,
         "classification": str(transition.get("classification", "UNKNOWN")),
         "delta_nu": int(_number(transition.get("delta_nu", spectral.get("spectral_flow", 0)), 0)),
         "spectral_flow": int(_number(spectral.get("spectral_flow", transition.get("delta_nu", 0)), 0)),
-        "curvature_stress": bool(transition.get("curvature_stress", monti_state.get("curvature_stress", False))),
-        "max_abs_monti": _number(monti_state.get("max_abs_monti"), 0.0),
+        "curvature_stress": bool(transition.get("curvature_stress", topological_state.get("curvature_stress", False))),
+        "max_abs_curvature_signal": _number(topological_state.get("max_abs_curvature_signal"), 0.0),
         "transition_detected": bool(transition.get("transition_detected", False)),
     }
 
@@ -144,7 +144,7 @@ def _anchor_strength(anchor_constraints: Optional[Sequence[Any]]) -> float:
 
 
 class FutureArrowOperator:
-    """Project an AI recognition/Monti state into a future probability cone."""
+    """Project an AI recognition/Topological Memory state into a future probability cone."""
 
     def __init__(self, config: Optional[FutureArrowConfig] = None) -> None:
         self.config = config or FutureArrowConfig()
@@ -153,7 +153,7 @@ class FutureArrowOperator:
         self,
         state: Optional[Dict[str, Any]] = None,
         recognition_certificate: Optional[Dict[str, Any]] = None,
-        monti_certificate: Optional[Dict[str, Any]] = None,
+        topological_memory_certificate: Optional[Dict[str, Any]] = None,
         entropy_potential: Optional[float] = None,
         statistical_layer: Optional[float] = None,
         anchor_constraints: Optional[Sequence[Any]] = None,
@@ -164,36 +164,36 @@ class FutureArrowOperator:
         cfg = self.config
         state = state if isinstance(state, dict) else {}
         recognition = _extract_recognition_features(recognition_certificate)
-        monti = _extract_monti_features(monti_certificate)
+        topological_memory = _extract_topological_memory_features(topological_memory_certificate)
 
         entropy = clamp(_number(entropy_potential, state.get("entropy_potential", recognition["open_residue"])))
         layer = clamp(_number(statistical_layer, state.get("statistical_layer", 1.0 - recognition["scale_value"])))
         anchor = _anchor_strength(anchor_constraints)
         delta_t_factor = 1.0 - math.exp(-max(0.0, float(cfg.delta_t)))
 
-        monti_jump_signal = 1.0 if abs(int(monti["delta_nu"])) > 0 else 0.0
-        monti_stress_signal = clamp(monti["max_abs_monti"] / (1.0 + monti["max_abs_monti"]))
-        if bool(monti["curvature_stress"]):
-            monti_stress_signal = max(monti_stress_signal, 0.62)
+        topological_memory_jump_signal = 1.0 if abs(int(topological_memory["delta_nu"])) > 0 else 0.0
+        topological_memory_stress_signal = clamp(topological_memory["max_abs_curvature_signal"] / (1.0 + topological_memory["max_abs_curvature_signal"]))
+        if bool(topological_memory["curvature_stress"]):
+            topological_memory_stress_signal = max(topological_memory_stress_signal, 0.62)
         residue_signal = clamp(recognition["open_residue"])
         seam_signal = clamp(recognition["seam_k"] / (1.0 + recognition["seam_k"]))
 
         raw_jump_risk = clamp(
-            cfg.monti_weight * monti_jump_signal
-            + 0.35 * cfg.monti_weight * monti_stress_signal
+            cfg.topological_memory_weight * topological_memory_jump_signal
+            + 0.35 * cfg.topological_memory_weight * topological_memory_stress_signal
             + cfg.entropy_weight * entropy * delta_t_factor
             + 0.25 * residue_signal
             + 0.15 * seam_signal
             - cfg.anchor_weight * anchor
         )
         raw_stress_risk = clamp(
-            0.45 * monti_stress_signal
+            0.45 * topological_memory_stress_signal
             + cfg.entropy_weight * entropy
             + cfg.layer_weight * layer
             + 0.20 * residue_signal
             - 0.15 * anchor
         )
-        post_jump_branching = clamp(0.55 * monti_jump_signal + 0.25 * entropy + 0.20 * layer - 0.10 * anchor)
+        post_jump_branching = clamp(0.55 * topological_memory_jump_signal + 0.25 * entropy + 0.20 * layer - 0.10 * anchor)
 
         nsl_strength = clamp(cfg.nsl_strength)
         nsl_tightening = 1.0 / (1.0 + nsl_strength + anchor)
@@ -209,10 +209,10 @@ class FutureArrowOperator:
             "ANCHOR_CONSTRAINED_FUTURE": anchor,
         })
         dominant = max(distribution, key=distribution.get)
-        expected_delta_nu = int(monti["delta_nu"]) + (1 if distribution["SECTOR_JUMP_RISK"] >= cfg.jump_threshold else 0)
+        expected_delta_nu = int(topological_memory["delta_nu"]) + (1 if distribution["SECTOR_JUMP_RISK"] >= cfg.jump_threshold else 0)
 
         if distribution["SECTOR_JUMP_RISK"] >= cfg.jump_threshold:
-            action = "PREPARE_TO_HOLD_AND_RECHECK_MONTI"
+            action = "PREPARE_TO_HOLD_AND_RECHECK_TOPOLOGICAL_MEMORY"
             reason = "future_sector_jump_risk_high"
         elif distribution["CURVATURE_STRESS_LIKELY"] >= cfg.stress_threshold:
             action = "WATCH_CURVATURE_STRESS_CONE"
@@ -237,7 +237,7 @@ class FutureArrowOperator:
             "input_state": {
                 "state": state,
                 "recognition_features": recognition,
-                "monti_features": monti,
+                "topological_memory_features": topological_memory,
                 "entropy_potential": entropy,
                 "statistical_layer": layer,
                 "anchor_strength": anchor,
@@ -248,8 +248,8 @@ class FutureArrowOperator:
                 "formula": "P(x,t+Delta t)=f(H,L,E,Delta t) with anchor and NSL tightening",
                 "entropy_component": entropy,
                 "statistical_layer_component": layer,
-                "monti_jump_component": monti_jump_signal,
-                "monti_stress_component": monti_stress_signal,
+                "topological_memory_jump_component": topological_memory_jump_signal,
+                "topological_memory_stress_component": topological_memory_stress_signal,
                 "anchor_component": anchor,
                 "delta_t_factor": delta_t_factor,
             },
@@ -280,7 +280,7 @@ class FutureArrowOperator:
 
 
 def demo() -> Dict[str, Any]:
-    monti = {
+    topological_memory = {
         "transition": {
             "classification": "TOPOLOGICAL_MEMORY_TRANSITION",
             "delta_nu": 1,
@@ -288,7 +288,7 @@ def demo() -> Dict[str, Any]:
             "transition_detected": True,
         },
         "spectral_state": {"spectral_flow": 1},
-        "monti_state": {"max_abs_monti": 0.52, "curvature_stress": False},
+        "topological_state": {"max_abs_curvature_signal": 0.52, "curvature_stress": False},
     }
     recognition = {
         "recognition_state": {
@@ -301,12 +301,12 @@ def demo() -> Dict[str, Any]:
     }
     cert = FutureArrowOperator(FutureArrowConfig(delta_t=2.0, nsl_strength=0.30)).project(
         recognition_certificate=recognition,
-        monti_certificate=monti,
+        topological_memory_certificate=topological_memory,
         entropy_potential=0.45,
         statistical_layer=0.60,
         anchor_constraints=["prime_anchor:recognition", "north_axis:low_entropy_gradient"],
         model_id="future-arrow-demo",
-        metadata={"demo": "post-Monti future cone"},
+        metadata={"demo": "post-Topological Memory future cone"},
     )
     return asdict(cert)
 

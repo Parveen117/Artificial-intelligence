@@ -35,3 +35,17 @@ release_controller_demo_ledger.jsonl
 release_controller_demo_ledger_report.md
 local_evidence_ledger.jsonl
 local_evidence_ledger_report.md
+
+# Python runtime files
+__pycache__/
+*.py[cod]
+
+# Jupyter working notebooks
+.ipynb_checkpoints/
+Untitled*.ipynb
+
+# Generated AI trust test and demo outputs
+ai_trust_*_ledger*.jsonl
+ai_trust_*_result.json
+*_certificate.json
+ai_trust_enablement/_test_*.jsonl

@@ -25,7 +25,7 @@ try:  # package execution
     from .ecl_commit_adapter import ECLCommitAdapter
     from .future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from .lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
-    from .monti_operator import MontiOperator, MontiOperatorConfig
+    from .topological_memory_operator import TopologicalMemoryOperator, TopologicalMemoryConfig
     from .release_controller import ReleaseController
     from .retrieval_resolution_engine import RetrievalResolutionEngine
     from .service_contract import SERVICE_NAME, SERVICE_VERSION, health_payload, version_payload
@@ -34,7 +34,7 @@ except ImportError:  # direct script execution
     from ecl_commit_adapter import ECLCommitAdapter
     from future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
-    from monti_operator import MontiOperator, MontiOperatorConfig
+    from topological_memory_operator import TopologicalMemoryOperator, TopologicalMemoryConfig
     from release_controller import ReleaseController
     from retrieval_resolution_engine import RetrievalResolutionEngine
     from service_contract import SERVICE_NAME, SERVICE_VERSION, health_payload, version_payload
@@ -131,8 +131,8 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 result = self._handle_lambda_laplace(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
-            if self.path == "/v1/monti":
-                result = self._handle_monti(payload)
+            if self.path == "/v1/topological-memory":
+                result = self._handle_topological_memory(payload)
                 json_response(self, HTTPStatus.OK, result)
                 return
             if self.path == "/v1/future-arrow":
@@ -283,15 +283,15 @@ class AITrustHandler(BaseHTTPRequestHandler):
             result["ecl_finality_commit"] = ecl_commit.to_dict()
         return result
 
-    def _handle_monti(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        config = MontiOperatorConfig(
+    def _handle_topological_memory(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        config = TopologicalMemoryConfig(
             dt=float(payload.get("dt", 1.0)),
             alpha=float(payload.get("alpha", 0.10)),
             beta=float(payload.get("beta", 0.10)),
             threshold=float(payload.get("threshold", 0.75)),
             topology_jump_threshold=int(payload.get("topology_jump_threshold", 1)),
         )
-        operator = MontiOperator(config)
+        operator = TopologicalMemoryOperator(config)
         skew = payload.get("skew_intensity_series")
         metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
         if "lambda_p_series" in payload:
@@ -299,7 +299,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
                 lambda_p_series=payload["lambda_p_series"],
                 lambda_v_series=payload.get("lambda_v_series"),
                 skew_intensity_series=skew,
-                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "monti-model")),
+                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "topological-memory-model")),
                 event_index=int(payload.get("event_index", 1)),
                 metadata=metadata,
             )
@@ -310,7 +310,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
             cert = operator.evaluate_certificates(
                 certificates=certificates,
                 skew_intensity_series=skew,
-                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "monti-model")),
+                model_id=str(payload.get("model_id") or os.getenv("AI_TRUST_MODEL_ID", "topological-memory-model")),
                 event_index=int(payload.get("event_index", 1)),
                 metadata=metadata,
             )
@@ -333,7 +333,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
             entropy_weight=float(payload.get("entropy_weight", 0.45)),
             layer_weight=float(payload.get("layer_weight", 0.25)),
             anchor_weight=float(payload.get("anchor_weight", 0.20)),
-            monti_weight=float(payload.get("monti_weight", 0.55)),
+            topological_memory_weight=float(payload.get("topological_memory_weight", 0.55)),
             nsl_strength=float(payload.get("nsl_strength", payload.get("nsl", 0.0))),
             jump_threshold=float(payload.get("jump_threshold", 0.62)),
             stress_threshold=float(payload.get("stress_threshold", 0.38)),
@@ -341,7 +341,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
         operator = FutureArrowOperator(config)
         state = payload.get("state") if isinstance(payload.get("state"), dict) else {}
         recognition_certificate = payload.get("recognition_certificate") if isinstance(payload.get("recognition_certificate"), dict) else None
-        monti_certificate = payload.get("monti_certificate") if isinstance(payload.get("monti_certificate"), dict) else None
+        topological_memory_certificate = payload.get("topological_memory_certificate") if isinstance(payload.get("topological_memory_certificate"), dict) else None
         anchor_constraints = payload.get("anchor_constraints")
         if anchor_constraints is not None and not isinstance(anchor_constraints, list):
             raise ValueError("anchor_constraints_must_be_array")
@@ -349,7 +349,7 @@ class AITrustHandler(BaseHTTPRequestHandler):
         cert = operator.project(
             state=state,
             recognition_certificate=recognition_certificate,
-            monti_certificate=monti_certificate,
+            topological_memory_certificate=topological_memory_certificate,
             entropy_potential=payload.get("entropy_potential"),
             statistical_layer=payload.get("statistical_layer"),
             anchor_constraints=anchor_constraints,

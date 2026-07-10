@@ -2,7 +2,7 @@
 """
 ECL finality bridge for AI Trust Enablement.
 
-This module turns AI recognition, repair, release, retrieval-resolution, Monti
+This module turns AI recognition, repair, release, retrieval-resolution, Topological Memory
 topological-memory, Future Arrow forecast, or Lambda-Laplace analytic
 certificates into append-only finality commits.
 
