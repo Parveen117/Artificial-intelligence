@@ -3,9 +3,10 @@ message: "If you use or reference this software, please cite it as below."
 title: "Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates"
 type: software
 version: 1.0.1
+doi: "10.5281/zenodo.21300179"
 authors:
-  - family-names: "Lathwal"
-    given-names: "Kajal"
+  - family-names: "Dabas"
+    given-names: "Monty"
 abstract: "A deployable AI trust-enablement repository for recognition-residue evaluation, hallucination-risk classification, confidence-collapse detection, release control, machine-readable certificates, finality records, temporal diagnostics, and future-state forecasting."
 keywords:
   - artificial intelligence
