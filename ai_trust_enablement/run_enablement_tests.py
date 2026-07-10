@@ -21,14 +21,14 @@ try:  # package execution
     from .ecl_commit_adapter import ECLCommitAdapter
     from .future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from .lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
-    from .monti_operator import MontiOperator, MontiOperatorConfig
+    from .topological_memory_operator import TopologicalMemoryOperator, TopologicalMemoryConfig
 except ImportError:  # direct script execution
     from ai_hallucination_recognition_engine import build_signature, demo, entropy_capacity_from_logits, sha256_json
     from batch_evaluator import evaluate_cases
     from ecl_commit_adapter import ECLCommitAdapter
     from future_arrow_operator import FutureArrowConfig, FutureArrowOperator
     from lambda_laplace_operator import LambdaLaplaceConfig, LambdaLaplaceOperator
-    from monti_operator import MontiOperator, MontiOperatorConfig
+    from topological_memory_operator import TopologicalMemoryOperator, TopologicalMemoryConfig
 
 
 def test_signature_has_concrete_fields() -> None:
@@ -99,15 +99,15 @@ def test_ecl_finality_commit_adapter() -> None:
     assert verify["checked"] == 2
 
 
-def test_monti_operator_detects_winding_transition() -> None:
-    operator = MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20))
+def test_topological_memory_operator_detects_winding_transition() -> None:
+    operator = TopologicalMemoryOperator(TopologicalMemoryConfig(threshold=0.45, alpha=0.25, beta=0.20))
     cert = asdict(operator.evaluate_series(
         lambda_p_series=[0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
         skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
-        model_id="test-monti",
+        model_id="test-topological_memory",
     ))
     assert cert["certificate_type"] == "AI_TOPOLOGICAL_MEMORY_CERTIFICATE"
-    assert cert["engine"] == "MontiOperatorSpectralWinding"
+    assert cert["engine"] == "TopologicalMemoryOperatorSpectralWinding"
     assert cert["transition"]["classification"] == "TOPOLOGICAL_MEMORY_TRANSITION"
     assert cert["transition"]["transition_detected"] is True
     assert cert["transition"]["primary_trigger"] == "spectral_winding_jump"
@@ -117,40 +117,40 @@ def test_monti_operator_detects_winding_transition() -> None:
     assert len(cert["certificate_hash"]) == 64
 
 
-def test_monti_operator_curvature_stress_without_sector_jump() -> None:
-    operator = MontiOperator(MontiOperatorConfig(threshold=0.01, alpha=0.0, beta=0.0))
+def test_topological_memory_operator_curvature_stress_without_sector_jump() -> None:
+    operator = TopologicalMemoryOperator(TopologicalMemoryConfig(threshold=0.01, alpha=0.0, beta=0.0))
     cert = asdict(operator.evaluate_series(
         lambda_p_series=[0.00, 0.03, 0.20, 0.24, 0.26],
-        model_id="test-monti-stress",
+        model_id="test-topological_memory-stress",
     ))
     assert cert["transition"]["classification"] == "CURVATURE_STRESS_WITHOUT_SECTOR_JUMP"
     assert cert["transition"]["transition_detected"] is False
     assert cert["transition"]["delta_nu"] == 0
-    assert cert["monti_state"]["curvature_stress"] is True
+    assert cert["topological_state"]["curvature_stress"] is True
     assert cert["technical_action"]["action"] == "FLAG_CURVATURE_STRESS"
 
 
-def test_monti_operator_stable_sector() -> None:
-    operator = MontiOperator(MontiOperatorConfig(threshold=10.0))
-    cert = asdict(operator.evaluate_series(lambda_p_series=[0.00, 0.02, 0.03, 0.04, 0.05], model_id="test-monti-stable"))
+def test_topological_memory_operator_stable_sector() -> None:
+    operator = TopologicalMemoryOperator(TopologicalMemoryConfig(threshold=10.0))
+    cert = asdict(operator.evaluate_series(lambda_p_series=[0.00, 0.02, 0.03, 0.04, 0.05], model_id="test-topological_memory-stable"))
     assert cert["transition"]["classification"] == "STABLE_TOPOLOGICAL_SECTOR"
     assert cert["transition"]["transition_detected"] is False
     assert cert["transition"]["delta_nu"] == 0
     assert cert["technical_action"]["action"] == "CONTINUE_MONITORING"
 
 
-def test_ecl_adapter_reads_monti_transition_classification() -> None:
-    operator = MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20))
+def test_ecl_adapter_reads_topological_memory_transition_classification() -> None:
+    operator = TopologicalMemoryOperator(TopologicalMemoryConfig(threshold=0.45, alpha=0.25, beta=0.20))
     cert = asdict(operator.evaluate_series(
         lambda_p_series=[0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
         skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
-        model_id="test-monti-ecl",
+        model_id="test-topological_memory-ecl",
     ))
     # Simulate a mixed certificate where a recognition-like block exists but the
     # topological transition block should dominate the ECL finality label.
     cert["recognition_state"] = {"classification": "UNKNOWN"}
     with tempfile.TemporaryDirectory() as tmp:
-        commit = ECLCommitAdapter(Path(tmp) / "monti_ecl.jsonl").commit_certificate(
+        commit = ECLCommitAdapter(Path(tmp) / "topological_memory_ecl.jsonl").commit_certificate(
             cert,
             source_type="AI_TOPOLOGICAL_MEMORY_CERTIFICATE",
         ).to_dict()
@@ -161,10 +161,10 @@ def test_ecl_adapter_reads_monti_transition_classification() -> None:
 
 
 def test_future_arrow_projects_probability_cone() -> None:
-    monti = asdict(MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20)).evaluate_series(
+    topological_memory = asdict(TopologicalMemoryOperator(TopologicalMemoryConfig(threshold=0.45, alpha=0.25, beta=0.20)).evaluate_series(
         lambda_p_series=[0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18],
         skew_intensity_series=[0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5],
-        model_id="test-future-monti",
+        model_id="test-future-topological_memory",
     ))
     recognition = {
         "recognition_state": {
@@ -177,7 +177,7 @@ def test_future_arrow_projects_probability_cone() -> None:
     }
     future = asdict(FutureArrowOperator(FutureArrowConfig(delta_t=2.0, nsl_strength=0.25)).project(
         recognition_certificate=recognition,
-        monti_certificate=monti,
+        topological_memory_certificate=topological_memory,
         entropy_potential=0.45,
         statistical_layer=0.60,
         anchor_constraints=["prime_anchor:recognition"],
@@ -208,7 +208,7 @@ def test_future_arrow_ecl_commit() -> None:
     assert commit["source_type"] == "AI_FUTURE_ARROW_CERTIFICATE"
     assert commit["classification"] == future["forecast"]["classification"]
     assert len(commit["certificate_hash"]) == 64
-    assert commit["action"] in {"CONTINUE_MONITORING", "WATCH_CURVATURE_STRESS_CONE", "PREPARE_TO_HOLD_AND_RECHECK_MONTI", "CONTINUE_WITH_ANCHOR_CONSTRAINTS"}
+    assert commit["action"] in {"CONTINUE_MONITORING", "WATCH_CURVATURE_STRESS_CONE", "PREPARE_TO_HOLD_AND_RECHECK_TOPOLOGICAL_MEMORY", "CONTINUE_WITH_ANCHOR_CONSTRAINTS"}
     assert commit["entropy_delta"] > 0
 
 
@@ -223,8 +223,8 @@ def test_lambda_laplace_detects_seam_signature() -> None:
     assert cert["certificate_type"] == "AI_LAMBDA_LAPLACE_CERTIFICATE"
     assert cert["engine"] == "LambdaLaplaceOperator"
     assert cert["analysis"]["classification"] == "LAMBDA_SEAM_SIGNATURE"
-    assert cert["analysis"]["feeds_monti"] is True
-    assert cert["technical_action"]["action"] == "FEED_SEAM_SIGNAL_TO_MONTI"
+    assert cert["analysis"]["feeds_topological_memory"] is True
+    assert cert["technical_action"]["action"] == "FEED_SEAM_SIGNAL_TO_TOPOLOGICAL_MEMORY"
     assert len(cert["certificate_hash"]) == 64
 
 
@@ -255,10 +255,10 @@ def main() -> None:
         test_entropy_capacity_collapse_path,
         test_batch_cases,
         test_ecl_finality_commit_adapter,
-        test_monti_operator_detects_winding_transition,
-        test_monti_operator_curvature_stress_without_sector_jump,
-        test_monti_operator_stable_sector,
-        test_ecl_adapter_reads_monti_transition_classification,
+        test_topological_memory_operator_detects_winding_transition,
+        test_topological_memory_operator_curvature_stress_without_sector_jump,
+        test_topological_memory_operator_stable_sector,
+        test_ecl_adapter_reads_topological_memory_transition_classification,
         test_future_arrow_projects_probability_cone,
         test_future_arrow_ecl_commit,
         test_lambda_laplace_detects_seam_signature,

@@ -1,6 +1,6 @@
 # Future Arrow Operator Integration
 
-This document describes the Future Arrow forecast layer added after the Monti topological-memory layer.
+This document describes the Future Arrow forecast layer added after the Topological Memory topological-memory layer.
 
 The design follows the uploaded Future Arrow Operator note:
 
@@ -12,10 +12,10 @@ The operator takes a present state and projects a probability-coated cone of pos
 
 ## Correct placement
 
-Future Arrow does not replace Monti.
+Future Arrow does not replace Topological Memory.
 
 ```text
-Monti Operator
+Topological Memory Operator
   -> asks whether a topological memory-sector jump occurred
 
 Future Arrow Operator
@@ -26,7 +26,7 @@ Correct stack:
 
 ```text
 AI recognition certificate
-  -> Monti spectral-winding certificate
+  -> Topological Memory spectral-winding certificate
   -> Future Arrow probability cone
   -> optional ECL finality commit
 ```
@@ -48,18 +48,18 @@ The operator can accept:
 
 - `state`
 - `recognition_certificate`
-- `monti_certificate`
+- `topological_memory_certificate`
 - `entropy_potential`
 - `statistical_layer`
 - `anchor_constraints`
 - `delta_t`
 - `nsl_strength`
 
-The strongest path is to provide both recognition and Monti certificates:
+The strongest path is to provide both recognition and topological-memory certificates:
 
 ```text
 recognition_certificate gives current residue / phase / seam state
-monti_certificate gives topological sector and spectral-flow context
+topological_memory_certificate gives topological sector and spectral-flow context
 ```
 
 ## Probability coating
@@ -74,7 +74,7 @@ In the implementation:
 
 - `H` is represented by `entropy_potential`.
 - `L` is represented by `statistical_layer`.
-- `E` is represented by the current recognition/Monti operator context.
+- `E` is represented by the current recognition/topological memory operator context.
 - `Delta t` is `delta_t`.
 - anchors and NSL tighten the cone.
 
@@ -90,7 +90,7 @@ POST_JUMP_BRANCHING
 ANCHOR_CONSTRAINED_FUTURE
 ```
 
-These are forecasts, not final events. The final event remains Monti's job. Apparently even operators need job descriptions.
+These are forecasts, not final events. The final event remains Topological Memory's job. Apparently even operators need job descriptions.
 
 ## Technical actions
 
@@ -107,10 +107,10 @@ WATCH_CURVATURE_STRESS_CONE
 Future curvature stress is likely.
 
 ```text
-PREPARE_TO_HOLD_AND_RECHECK_MONTI
+PREPARE_TO_HOLD_AND_RECHECK_TOPOLOGICAL_MEMORY
 ```
 
-Future sector jump risk is high enough that the system should re-run Monti checks before release.
+Future sector jump risk is high enough that the system should re-run Topological Memory checks before release.
 
 ```text
 CONTINUE_WITH_ANCHOR_CONSTRAINTS
@@ -154,7 +154,7 @@ A stronger call can include prior certificates:
     },
     "seam_memory": {"k": 2}
   },
-  "monti_certificate": {
+  "topological_memory_certificate": {
     "transition": {
       "classification": "TOPOLOGICAL_MEMORY_TRANSITION",
       "delta_nu": 1,
@@ -162,7 +162,7 @@ A stronger call can include prior certificates:
       "transition_detected": true
     },
     "spectral_state": {"spectral_flow": 1},
-    "monti_state": {"max_abs_monti": 0.52, "curvature_stress": false}
+    "topological_state": {"max_abs_curvature_signal": 0.52, "curvature_stress": false}
   },
   "entropy_potential": 0.45,
   "statistical_layer": 0.60,
@@ -181,7 +181,7 @@ When `commit_to_ecl` is true, the Future Arrow certificate is sealed as:
 AI_FUTURE_ARROW_CERTIFICATE
 ```
 
-This should be interpreted as a sealed forecast, not a sealed fact. Monti/ECL finality records what has occurred. Future Arrow/ECL records what the system forecasted at a given time.
+This should be interpreted as a sealed forecast, not a sealed fact. Topological Memory/ECL finality records what has occurred. Future Arrow/ECL records what the system forecasted at a given time.
 
 ## Run tests
 
@@ -194,4 +194,4 @@ The regression suite includes:
 - Future Arrow probability-cone generation,
 - probability normalization,
 - Future Arrow ECL commit compatibility,
-- existing Monti spectral-winding tests.
+- existing Topological Memory spectral-winding tests.

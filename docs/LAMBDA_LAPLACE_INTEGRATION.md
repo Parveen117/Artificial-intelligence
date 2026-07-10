@@ -1,6 +1,6 @@
 # Lambda-Laplace Operator Integration
 
-This document describes the Lambda-Laplace analytic layer added before Monti.
+This document describes the Lambda-Laplace analytic layer added before Topological Memory.
 
 The design follows the uploaded Lambda-Laplace note:
 
@@ -12,13 +12,13 @@ The operator is used as an analytic hinge connecting thermodynamic lambda geomet
 
 ## Correct placement
 
-Lambda-Laplace does not replace Monti.
+Lambda-Laplace does not replace Topological Memory.
 
 ```text
 Lambda-Laplace Operator
   -> asks whether the lambda trajectory has analytic seam / diffusion / spectral-gap signatures
 
-Monti Operator
+Topological Memory Operator
   -> asks whether the lambda trajectory crosses a winding-number sector
 ```
 
@@ -27,7 +27,7 @@ Correct stack:
 ```text
 AI recognition certificate
   -> Lambda-Laplace analytic diffusion / seam diagnostics
-  -> Monti spectral-winding certificate
+  -> Topological Memory spectral-winding certificate
   -> Future Arrow probability cone
   -> optional ECL finality commit
 ```
@@ -92,13 +92,13 @@ cycle_entropy_proxy
 LAMBDA_SMOOTH_STABLE
 ```
 
-Stable lambda diffusion. Pass to Monti as stable input.
+Stable lambda diffusion. Pass to Topological Memory as stable input.
 
 ```text
 LAMBDA_SEAM_SIGNATURE
 ```
 
-Branch gap, skew, or heat-trace signature indicates a seam-like analytic signal. Feed to Monti.
+Branch gap, skew, or heat-trace signature indicates a seam-like analytic signal. Feed to Topological Memory.
 
 ```text
 LAMBDA_DIFFUSION_STRESS
@@ -115,8 +115,8 @@ The spectral-gap proxy is weak. Increase the observation window.
 ## Technical actions
 
 ```text
-PASS_TO_MONTI_AS_STABLE_INPUT
-FEED_SEAM_SIGNAL_TO_MONTI
+PASS_TO_TOPOLOGICAL_MEMORY_AS_STABLE_INPUT
+FEED_SEAM_SIGNAL_TO_TOPOLOGICAL_MEMORY
 SMOOTH_AND_RECHECK_LAMBDA_TRAJECTORY
 INCREASE_OBSERVATION_WINDOW
 ```
@@ -167,7 +167,7 @@ When `commit_to_ecl` is true, the Lambda-Laplace certificate is sealed as:
 AI_LAMBDA_LAPLACE_CERTIFICATE
 ```
 
-This is an analytic diagnostic finality record, not a topological-transition finality record. Monti remains responsible for the actual winding-sector jump claim.
+This is an analytic diagnostic finality record, not a topological-transition finality record. Topological Memory remains responsible for the actual winding-sector jump claim.
 
 ## Run tests
 
@@ -179,5 +179,5 @@ The regression suite includes:
 
 - Lambda-Laplace seam detection,
 - Lambda-Laplace ECL commit compatibility,
-- Monti spectral-winding tests,
+- Topological Memory spectral-winding tests,
 - Future Arrow probability-cone tests.

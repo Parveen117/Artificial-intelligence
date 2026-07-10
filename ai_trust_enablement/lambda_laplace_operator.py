@@ -2,15 +2,15 @@
 """
 Lambda-Laplace analytic operator for AI Trust Enablement.
 
-This layer is the analytic hinge before Monti: it studies lambda trajectories as
+This layer is the analytic hinge before Topological Memory: it studies lambda trajectories as
 entropy-weighted diffusion with skew / nonreciprocal perturbation and entropic
-drift. It does not declare a topological jump. That remains Monti's job.
+drift. It does not declare a topological jump. That remains Topological Memory's job.
 
 Operational role:
   raw lambda trajectory
     -> Lambda-Laplace diffusion / seam diagnostics
     -> cleaner spectral-seam signal
-    -> Monti winding-sector detection
+    -> Topological Memory winding-sector detection
     -> Future Arrow forecasting
     -> optional ECL finality
 """
@@ -213,7 +213,7 @@ class LambdaLaplaceOperator:
 
         if seam_detected:
             classification = "LAMBDA_SEAM_SIGNATURE"
-            action = "FEED_SEAM_SIGNAL_TO_MONTI"
+            action = "FEED_SEAM_SIGNAL_TO_TOPOLOGICAL_MEMORY"
             reason = "lambda_heat_trace_or_branch_gap_seam_signature"
         elif stress_detected:
             classification = "LAMBDA_DIFFUSION_STRESS"
@@ -225,7 +225,7 @@ class LambdaLaplaceOperator:
             reason = "weak_lambda_spectral_gap_proxy"
         else:
             classification = "LAMBDA_SMOOTH_STABLE"
-            action = "PASS_TO_MONTI_AS_STABLE_INPUT"
+            action = "PASS_TO_TOPOLOGICAL_MEMORY_AS_STABLE_INPUT"
             reason = "stable_lambda_diffusion"
 
         payload = {
@@ -285,7 +285,7 @@ class LambdaLaplaceOperator:
                 "seam_detected": seam_detected,
                 "stress_detected": stress_detected,
                 "gap_weak": gap_weak,
-                "feeds_monti": True,
+                "feeds_topological_memory": True,
             },
             "technical_action": {
                 "action": action,
@@ -320,7 +320,7 @@ def demo() -> Dict[str, Any]:
         skew_intensity_series=[0.0, 0.2, 0.2, 0.4, 0.6, 0.8, 0.9],
         entropy_potential_series=[0.01, 0.04, 0.08, 0.13, 0.20, 0.27, 0.35],
         model_id="lambda-laplace-demo",
-        metadata={"demo": "lambda seam signature before Monti"},
+        metadata={"demo": "lambda seam signature before Topological Memory"},
     )
     return asdict(cert)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Monti Operator topological-memory diagnostics for AI Trust Enablement.
+Topological Memory Operator topological-memory diagnostics for AI Trust Enablement.
 
 The layer evaluates a lambda_p(t) phase trajectory, estimates winding-number
 sector movement, computes discrete curvature stress, and emits a
@@ -11,8 +11,8 @@ Conceptual priority:
   2. curvature stress: M > M* without sector jump
   3. stable sector: no integer jump and subcritical curvature
 
-This follows the Monti-Winding interpretation: the topological event is the
-integer sector jump / spectral-flow crossing. The curvature-Monti value is
+This follows the spectral-winding interpretation: the topological event is the
+integer sector jump / spectral-flow crossing. The curvature-curvature signal value is
 supporting evidence and a pre-transition stress signal, not the whole theorem
 wearing a fake moustache.
 """
@@ -31,7 +31,7 @@ TWO_PI = 2.0 * math.pi
 
 
 @dataclass(frozen=True)
-class MontiOperatorConfig:
+class TopologicalMemoryConfig:
     dt: float = 1.0
     alpha: float = 0.10
     beta: float = 0.10
@@ -41,7 +41,7 @@ class MontiOperatorConfig:
 
 
 @dataclass(frozen=True)
-class MontiMemoryCertificate:
+class TopologicalMemoryCertificate:
     version: str
     certificate_type: str
     engine: str
@@ -51,7 +51,7 @@ class MontiMemoryCertificate:
     input_state: Dict[str, Any]
     winding_state: Dict[str, Any]
     spectral_state: Dict[str, Any]
-    monti_state: Dict[str, Any]
+    topological_state: Dict[str, Any]
     transition: Dict[str, Any]
     technical_action: Dict[str, Any]
     certificate_hash: str
@@ -205,9 +205,9 @@ def thermo_seed_series_from_certificates(certificates: Sequence[Dict[str, Any]])
     return [thermo_seed_from_certificate(certificate, index) for index, certificate in enumerate(certificates)]
 
 
-def classify_topological_state(delta_nu: int, max_monti: float, threshold: float, topology_jump_threshold: int) -> Tuple[str, str, bool, bool, bool]:
+def classify_topological_state(delta_nu: int, max_curvature_signal: float, threshold: float, topology_jump_threshold: int) -> Tuple[str, str, bool, bool, bool]:
     sector_jump = abs(int(delta_nu)) >= int(topology_jump_threshold)
-    threshold_crossed = abs(float(max_monti)) > float(threshold)
+    threshold_crossed = abs(float(max_curvature_signal)) > float(threshold)
     curvature_stress = bool(threshold_crossed and not sector_jump)
     if sector_jump:
         return (
@@ -234,21 +234,21 @@ def classify_topological_state(delta_nu: int, max_monti: float, threshold: float
     )
 
 
-class MontiOperator:
-    """Compute spectral/winding-sector and Monti curvature diagnostics."""
+class TopologicalMemoryOperator:
+    """Compute spectral/winding-sector and Topological Memory curvature diagnostics."""
 
-    def __init__(self, config: Optional[MontiOperatorConfig] = None) -> None:
-        self.config = config or MontiOperatorConfig()
+    def __init__(self, config: Optional[TopologicalMemoryConfig] = None) -> None:
+        self.config = config or TopologicalMemoryConfig()
 
     def evaluate_series(
         self,
         lambda_p_series: Sequence[Any],
         skew_intensity_series: Optional[Sequence[Any]] = None,
         lambda_v_series: Optional[Sequence[Any]] = None,
-        model_id: str = "monti-operator",
+        model_id: str = "topological-memory-operator",
         event_index: int = 1,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> MontiMemoryCertificate:
+    ) -> TopologicalMemoryCertificate:
         cfg = self.config
         lambda_values = _as_float_series(lambda_p_series, "lambda_p_series")
         if skew_intensity_series is None:
@@ -269,16 +269,16 @@ class MontiOperator:
         lambda_ddot = second_derivative(lambda_values, cfg.dt)
         nu_dot = first_derivative(winding["winding_path"], cfg.dt)
 
-        monti_values: List[float] = []
+        curvature_signal_values: List[float] = []
         for index, curvature in enumerate(lambda_ddot):
             skew_term = cfg.alpha * (float(skew_values[index]) ** 2)
             memory_term = cfg.beta * abs(float(nu_dot[index]))
-            monti_values.append(float(curvature) + skew_term + memory_term)
+            curvature_signal_values.append(float(curvature) + skew_term + memory_term)
 
-        max_monti = max(abs(value) for value in monti_values)
+        max_curvature_signal = max(abs(value) for value in curvature_signal_values)
         classification, action, transition_detected, threshold_crossed, curvature_stress = classify_topological_state(
             delta_nu=int(winding["delta_nu"]),
-            max_monti=max_monti,
+            max_curvature_signal=max_curvature_signal,
             threshold=cfg.threshold,
             topology_jump_threshold=cfg.topology_jump_threshold,
         )
@@ -289,7 +289,7 @@ class MontiOperator:
         payload = {
             "version": "2.0.0",
             "certificate_type": "AI_TOPOLOGICAL_MEMORY_CERTIFICATE",
-            "engine": "MontiOperatorSpectralWinding",
+            "engine": "TopologicalMemoryOperatorSpectralWinding",
             "model_id": model_id,
             "event": {
                 "event_index": int(event_index),
@@ -322,11 +322,11 @@ class MontiOperator:
                 "sector_jump_primary": sector_jump,
                 "theorem_interface": "spectral_flow_equals_delta_nu",
             },
-            "monti_state": {
+            "topological_state": {
                 "lambda_ddot_series": lambda_ddot,
                 "nu_dot_series": nu_dot,
-                "monti_series": monti_values,
-                "max_abs_monti": max_monti,
+                "curvature_signal_series": curvature_signal_values,
+                "max_abs_curvature_signal": max_curvature_signal,
                 "threshold_crossed": threshold_crossed,
                 "curvature_stress": curvature_stress,
             },
@@ -343,16 +343,16 @@ class MontiOperator:
                 "reason": "integer_winding_jump" if sector_jump else ("subcritical_topology_curvature_stress" if curvature_stress else "stable_sector_subcritical_curvature"),
             },
         }
-        return MontiMemoryCertificate(certificate_hash=sha256_json(payload), **payload)
+        return TopologicalMemoryCertificate(certificate_hash=sha256_json(payload), **payload)
 
     def evaluate_certificates(
         self,
         certificates: Sequence[Dict[str, Any]],
         skew_intensity_series: Optional[Sequence[Any]] = None,
-        model_id: str = "monti-operator",
+        model_id: str = "topological-memory-operator",
         event_index: int = 1,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> MontiMemoryCertificate:
+    ) -> TopologicalMemoryCertificate:
         seeds = thermo_seed_series_from_certificates(certificates)
         lambda_p = [seed["lambda_p"] for seed in seeds]
         lambda_v = [seed["lambda_v"] for seed in seeds]
@@ -372,17 +372,17 @@ def demo() -> Dict[str, Any]:
     # primary topological event; curvature terms only support the diagnosis.
     lambda_p = [0.00, 0.15, 0.32, 0.50, 0.74, 1.02, 1.18]
     skew = [0.0, 0.1, 0.1, 0.2, 0.4, 0.5, 0.5]
-    cert = MontiOperator(MontiOperatorConfig(threshold=0.45, alpha=0.25, beta=0.20)).evaluate_series(
+    cert = TopologicalMemoryOperator(TopologicalMemoryConfig(threshold=0.45, alpha=0.25, beta=0.20)).evaluate_series(
         lambda_p,
         skew_intensity_series=skew,
-        model_id="monti-demo",
+        model_id="topological_memory-demo",
         metadata={"demo": "one winding sector transition"},
     )
     return asdict(cert)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Compute a Monti topological memory certificate")
+    parser = argparse.ArgumentParser(description="Compute a Topological Memory topological memory certificate")
     parser.add_argument("--lambda-p", nargs="+", type=float, default=None, help="lambda_p samples")
     parser.add_argument("--lambda-v", nargs="+", type=float, default=None, help="optional lambda_v samples")
     parser.add_argument("--skew", nargs="+", type=float, default=None, help="optional skew intensity samples")
@@ -391,15 +391,15 @@ def main() -> None:
     parser.add_argument("--beta", type=float, default=0.10)
     parser.add_argument("--threshold", type=float, default=0.75)
     parser.add_argument("--topology-jump-threshold", type=int, default=1)
-    parser.add_argument("--model-id", default="monti-cli")
-    parser.add_argument("--out", default="monti_memory_certificate.json")
+    parser.add_argument("--model-id", default="topological_memory-cli")
+    parser.add_argument("--out", default="topological_memory_memory_certificate.json")
     parser.add_argument("--demo", action="store_true")
     args = parser.parse_args()
 
     if args.demo or args.lambda_p is None:
         result = demo()
     else:
-        result = asdict(MontiOperator(MontiOperatorConfig(
+        result = asdict(TopologicalMemoryOperator(TopologicalMemoryConfig(
             dt=args.dt,
             alpha=args.alpha,
             beta=args.beta,
