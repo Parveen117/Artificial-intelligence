@@ -1,0 +1,2 @@
+# Runtime dependencies
+# None. The deployable v1 service uses only the Python standard library.

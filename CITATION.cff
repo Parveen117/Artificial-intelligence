@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use or reference this repository, please cite it as below."
+title: "Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates"
+authors:
+  - family-names: "Lathwal"
+    given-names: "Kajal"
+repository-code: "https://github.com/Parveen117/Artificial-intelligence"
+abstract: "A deployable AI trust-enablement repository for hallucination-recognition, confidence-collapse detection, release-control certificates, ECL-style finality, Lambda-Laplace diagnostics, topological-memory diagnostics, and Future Arrow forecasting."
+keywords:
+  - artificial intelligence
+  - hallucination detection
+  - recognition residue
+  - release control
+  - AI safety
+  - audit certificates
+  - ECL finality
+  - Lambda-Laplace
+  - topological memory
+  - Future Arrow
+license: "LicenseRef-All-Rights-Reserved"
+version: "1.0.0"
+date-released: "2026-07-10"
+preferred-citation:
+  type: software
+  title: "Artificial Intelligence Trust Enablement"
+  authors:
+    - family-names: "Lathwal"
+      given-names: "Kajal"
+  year: 2026
+  repository: "https://github.com/Parveen117/Artificial-intelligence"
+  notes: "Public technical release of an AI trust-enablement system."

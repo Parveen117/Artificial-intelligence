@@ -1,0 +1,216 @@
+[
+  {
+    "case_id": "grounded_school_library",
+    "expected_fusion_actions": [
+      "COMMIT"
+    ],
+    "expected_repair_actions": [
+      "UNCHANGED_SAFE"
+    ],
+    "required_safe_substrings": [
+      "opens at 8 AM",
+      "borrow two books"
+    ],
+    "forbidden_safe_substrings": [
+      "robotics lab",
+      "10 AM"
+    ],
+    "min_corrected": 0,
+    "max_corrected": 0,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "unsupported_extra_facility",
+    "expected_fusion_actions": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE"
+    ],
+    "expected_repair_actions": [
+      "RETRIEVAL_NEEDED",
+      "PARTIAL_REPAIR_RETRIEVAL_NEEDED"
+    ],
+    "required_safe_substrings": [
+      "opens at 8 AM",
+      "borrow two books"
+    ],
+    "forbidden_safe_substrings": [
+      "robotics lab"
+    ],
+    "min_corrected": 0,
+    "max_corrected": 0,
+    "min_retrieval": 1,
+    "max_retrieval": 2
+  },
+  {
+    "case_id": "wrong_opening_time",
+    "expected_fusion_actions": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ],
+    "expected_repair_actions": [
+      "REPAIRED_CONTRADICTIONS"
+    ],
+    "required_safe_substrings": [
+      "opens at 8 AM",
+      "borrow two books"
+    ],
+    "forbidden_safe_substrings": [
+      "opens at 10 AM"
+    ],
+    "min_corrected": 1,
+    "max_corrected": 2,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "grounded_science_conversion",
+    "expected_fusion_actions": [
+      "COMMIT",
+      "REVIEW"
+    ],
+    "expected_repair_actions": [
+      "UNCHANGED_SAFE"
+    ],
+    "required_safe_substrings": [
+      "electrical energy"
+    ],
+    "forbidden_safe_substrings": [
+      "sound energy"
+    ],
+    "min_corrected": 0,
+    "max_corrected": 0,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "wrong_conversion_output",
+    "expected_fusion_actions": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ],
+    "expected_repair_actions": [
+      "REPAIRED_CONTRADICTIONS"
+    ],
+    "required_safe_substrings": [
+      "electrical energy"
+    ],
+    "forbidden_safe_substrings": [
+      "sound energy"
+    ],
+    "min_corrected": 1,
+    "max_corrected": 2,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "negation_contradiction",
+    "expected_fusion_actions": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ],
+    "expected_repair_actions": [
+      "REPAIRED_CONTRADICTIONS"
+    ],
+    "required_safe_substrings": [
+      "should be taken after meals"
+    ],
+    "forbidden_safe_substrings": [
+      "should not be taken"
+    ],
+    "min_corrected": 1,
+    "max_corrected": 2,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "unsupported_medical_advice",
+    "expected_fusion_actions": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE",
+      "BLOCK_OUTPUT"
+    ],
+    "expected_repair_actions": [
+      "RETRIEVAL_NEEDED",
+      "PARTIAL_REPAIR_RETRIEVAL_NEEDED"
+    ],
+    "required_safe_substrings": [
+      "taken after meals"
+    ],
+    "forbidden_safe_substrings": [
+      "cures fever",
+      "within one hour"
+    ],
+    "min_corrected": 0,
+    "max_corrected": 0,
+    "min_retrieval": 1,
+    "max_retrieval": 2
+  },
+  {
+    "case_id": "entity_location_contradiction",
+    "expected_fusion_actions": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ],
+    "expected_repair_actions": [
+      "REPAIRED_CONTRADICTIONS"
+    ],
+    "required_safe_substrings": [
+      "located in Delhi"
+    ],
+    "forbidden_safe_substrings": [
+      "located in Mumbai"
+    ],
+    "min_corrected": 1,
+    "max_corrected": 2,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "exact_location_grounded",
+    "expected_fusion_actions": [
+      "COMMIT",
+      "REVIEW"
+    ],
+    "expected_repair_actions": [
+      "UNCHANGED_SAFE"
+    ],
+    "required_safe_substrings": [
+      "located in Delhi"
+    ],
+    "forbidden_safe_substrings": [
+      "Mumbai"
+    ],
+    "min_corrected": 0,
+    "max_corrected": 0,
+    "min_retrieval": 0,
+    "max_retrieval": 0
+  },
+  {
+    "case_id": "empty_context_claim",
+    "expected_fusion_actions": [
+      "REGENERATE_WITH_EVIDENCE",
+      "RETRIEVE_MORE_EVIDENCE",
+      "BLOCK_OUTPUT",
+      "REVIEW"
+    ],
+    "expected_repair_actions": [
+      "NO_SAFE_ANSWER"
+    ],
+    "required_safe_substrings": [
+      "Insufficient supplied evidence"
+    ],
+    "forbidden_safe_substrings": [
+      "located in Delhi"
+    ],
+    "min_corrected": 0,
+    "max_corrected": 0,
+    "min_retrieval": 1,
+    "max_retrieval": 2
+  }
+]

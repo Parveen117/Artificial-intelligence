@@ -1,0 +1,7 @@
+{
+  "context": "The Eiffel Tower is located in Paris. It was completed in 1889. The tower is made of iron.",
+  "prompt": "Answer using only the supplied context: where is the Eiffel Tower, when was it completed, and what material is it made of?",
+  "answer": "The Eiffel Tower is located in Berlin. It was completed in 1789 and is made of wood.",
+  "model_id": "demo-llm",
+  "event_index": 1
+}

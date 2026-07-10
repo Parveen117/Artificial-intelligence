@@ -1,0 +1,20 @@
+{
+  "created_utc": "2026-07-01T08:24:56+00:00",
+  "files": {
+    "BASELINE_COMPARISON_V1_REPORT.md": "3f03c6878ef11bd60171c4bc9bf80e4053fcaa164b1f387f0c130e148348e832",
+    "local_baseline_comparison.py": "1dc1b28f94277f1612f0f45c3e59a6698de5ed76822259e298a00695112ae238",
+    "local_baseline_outputs/baseline_comparison_report.md": "c3f578dded2aef0cbdd8a216c8d5aa75261486345662a3e3ff14894fb946f291"
+  },
+  "name": "Baseline Comparison v1",
+  "result": {
+    "fusion_engine": "10/10",
+    "gain_cases": [
+      "unsupported_extra_facility",
+      "wrong_opening_time",
+      "wrong_conversion_output",
+      "negation_contradiction",
+      "entity_location_contradiction"
+    ],
+    "naive_token_baseline": "5/10"
+  }
+}

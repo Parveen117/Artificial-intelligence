@@ -1,0 +1,180 @@
+[
+  {
+    "case_id": "adv_exact_multi_claim",
+    "description": "Multiple exact grounded claims.",
+    "context": "The school bus arrives at 7 AM. The bus stops near Gate 2. Students must carry their ID cards.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school bus arrives at 7 AM. The bus stops near Gate 2. Students must carry their ID cards.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "adv_hidden_wrong_time",
+    "description": "Mostly correct answer with one wrong time.",
+    "context": "The school bus arrives at 7 AM. The bus stops near Gate 2. Students must carry their ID cards.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school bus arrives at 8 AM. The bus stops near Gate 2. Students must carry their ID cards.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_hidden_wrong_gate",
+    "description": "Mostly correct answer with one wrong location/number-like gate.",
+    "context": "The school bus arrives at 7 AM. The bus stops near Gate 2. Students must carry their ID cards.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school bus arrives at 7 AM. The bus stops near Gate 5. Students must carry their ID cards.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_unsupported_inserted_middle",
+    "description": "Unsupported claim inserted between supported claims.",
+    "context": "The school bus arrives at 7 AM. Students must carry their ID cards.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The school bus arrives at 7 AM. The bus has free Wi-Fi. Students must carry their ID cards.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_negation_flip",
+    "description": "Supported obligation changed into negated obligation.",
+    "context": "Students must carry their ID cards.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "Students must not carry their ID cards.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_material_wrong",
+    "description": "Material/object contradiction.",
+    "context": "The model bridge is made of wood. The bridge is painted blue.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The model bridge is made of steel. The bridge is painted blue.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_material_exact",
+    "description": "Exact material claim.",
+    "context": "The model bridge is made of wood. The bridge is painted blue.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The model bridge is made of wood. The bridge is painted blue.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "adv_conversion_wrong_object",
+    "description": "Conversion target contradiction.",
+    "context": "A wind turbine converts wind energy into electrical energy.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "A wind turbine converts wind energy into sound energy.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_conversion_paraphrase",
+    "description": "Conversion paraphrase grounded.",
+    "context": "A wind turbine converts wind energy into electrical energy.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "A wind turbine changes wind energy into electrical energy.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "adv_location_wrong_city",
+    "description": "Entity/location contradiction.",
+    "context": "India Gate is located in Delhi.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "India Gate is located in Jaipur.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_location_exact",
+    "description": "Exact entity/location grounded.",
+    "context": "India Gate is located in Delhi.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "India Gate is located in Delhi.",
+    "expected_action_family": [
+      "COMMIT",
+      "REVIEW"
+    ]
+  },
+  {
+    "case_id": "adv_medical_unsupported_strong",
+    "description": "High-stakes unsupported medical claim.",
+    "context": "The syrup should be taken after meals.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The syrup should be taken after meals. It cures cough in one day.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE",
+      "BLOCK_OUTPUT"
+    ]
+  },
+  {
+    "case_id": "adv_medical_negation_wrong",
+    "description": "Medical instruction negation contradiction.",
+    "context": "The syrup should be taken after meals.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The syrup should not be taken after meals.",
+    "expected_action_family": [
+      "BLOCK_OUTPUT",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  },
+  {
+    "case_id": "adv_no_context_confident_claim",
+    "description": "Confident claim with empty context.",
+    "context": "",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "India Gate is located in Delhi.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE",
+      "BLOCK_OUTPUT"
+    ]
+  },
+  {
+    "case_id": "adv_partly_correct_extra_number",
+    "description": "Unsupported added number in otherwise grounded answer.",
+    "context": "The class has a science quiz on Monday.",
+    "prompt": "Answer using only the supplied context.",
+    "answer": "The class has a science quiz on Monday. The quiz has 50 questions.",
+    "expected_action_family": [
+      "REVIEW",
+      "RETRIEVE_MORE_EVIDENCE",
+      "REGENERATE_WITH_EVIDENCE"
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "architecture": [
+    "claim-frame verification",
+    "fusion certificate",
+    "claim repair certificate",
+    "evidence ledger hash chain",
+    "retrieval request routing",
+    "retrieval resolution certificate",
+    "full stack validator"
+  ],
+  "created_utc": "2026-07-01T08:11:29+00:00",
+  "files": {
+    "LOCAL_DEVELOPMENT_NOTES.md": "f1afbaff67498734de9efbc22205b9649b374ed585933505b9f476f8353607b3",
+    "ai_trust_enablement/claim_frame_kernel.py": "764d351d73c4de0ad14a8bd3a7c9829bab3add2a4af99c2b5eafe34f0f7815e6",
+    "ai_trust_enablement/claim_repair_engine.py": "0f7c2b25e2617f7e42b2313222f114f60c37d3ef5c93e54e3a5c590181097ab9",
+    "ai_trust_enablement/evidence_ledger.py": "e1225a4da4f347ad8e633cf3904952573d977cf8811fa584530954c2405d7220",
+    "ai_trust_enablement/fusion_certificate_engine.py": "b0385c9e42d7d16511aad35154814fffdffb39753fa6d805a52cb764e872ace9",
+    "ai_trust_enablement/retrieval_resolution_engine.py": "f260b240c498232f7e2da97676b8a90d702faaccc83e40a0d36e2846f756e210",
+    "ai_trust_enablement/retrieval_router.py": "93f50aaacef917235f5b36a978bee8c86a714824315e28717da07cd8416d6429",
+    "local_benchmark_cases.json": "89fb05563e47feee6f8c744073a28e2f2fcb9d2bff615ce55c29b80047953cf2",
+    "local_evidence_ledger.jsonl": "331b69fd91dd7c9be82295656853c9af847306096547a1d3141200cce4f0e7af",
+    "local_full_stack_outputs/full_stack_report.md": "30704469405c6848b13222ad17d567dde967e678f319911b53354737062bf3e8",
+    "local_full_stack_validator.py": "b9258862b2f1e5c31a2637bd039a1317cae21680bcf641d629bb17132f65463d",
+    "local_repair_expectations.json": "867d6ef197836aacbebf8b94be6ca6dd480c288db0ee9b8f1c4eed8131c5741d",
+    "local_repair_validator.py": "acbe8e35cfd8a02dca8f7c02d5e5b6295709000a5fac854399772b769efde9fa",
+    "local_resolution_validator.py": "5facb8b425f56a210bde06975e410bd2ad0341d7a9d628f91dd7dad80d707be1"
+  },
+  "name": "AI Trust Enablement Local Proof Pack v1",
+  "status": "OVERALL_OK_TRUE",
+  "validation": {
+    "compile_ok": true,
+    "detection_benchmark": "10/10",
+    "evidence_ledger_chain": "valid",
+    "repair_validation": "10/10",
+    "retrieval_resolution": "3/3",
+    "smoke_suite": "6/6"
+  }
+}

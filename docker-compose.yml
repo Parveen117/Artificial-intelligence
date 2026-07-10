@@ -1,0 +1,14 @@
+services:
+  ai-trust-enable:
+    build: .
+    image: ai-trust-enable:latest
+    ports:
+      - "8080:8080"
+    environment:
+      AI_TRUST_HOST: 0.0.0.0
+      AI_TRUST_PORT: 8080
+      AI_TRUST_RATE_LIMIT_PER_MIN: 120
+      AI_TRUST_MAX_BODY_BYTES: 1000000
+      # Set this before exposing the service beyond localhost.
+      # AI_TRUST_API_TOKEN: change-me
+    restart: unless-stopped
