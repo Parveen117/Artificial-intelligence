@@ -18,7 +18,7 @@ keywords:
   - Monti operator
   - Future Arrow
 license: "LicenseRef-All-Rights-Reserved"
-version: "public-priority-release-v1"
+version: "1.0.0"
 date-released: "2026-07-10"
 preferred-citation:
   type: software
