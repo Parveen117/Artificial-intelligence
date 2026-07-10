@@ -2,6 +2,12 @@
 
 This repository contains a deployable AI hallucination-recognition, confidence-collapse, release-control, ECL-finality, Lambda-Laplace analytic, Monti topological-memory, and Future Arrow forecasting certificate service.
 
+> **Patent and priority status.** This public repository is associated with inventor-controlled provisional patent filings and continuing complete/PCT preparation materials covering AI recognition-residue evaluation, release-control logic, certificate generation, ECL-style finality, Lambda-Laplace diagnostics, Monti topological-memory diagnostics, Future Arrow forecasting, and related EMK/UGD/RSC theory support. See [`PATENT_NOTICE.md`](PATENT_NOTICE.md).
+>
+> **Copyright and license boundary.** This is a public technical inspection and citation release, not an unrestricted open-source grant. All rights are reserved unless a separate written license states otherwise. See [`LICENSE`](LICENSE) and [`COPYRIGHT_NOTICE.md`](COPYRIGHT_NOTICE.md).
+>
+> **Public release boundary.** This repository does not publish the full provisional claim set, complete/PCT claim architecture, protected device mappings, or all private priority-support materials. See [`docs/PUBLIC_RELEASE_BOUNDARY.md`](docs/PUBLIC_RELEASE_BOUNDARY.md).
+
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 - deterministic AI answer evaluation from context, prompt, and answer,
@@ -147,7 +153,14 @@ Monti says what crossed. Future Arrow estimates where the recognition trajectory
 - `docs/LAMBDA_LAPLACE_INTEGRATION.md` - Lambda-Laplace analytic diffusion and seam diagnostics.
 - `docs/MONTI_OPERATOR_INTEGRATION.md` - Monti Operator winding-sector memory diagnostics.
 - `docs/FUTURE_ARROW_INTEGRATION.md` - Future Arrow probability-cone forecasting.
+- `docs/PUBLIC_RELEASE_BOUNDARY.md` - boundary between public release and private priority materials.
+- `PATENT_NOTICE.md` - patent/provisional priority and no-patent-license notice.
+- `COPYRIGHT_NOTICE.md` - copyright ownership and restriction notice.
+- `LICENSE` - all-rights-reserved repository license boundary.
+- `CITATION.cff` - citation metadata for academic and technical references.
 
 ## Status
 
 Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, Monti temporal memory diagnostics, Future Arrow forecasting, and integration into AI applications. It is not a standalone truth oracle and not a substitute for domain validation.
+
+The public release is intended as a technical and citation layer associated with the inventor-controlled Artificial Intelligence provisional materials and broader EMK/UGD/RSC priority record.
