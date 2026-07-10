@@ -5,7 +5,7 @@ authors:
   - family-names: "Lathwal"
     given-names: "Kajal"
 repository-code: "https://github.com/Parveen117/Artificial-intelligence"
-abstract: "A deployable AI trust-enablement repository for hallucination-recognition, confidence-collapse detection, release-control certificates, ECL-style finality, Lambda-Laplace diagnostics, Monti topological-memory diagnostics, and Future Arrow forecasting."
+abstract: "A deployable AI trust-enablement repository for hallucination-recognition, confidence-collapse detection, release-control certificates, ECL-style finality, Lambda-Laplace diagnostics, topological-memory diagnostics, and Future Arrow forecasting."
 keywords:
   - artificial intelligence
   - hallucination detection
@@ -15,7 +15,7 @@ keywords:
   - audit certificates
   - ECL finality
   - Lambda-Laplace
-  - Monti operator
+  - topological memory
   - Future Arrow
 license: "LicenseRef-All-Rights-Reserved"
 version: "1.0.0"
@@ -28,4 +28,4 @@ preferred-citation:
       given-names: "Kajal"
   year: 2026
   repository: "https://github.com/Parveen117/Artificial-intelligence"
-  notes: "Public technical release associated with inventor-controlled AI provisional and EMK/UGD/RSC priority materials."
+  notes: "Public technical release of an AI trust-enablement system."
