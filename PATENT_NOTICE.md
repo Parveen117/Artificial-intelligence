@@ -1,6 +1,6 @@
 # Patent and Priority Notice
 
-This repository is part of an invention-disclosure and public technical release program for AI recognition, hallucination-residue evaluation, confidence-collapse detection, release-control certification, ECL-style finality, Lambda-Laplace diagnostics, Monti topological-memory diagnostics, and Future Arrow forecasting.
+This repository is part of an invention-disclosure and public technical release program for AI recognition, hallucination-residue evaluation, confidence-collapse detection, release-control certification, ECL-style finality, Lambda-Laplace diagnostics, topological-memory / winding-sector diagnostics, and Future Arrow forecasting.
 
 ## Patent status
 
@@ -19,6 +19,10 @@ This public repository should be read together with the inventor-controlled prio
 - dated GitHub commits, source snapshots, and supporting archives under inventor control.
 
 The private priority materials contain broader claim language, embodiments, theory support, device/application boundaries, and implementation alternatives that are not fully reproduced in this public repository.
+
+## Relationship to device-side provisional materials
+
+Device-level recognition-kernel materials, including physical input channels, visible/shadow response strands, additive determinant residue modules, rotating-sheet winding closure, tensor-time residue, holonomy spectral-flow verification, Eye/Commit output logic, and hardware embodiments, are treated as protected priority materials and are not fully released in this public AI repository.
 
 ## No patent license
 
