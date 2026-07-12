@@ -7,6 +7,8 @@ doi: "10.5281/zenodo.21300179"
 authors:
   - family-names: "Dabas"
     given-names: "Monty"
+    orcid: "https://orcid.org/0009-0005-6948-209X"
+    affiliation: "Independent Researcher"
 abstract: "A deployable AI trust-enablement repository for recognition-residue evaluation, hallucination-risk classification, confidence-collapse detection, release control, machine-readable certificates, finality records, temporal diagnostics, and future-state forecasting."
 keywords:
   - artificial intelligence
@@ -17,3 +19,5 @@ keywords:
   - release control
   - machine-readable certificates
   - trustworthy AI
+repository-code: "https://github.com/Parveen117/Artificial-intelligence"
+url: "https://github.com/Parveen117/Artificial-intelligence"
