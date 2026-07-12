@@ -2,7 +2,8 @@ cff-version: 1.2.0
 message: "If you use or reference this software, please cite it as below."
 title: "Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates"
 type: software
-version: 1.0.1
+version: "1.0.2"
+date-released: "2026-07-12"
 doi: "10.5281/zenodo.21300179"
 authors:
   - family-names: "Dabas"
