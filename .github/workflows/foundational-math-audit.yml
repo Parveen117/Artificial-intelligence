@@ -1,0 +1,43 @@
+name: Foundational Mathematics Adversarial Audit
+
+on:
+  pull_request:
+    paths:
+      - 'foundational_mathematics/invariant_gated_state_transitions/**'
+      - '.github/workflows/foundational-math-audit.yml'
+  push:
+    branches:
+      - main
+      - agent/foundational-math-hard-audit
+    paths:
+      - 'foundational_mathematics/invariant_gated_state_transitions/**'
+      - '.github/workflows/foundational-math-audit.yml'
+
+jobs:
+  adversarial-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run exact adversarial audit
+        run: |
+          python foundational_mathematics/invariant_gated_state_transitions/audit/run_adversarial_audit.py | tee /tmp/audit.json
+          grep -q 'PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT' /tmp/audit.json
+
+      - name: Verify pinned result status
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('foundational_mathematics/invariant_gated_state_transitions/audit/result.json')
+          data = json.loads(p.read_text())
+          assert data['status'] == 'PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT'
+          assert data['total_trials_or_exact_cases'] == 140448
+          print(data['status'])
+          PY

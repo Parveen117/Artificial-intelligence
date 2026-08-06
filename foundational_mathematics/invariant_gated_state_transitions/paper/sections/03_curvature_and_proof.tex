@@ -1,0 +1,163 @@
+\section{Path-order curvature}
+
+Let $A,B\in\operatorname{End}(\X)$ and let $s,t\in\R\setminus\{0\}$. Define two local actions
+\begin{equation}
+U_s=I+sA,\qquad V_t=I+tB.
+\label{eq:actions}
+\end{equation}
+For $x\in\X$, compare the two orderings
+\begin{equation}
+x_{A\to B}=V_tU_sx,\qquad
+x_{B\to A}=U_sV_tx.
+\label{eq:orders}
+\end{equation}
+
+\begin{theorem}[T6: exact path-order curvature]
+The ordered-path residue is
+\begin{equation}
+x_{A\to B}-x_{B\to A}=st(BA-AB)x.
+\label{eq:commutator-residue}
+\end{equation}
+Thus the commutator
+\begin{equation}
+\mathcal K_{A,B}=BA-AB
+\label{eq:curvature}
+\end{equation}
+is the exact first path-order curvature of the two local actions.
+\end{theorem}
+
+\begin{proof}
+Expand both compositions:
+\[
+V_tU_sx=x+sAx+tBx+stBAx,
+\]
+\[
+U_sV_tx=x+tBx+sAx+stABx.
+\]
+Subtracting gives \cref{eq:commutator-residue}.
+\end{proof}
+
+\begin{corollary}[Path independence]
+The two orderings agree on $x$ if and only if $\mathcal K_{A,B}x=0$.
+\end{corollary}
+
+\begin{proposition}[Unitary covariance and magnitude invariance]
+Let $Q:\X\to\X$ be unitary and put
+\[
+A'=QAQ^*,\qquad B'=QBQ^*,\qquad x'=Qx.
+\]
+Then
+\begin{equation}
+\mathcal K_{A',B'}=Q\mathcal K_{A,B}Q^*,
+\qquad
+\norm{\mathcal K_{A',B'}x'}=\norm{\mathcal K_{A,B}x}.
+\label{eq:curvature-unitary}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Direct multiplication gives
+\[
+B'A'-A'B'
+=QBQ^*QAQ^*-QAQ^*QBQ^*
+=Q(BA-AB)Q^*.
+\]
+Applying this identity to $x'=Qx$ and using unitarity of $Q$ proves the norm equality.
+\end{proof}
+
+\begin{proposition}[Commutator consistency]
+The path-order curvature is antisymmetric and satisfies the Jacobi identity:
+\[
+\mathcal K_{A,B}=-\mathcal K_{B,A},
+\qquad
+[A,[B,C]]+[B,[C,A]]+[C,[A,B]]=0.
+\]
+\end{proposition}
+
+\begin{proof}
+Both identities follow by expanding the commutators and cancelling equal products with opposite signs.
+\end{proof}
+
+\begin{remark}
+The term ``path-order curvature'' refers only to the exact order defect of the local actions in \cref{eq:actions}. No identification with Riemannian curvature or the curvature of a particular connection is asserted without additional structure.
+\end{remark}
+
+\begin{definition}[Curvature magnitude]
+Define
+\begin{equation}
+\I_{\mathrm{curv}}(x;A,B)=\norm{\mathcal K_{A,B}x}
+=\frac{\norm{x_{A\to B}-x_{B\to A}}}{|st|}.
+\label{eq:curvature-magnitude}
+\end{equation}
+\end{definition}
+
+\begin{proposition}[Curvature-sensitive admissibility]
+If a policy fixes $\I_{\mathrm{curv}}\le\varepsilon_{\mathrm{curv}}$, then any candidate with $\norm{\mathcal K_{A,B}x}>\varepsilon_{\mathrm{curv}}$ cannot be identified with a path-independent accepted state under that policy.
+\end{proposition}
+
+\begin{proof}
+Such an identification would contradict the declared inequality in \cref{eq:curvature-magnitude}.
+\end{proof}
+
+\begin{example}[Exact nonzero residue]
+Let
+\[
+A=\begin{pmatrix}0&1\\0&0\end{pmatrix},\quad
+B=\begin{pmatrix}0&0\\1&0\end{pmatrix},\quad
+x=\begin{pmatrix}1\\1\end{pmatrix},\quad
+s=\frac12,\quad t=\frac13.
+\]
+Then
+\[
+(BA-AB)x=\begin{pmatrix}-1\\1\end{pmatrix},
+\qquad
+x_{A\to B}-x_{B\to A}=\begin{pmatrix}-1/6\\1/6\end{pmatrix}.
+\]
+If $B=\lambda A$, the commutator vanishes and the two orderings agree exactly.
+\end{example}
+
+\section{Finite proof admission}
+
+We now formalize a proof-shaped event without reference to prose quality.
+
+\begin{definition}[Finite derivation object]
+A finite derivation object is
+\begin{equation}
+\Pi=(\Gamma,\varphi_{\mathrm{target}},(\ell_i)_{i=1}^n,D,\rho),
+\label{eq:proof-object}
+\end{equation}
+where $\Gamma$ is a finite set of premises, $\varphi_{\mathrm{target}}$ the declared target, $D$ a directed dependency graph on the proof lines, and $\rho$ a fixed finite collection of admissible inference rules.
+\end{definition}
+
+\begin{definition}[Admitted derivation]
+The object $\Pi$ is admitted when:
+\begin{enumerate}[label=(\roman*)]
+\item $D$ is acyclic;
+\item every dependency of line $\ell_i$ points to a predecessor of $\ell_i$;
+\item every line is either a declared premise or follows from its cited predecessors by one rule in $\rho$;
+\item the final verified line equals $\varphi_{\mathrm{target}}$.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[T7: finite proof admission]
+If $\Pi$ is admitted, then $\Gamma\vdash_{\rho}\varphi_{\mathrm{target}}$. Conversely, any derivation with a cycle, an unlicensed rule, a missing dependency, or a final-target mismatch fails the admission predicate.
+\end{theorem}
+
+\begin{proof}
+Because $D$ is acyclic, choose a topological ordering of its lines. Induct along that ordering. A premise line belongs to $\Gamma$. Every non-premise line follows from already verified predecessors by a rule in $\rho$, so each line is derivable from $\Gamma$. The final verified line is exactly $\varphi_{\mathrm{target}}$, proving $\Gamma\vdash_{\rho}\varphi_{\mathrm{target}}$. The converse statements follow directly because each listed defect violates one defining clause of admission.
+\end{proof}
+
+\begin{theorem}[T7B: semantic soundness lift]
+Let $\mathfrak M$ be a semantics for the formulas of $\rho$. Assume every premise in $\Gamma$ is true in $\mathfrak M$ and every rule in $\rho$ is truth-preserving in $\mathfrak M$. If $\Pi$ is admitted, then
+\[
+\mathfrak M\models\varphi_{\mathrm{target}}.
+\]
+\end{theorem}
+
+\begin{proof}
+Use the same topological ordering as in T7. Every premise line is true by assumption. If all cited predecessors of a non-premise line are true, truth preservation of the licensed rule makes that line true. Induction therefore makes every verified line true, including the final line $\varphi_{\mathrm{target}}$.
+\end{proof}
+
+\begin{remark}
+T7 is syntactic and relative to the declared calculus $\rho$. T7B is the semantic lift: it requires sound rules and true premises. Neither theorem claims that $\rho$ is complete for all mathematics.
+\end{remark}
