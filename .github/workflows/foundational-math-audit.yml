@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - main
-      - agent/foundational-math-hard-audit
     paths:
       - 'foundational_mathematics/invariant_gated_state_transitions/**'
       - '.github/workflows/foundational-math-audit.yml'
@@ -25,19 +24,39 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run exact adversarial audit
+      - name: Run finite-core adversarial audit
         run: |
-          python foundational_mathematics/invariant_gated_state_transitions/audit/run_adversarial_audit.py | tee /tmp/audit.json
-          grep -q 'PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT' /tmp/audit.json
+          python foundational_mathematics/invariant_gated_state_transitions/audit/run_adversarial_audit.py | tee /tmp/core-audit.json
+          grep -q 'PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT' /tmp/core-audit.json
 
-      - name: Verify pinned result status
+      - name: Run Hilbert representation audit
+        run: |
+          python foundational_mathematics/invariant_gated_state_transitions/audit/run_hilbert_extension_audit.py | tee /tmp/hilbert-audit.json
+          grep -q 'PASS_HILBERT_FINITE_CHANNEL_EXTENSION_AUDIT' /tmp/hilbert-audit.json
+
+      - name: Run native flow-completion audit
+        run: |
+          python foundational_mathematics/invariant_gated_state_transitions/audit/run_native_flow_completion_audit.py | tee /tmp/native-audit.json
+          grep -q 'PASS_NATIVE_FLOW_COMPLETION_AUDIT' /tmp/native-audit.json
+
+      - name: Verify pinned result statuses
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('foundational_mathematics/invariant_gated_state_transitions/audit/result.json')
-          data = json.loads(p.read_text())
-          assert data['status'] == 'PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT'
-          assert data['total_trials_or_exact_cases'] == 140448
-          print(data['status'])
+          root = Path('foundational_mathematics/invariant_gated_state_transitions/audit')
+          checks = [
+              ('result.json', 'PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT', 140448),
+              ('hilbert_extension_result.json', 'PASS_HILBERT_FINITE_CHANNEL_EXTENSION_AUDIT', 41000),
+              ('native_flow_completion_result.json', 'PASS_NATIVE_FLOW_COMPLETION_AUDIT', 55008),
+          ]
+          total = 0
+          for filename, status, count in checks:
+              data = json.loads((root / filename).read_text())
+              assert data['status'] == status
+              assert data['total_trials_or_exact_cases'] == count
+              total += count
+              print(status, count)
+          assert total == 236456
+          print('PASS_COMBINED_FOUNDATIONAL_MATH_AUDIT', total)
           PY
