@@ -6,7 +6,9 @@ on:
       - 'foundational_mathematics/invariant_gated_state_transitions/**'
       - '.github/workflows/foundational-math-audit.yml'
   push:
-    branches: [main]
+    branches:
+      - main
+      - agent/foundational-math-hard-audit
     paths:
       - 'foundational_mathematics/invariant_gated_state_transitions/**'
       - '.github/workflows/foundational-math-audit.yml'
