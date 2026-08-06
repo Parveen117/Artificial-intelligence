@@ -19,7 +19,7 @@
   linkcolor=darkblue,
   citecolor=darkblue,
   urlcolor=darkblue,
-  pdftitle={Invariant-Gated State Transitions: Exact Admission, Curvature, and Persistent Records},
+  pdftitle={Invariant-Gated State Transitions: Exact Admission, Flow Completion, Curvature, and Persistent Records},
   pdfauthor={Monty Dabas}
 }
 
@@ -61,7 +61,7 @@
 \newcommand{\Str}{\mathsf S}
 
 \title{\textbf{Invariant-Gated State Transitions:}\\
-Exact Admission, Curvature, and Persistent Records}
+Exact Admission, Flow Completion, Curvature, and Persistent Records}
 \author{Monty Dabas\\Independent Researcher\\ORCID: 0009-0005-6948-209X}
 \date{August 2026}
 
@@ -69,7 +69,7 @@ Exact Admission, Curvature, and Persistent Records}
 \maketitle
 
 \begin{abstract}
-We develop a theorem chain for guarded state systems in which a candidate update may be committed only after independently specified admissibility conditions close. The finite core begins from a structured initial datum with no accepted claims, introduces an invariant-preserving transition law, separates candidates from their validators, and proves exact conditions under which an observation operator determines a declared target. A quotient detects target-changing directions invisible to the observation, a canonical completion removes precisely those directions, and a positive-semidefinite inequality characterizes bounded target support. We next define an operational curvature by comparing two admissible local steps in opposite orders and prove that the resulting residue is exactly their commutator action. A finite proof-admission theorem is formulated on acyclic derivation graphs, followed by an all-obligation threshold theorem, a perturbation margin, a clock-independent fixed-state selector, a disjoint commit/hold/reject classification, exact refinement, and replay-complete append-only persistence. We then extend the target-support layer to arbitrary Hilbert spaces: a finite-channel adverse perturbation is governed exactly by a finite Hermitian compression, the minimum number of repair channels equals the target-relevant blind dimension, strict spectral reserve gives a quantitative source-relative positivity margin, and orthogonal source completion yields a positive projection defect. Thus finite certification is tied to finite target-relevant obstruction rank rather than to finite ambient dimension.
+We develop a theorem chain for guarded state systems in which a candidate update may be committed only after independently specified admissibility conditions close. The finite core begins from a structured initial datum with no accepted claims, introduces an invariant-preserving transition law, separates candidates from validators, detects target-changing blind directions, and derives exact target-support, curvature, proof-admission, threshold, fixed-state, status, refinement, and replay-persistence conditions. We then give a stronger finite-to-infinite extension whose Hilbert carrier is obtained by quotienting and completing a declared positive form rather than introduced as an unexplained primitive. An involution-graded generator produces a bilateral exponential flow and a nested observer-jet tower with an exact remainder. Corrected finite packets are transported to one common carrier and completed in operator norm with explicit Gram-error bounds. A vanishing faithfulness residual forces the limiting adverse memory into a finite observer range; a variational theorem derives the minimum faithful observer rank from that range. Only after these obligations close is the limiting sign reduced to a finite Hermitian matrix, whose eigenvalues carry the negative index, kernel, and normalized positivity margin of the infinite signed form. A finite outward matrix bound plus a proved completion error therefore yields a strict limiting certificate. Earlier Hilbert compression formulas remain as downstream representation corollaries. Finite certification is thus tied to finite target-relevant obstruction rank and verified completion, not to finite ambient dimension or untracked truncation.
 \end{abstract}
 
 \tableofcontents
@@ -80,6 +80,7 @@ We develop a theorem chain for guarded state systems in which a candidate update
 \input{sections/03_curvature_and_proof}
 \input{sections/04_gate_and_status}
 \input{sections/05_refinement_persistence_main}
+\input{sections/06_native_flow_completion}
 \input{sections/06_hilbert_finite_channel_extension}
 \input{sections/07_hilbert_covariance_corollary}
 
