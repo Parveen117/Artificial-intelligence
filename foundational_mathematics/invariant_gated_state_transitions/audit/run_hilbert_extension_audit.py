@@ -124,17 +124,20 @@ def record(name, count, status="PASS"):
 
 
 ROOT = Path(__file__).resolve().parents[1]
-src = (ROOT / "paper" / "sections" / "06_hilbert_finite_channel_extension.tex").read_text()
+paper = ROOT / "paper"
+src = (paper / "main.tex").read_text()
+for q in sorted((paper / "sections").glob("*.tex")):
+    src += "\n" + q.read_text()
 for token in (
-    "T14: finite-channel Hilbert-space compression",
-    "T15: minimal target-repair dimension",
-    "T16: strict finite-channel reserve",
-    "T17: projection-defect positivity",
+    "Finite-channel Hilbert compression",
+    "Strictly positive source form",
+    "Rank-one burden",
+    "Positive projection defect",
     "Birman--Schwinger/Schur-complement",
 ):
     assert token in src
 
-# T14: exact factorization, finite inverse-form shadow, and positive/negative cases.
+# H1: exact factorization, inverse-form shadow, and positive/negative cases.
 for trial in range(12000):
     m = rng.randint(1, 5)
     n = rng.randint(m, m + 5)
@@ -160,9 +163,8 @@ for trial in range(12000):
     else:
         assert qform(defect, z) == F(1) - beta
         assert qform(defect, z) < 0
-record("T14 finite-channel compression / inverse-form shadow", 12000)
+record("H1 finite-channel compression / inverse-form shadow", 12000)
 
-# Necessity control: an adverse channel outside the source support cannot be hidden by the theorem.
 for _ in range(1000):
     n = rng.randint(2, 8)
     S = diag([F(0)] + [F(rng.randint(1, 5)) for _ in range(n - 1)])
@@ -170,9 +172,9 @@ for _ in range(1000):
     defect = matsub(S, matmul(V, transpose(V)))
     e0 = [F(1)] + [F(0)] * (n - 1)
     assert qform(defect, e0) < 0
-record("T14 source-support necessity controls", 1000, "PASS_NEGATIVE_CONTROL")
+record("H1 source-support necessity controls", 1000, "PASS_NEGATIVE_CONTROL")
 
-# T15: exact minimum repair dimension on a controlled blind subspace.
+# H2: target-repair dimension sanity check, retained as a representation-level shadow of T18.
 for _ in range(8000):
     a = rng.randint(1, 4)
     r = rng.randint(1, 5)
@@ -185,9 +187,9 @@ for _ in range(8000):
     if r > 1:
         G = randmat(r - 1, n)
         assert rank(A + G + L) > rank(A + G)
-record("T15 minimal target-repair dimension", 8000)
+record("H2 target-repair dimension shadow", 8000)
 
-# T16: strict reserve and a sharp witness on the top singular channel.
+# H3: strict reserve and a sharp witness on the top singular channel.
 for _ in range(8000):
     m = rng.randint(1, 5)
     n = rng.randint(m, m + 5)
@@ -202,9 +204,9 @@ for _ in range(8000):
     for _ in range(2):
         w = randvec(n)
         assert qform(defect, w) >= (F(1) - beta) * qform(S, w)
-record("T16 strict reserve and sharp top-channel witness", 8000)
+record("H3 strict reserve and sharp top-channel witness", 8000)
 
-# T17: projection defect equals a positive Gram difference exactly.
+# H4: projection defect equals a positive Gram difference exactly.
 for _ in range(12000):
     n = rng.randint(1, 8)
     m = rng.randint(1, 5)
@@ -219,7 +221,7 @@ for _ in range(12000):
     c = randvec(m)
     w = matvec(ImP, matvec(R, c))
     assert qform(K, c) == dot(w, w) >= 0
-record("T17 projection-defect positivity / Gram difference", 12000)
+record("H4 projection-defect positivity / Gram difference", 12000)
 
 
 total = sum(v["trials"] for v in results.values())
