@@ -1,0 +1,69 @@
+name: Challenge Engine
+
+on:
+  pull_request:
+    paths:
+      - 'challenge_engine/**'
+      - '.github/workflows/challenge-engine.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'challenge_engine/**'
+      - '.github/workflows/challenge-engine.yml'
+
+jobs:
+  challenge-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Unit tests
+        run: python -m unittest discover -s challenge_engine/tests -v
+
+      - name: Capability contract
+        run: |
+          python challenge_engine/challenge.py --capabilities --compact > /tmp/capabilities.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/capabilities.json'))
+          assert data['default_package'] == 'math'
+          assert data['schema_version'] == '1.0'
+          names = {p['package'] for p in data['packages']}
+          assert {'math','logic','code','security_audit'} <= names
+          PY
+
+      - name: Certified math example
+        run: |
+          python challenge_engine/challenge.py challenge_engine/examples/math_challenge.json --compact > /tmp/math.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/math.json'))
+          assert data['result'] == 'CERTIFIED'
+          assert data['formal_promotion'] is True
+          PY
+
+      - name: Non-formal adversarial example
+        run: |
+          python challenge_engine/challenge.py challenge_engine/examples/nonformal_behavioral_challenge.json --compact > /tmp/nonformal.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/nonformal.json'))
+          assert data['result'] == 'ADVERSARIAL_PASS'
+          assert data['formal_promotion'] is False
+          PY
+
+      - name: Authorized security-audit example
+        run: |
+          python challenge_engine/challenge.py challenge_engine/examples/security_audit_challenge.json --compact > /tmp/security.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/security.json'))
+          assert data['result'] == 'ADVERSARIAL_PASS'
+          PY
