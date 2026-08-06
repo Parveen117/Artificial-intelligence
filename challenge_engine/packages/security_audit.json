@@ -1,0 +1,14 @@
+{
+  "package": "security_audit",
+  "version": "1.0",
+  "description": "Authorized defensive/security assessment package. Scope authorization is mandatory before evaluation.",
+  "default_mode": "adversarial",
+  "allowed_modes": ["exploratory", "adversarial", "certified"],
+  "requires_authorization": true,
+  "certification_requires_formal_adapter": true,
+  "required_obligations": {
+    "exploratory": ["structure", "target", "evidence"],
+    "adversarial": ["structure", "target", "evidence", "negative_controls"],
+    "certified": ["structure", "target", "evidence", "negative_controls", "dependencies"]
+  }
+}
