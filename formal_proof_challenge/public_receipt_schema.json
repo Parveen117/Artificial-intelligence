@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/formal-proof-public-receipt-v1.schema.json",
+  "$id": "urn:formal-proof-gate:public-receipt:v1",
   "title": "Formal Proof Gate Public Receipt v1",
   "type": "object",
   "required": [
