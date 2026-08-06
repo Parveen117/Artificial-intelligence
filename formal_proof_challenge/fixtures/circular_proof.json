@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "proof_id": "circular-proof",
+  "assumptions": [],
+  "target": {"op": "atom", "name": "P"},
+  "steps": [
+    {"id": "S1", "rule": "AND_ELIM_LEFT", "premises": ["S2"], "conclusion": {"op": "atom", "name": "P"}},
+    {"id": "S2", "rule": "AND_INTRO", "premises": ["S1", "S1"], "conclusion": {"op": "and", "left": {"op": "atom", "name": "P"}, "right": {"op": "atom", "name": "P"}}}
+  ],
+  "conclusion_step": "S1"
+}

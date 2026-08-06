@@ -49,3 +49,16 @@ ai_trust_*_ledger*.jsonl
 ai_trust_*_result.json
 *_certificate.json
 ai_trust_enablement/_test_*.jsonl
+
+# Formal Proof Gate runtime receipts
+formal_proof_challenge/outputs/
+formal_proof_public_receipts.jsonl
+formal-proof-public-ledger.jsonl
+*-public-receipt.json
+*-seal-result.json
+replay-result.json
+
+# FPG3 deployment and anchor build outputs
+dist/formal-proof-gate-space/
+latest-anchor.json
+_site/

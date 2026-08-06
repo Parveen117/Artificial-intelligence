@@ -10,6 +10,34 @@ This repository contains a deployable AI trust-enablement service for hallucinat
 >
 > **Public release boundary.** This repository is a selected public technical release and does not reproduce the complete private filing, research, hardware, or internal development record. See [`docs/PUBLIC_RELEASE_BOUNDARY.md`](docs/PUBLIC_RELEASE_BOUNDARY.md).
 
+## Break the Formal Proof Gate
+
+The `formal_proof_challenge/` package is a no-dependency public red-team challenge for finite formal derivations.
+
+```bash
+python -m formal_proof_challenge.app
+```
+
+Open `http://127.0.0.1:8081`, load a valid proof, and press **Tamper proof**. The gate checks admitted syntax, declared assumptions, rule licensing, dependency cycles, arithmetic truth, and final-target equality before emitting a deterministic certificate.
+
+FPG2 adds a complete public receipt chain:
+
+```text
+Formal proof certificate
+→ ECL COMMIT / REJECT decision
+→ IEL State(I,E,theta) audit transition
+→ SHA-256 previous-entry and payload binding
+→ tamper and replay verification
+```
+
+Use **Seal public receipt** to append either a valid `COMMIT` or a typed `REJECT` decision. Use **Tamper receipt** to alter one bound field and expose the resulting hash, state-transition, and decision mismatches. Duplicate proof certificates return `REPLAY_REJECTED` without changing the ledger.
+
+A real break is an invalid proof written in the admitted grammar that receives `VALID_PROOF`. Unsupported prose or an unknown rule correctly fails closed as `PARSE_NOT_ADMITTED`.
+
+This challenge does **not** claim to understand unrestricted natural-language mathematics. The SHA-256 receipt is tamper-evident, not a digital signature, identity proof, trusted timestamp, consensus protocol, or legal notarization. See [`formal_proof_challenge/README.md`](formal_proof_challenge/README.md).
+
+FPG3 adds hosted deployment, a formal red-team Issue Form, `/healthz`, `/api/stats`, `/api/anchor`, a self-contained Docker Space bundle, and a GitHub Pages workflow that can publish the latest verified ledger-head checkpoint. See [`formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md`](formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md).
+
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 - deterministic AI answer evaluation from context, prompt, and answer,
@@ -60,8 +88,8 @@ from ai_trust_enablement.ecl_commit_adapter import ECLCommitAdapter
 engine = AIHallucinationRecognitionEngine()
 certificate = asdict(engine.evaluate(
     reference_text="The Eiffel Tower is located in Paris. It was completed in 1889.",
-    prompt="Answer using only the supplied context.",
-    answer="The Eiffel Tower is located in Berlin. It was completed in 1789.",
+    prompt_text="Answer using only the supplied context.",
+    answer_text="The Eiffel Tower is located in Berlin. It was completed in 1789.",
 ))
 
 commit = ECLCommitAdapter().commit_certificate(certificate)
@@ -98,6 +126,8 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
+- `formal_proof_challenge/README.md` - finite formal-proof public challenge and FPG2 finality receipt chain.
+- `formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md` - hosted red-team, Docker Space, Issue Form, and external-anchor launch guide.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
@@ -117,6 +147,6 @@ Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Recognition-Residue
 
 ## Status
 
-Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, topological-memory diagnostics, Future Arrow forecasting, and integration into AI applications. It is not a standalone truth oracle and not a substitute for domain validation.
+Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, topological-memory diagnostics, Future Arrow forecasting, and integration into AI applications. The Formal Proof Gate is a finite-calculus challenge, not an unrestricted natural-language theorem prover. The repository is not a standalone truth oracle and not a substitute for domain validation.
 
 This public release is a technical and citation layer associated with inventor-controlled intellectual-property materials.

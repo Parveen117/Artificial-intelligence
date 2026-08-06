@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "proof_id": "valid-modus-ponens",
+  "assumptions": [
+    {"op": "atom", "name": "P"},
+    {"op": "implies", "left": {"op": "atom", "name": "P"}, "right": {"op": "atom", "name": "Q"}}
+  ],
+  "target": {"op": "atom", "name": "Q"},
+  "steps": [
+    {"id": "S1", "rule": "ASSUMPTION", "premises": [], "conclusion": {"op": "atom", "name": "P"}},
+    {"id": "S2", "rule": "ASSUMPTION", "premises": [], "conclusion": {"op": "implies", "left": {"op": "atom", "name": "P"}, "right": {"op": "atom", "name": "Q"}}},
+    {"id": "S3", "rule": "MODUS_PONENS", "premises": ["S1", "S2"], "conclusion": {"op": "atom", "name": "Q"}}
+  ],
+  "conclusion_step": "S3"
+}

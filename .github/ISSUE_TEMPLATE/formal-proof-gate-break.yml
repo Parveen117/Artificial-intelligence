@@ -1,0 +1,80 @@
+name: Formal Proof Gate break report
+description: Report an admitted invalid derivation that was incorrectly certified, or another reproducible gate/receipt defect.
+title: "[FPG BREAK]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A genuine proof-gate break is an invalid derivation inside the admitted JSON grammar that receives `VALID_PROOF`. Unsupported prose or unknown syntax returning `PARSE_NOT_ADMITTED` is not a break.
+
+        Do not include passwords, access tokens, private keys, confidential documents, personal data, or harmful payloads.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Break category
+      options:
+        - Invalid proof received VALID_PROOF
+        - Valid proof was rejected
+        - Receipt tamper was not detected
+        - Replay was accepted
+        - Ledger or anchor continuity failure
+        - Hosted interface or deployment defect
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: Minimal proof JSON
+      description: Paste the smallest admitted proof that reproduces the problem.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: invalidity
+    attributes:
+      label: Why is the derivation invalid or the result wrong?
+      description: Identify the exact unlicensed step, false arithmetic, cycle, target mismatch, receipt mutation, or replay condition.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed certificate or receipt
+      description: Paste the complete returned object, or the smallest relevant excerpt plus its hashes.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Source revision
+      description: Git commit, release tag, Space revision, or container digest.
+      placeholder: 0a3776d9e41486c56f8ac700417e1f6898aa0d24
+    validations:
+      required: true
+  - type: input
+    id: anchor
+    attributes:
+      label: Anchor or receipt hash
+      description: Include the public anchor hash, receipt hash, or ledger head when applicable.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Include exact UI actions or commands and whether the result reproduces from a clean checkout.
+      placeholder: |
+        python -m formal_proof_challenge.verifier proof.json
+        python -m formal_proof_challenge.finality proof.json --ledger ledger.jsonl
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Submission checks
+      options:
+        - label: I confirmed the input is inside the declared grammar or clearly identified the interface/receipt defect.
+          required: true
+        - label: I removed secrets, private information, and harmful payloads.
+          required: true
+        - label: I permit this case to become a public regression fixture with attribution to my GitHub account.
+          required: true

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security-sensitive disclosure
+    url: https://github.com/Parveen117/Artificial-intelligence/blob/main/SECURITY.md
+    about: Use the security policy instead of a public issue when publication could create material risk.
