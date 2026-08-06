@@ -1,0 +1,124 @@
+\section{Candidate--validator separation}
+
+\begin{definition}[External validator]
+Let
+\begin{equation}
+V:\X\times\mathcal P\to\{0,1\}\times\mathcal R
+\label{eq:validator}
+\end{equation}
+be a fixed validation map, where $\mathcal P$ contains the declared policy and admissible evidence and $\mathcal R$ records reasons or open obligations.
+\end{definition}
+
+\begin{theorem}[T3: self-declaration cannot create validity]
+Suppose a candidate carries an arbitrary bit $b\in\{0,1\}$ asserting its own validity. If $V$ does not use $b$ as evidence for the value of $V$ itself, then changing $b$ alone cannot change the validation result.
+\end{theorem}
+
+\begin{proof}
+For fixed admissible input $(x,p)$, $V(x,p)$ is fixed. Since $b$ is not an admissible premise for the validator's own output, replacing $b$ by $1-b$ leaves $V(x,p)$ unchanged.
+\end{proof}
+
+\begin{corollary}[Generated-status principle]
+Any field representing proof validity, invariant validity, support validity, or gate closure must be produced by its corresponding validator rather than accepted from the candidate as a premise.
+\end{corollary}
+
+\section{Observation and target determination}
+
+Let $\X$ and $\Y$ be finite-dimensional complex inner-product spaces; throughout this section the inner product is linear in its first argument. Fix a linear observation operator
+\begin{equation}
+A:\X\to\Y
+\label{eq:A}
+\end{equation}
+and a scalar target map
+\begin{equation}
+L:\X\to\C.
+\label{eq:L}
+\end{equation}
+The operator $A$ encodes what is observable from the admitted evidence; $L$ encodes the scalar conclusion to be determined.
+
+\subsection{Invisible target-changing directions}
+
+\begin{definition}[Target defect quotient]
+Define
+\begin{equation}
+\mathfrak Q(A,L)=\ker A\big/\bigl(\ker A\cap\ker L\bigr).
+\label{eq:quotient}
+\end{equation}
+\end{definition}
+
+A nonzero class in $\mathfrak Q(A,L)$ is invisible to $A$ but changes $L$.
+
+\begin{theorem}[T4: exact target determination]
+The following are equivalent:
+\begin{enumerate}[label=(\roman*)]
+\item $\mathfrak Q(A,L)=\{0\}$;
+\item $\ker A\subseteq\ker L$;
+\item there exists a unique $c\in\operatorname{Ran}A$ such that
+\begin{equation}
+Lz=\inner{Az}{c}\qquad\text{for every }z\in\X.
+\label{eq:decoder}
+\end{equation}
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+The equivalence of (i) and (ii) is immediate from the quotient. Assume (ii). Define $\ell(Az)=Lz$ on $\operatorname{Ran}A$. If $Az=Aw$, then $z-w\in\ker A\subseteq\ker L$, so $Lz=Lw$ and $\ell$ is well defined. The Riesz representation theorem on the finite-dimensional space $\operatorname{Ran}A$ gives a unique $c\in\operatorname{Ran}A$ satisfying \cref{eq:decoder}. Conversely, if \cref{eq:decoder} holds and $z\in\ker A$, then $Lz=0$, proving (ii).
+\end{proof}
+
+\begin{corollary}[No admission under unresolved target defect]
+If $\mathfrak Q(A,L)\neq\{0\}$, the observation $A$ does not determine the target $L$. Any admission rule that requires target determination must therefore withhold commitment until the defect is removed or the target is weakened.
+\end{corollary}
+
+\subsection{Canonical completion}
+
+Let $N=\ker A$, let $P_N$ be the orthogonal projection onto $N$, and let
+\[
+q_L:N\to N/(N\cap\ker L)
+\]
+be the quotient map, with the finite-dimensional quotient equipped with its canonical quotient inner-product structure. Define
+\begin{equation}
+A_L^{\sharp}z=(Az,q_LP_Nz).
+\label{eq:completion}
+\end{equation}
+
+\begin{theorem}[T5A: exact completion]
+The completed operator satisfies
+\begin{equation}
+\ker A_L^{\sharp}=\ker A\cap\ker L.
+\label{eq:completion-kernel}
+\end{equation}
+Hence $\mathfrak Q(A_L^{\sharp},L)=\{0\}$.
+\end{theorem}
+
+\begin{proof}
+If $A_L^{\sharp}z=0$, then $Az=0$, so $z\in N$. Therefore $P_Nz=z$, and $q_Lz=0$ implies $z\in N\cap\ker L$. The reverse inclusion is immediate.
+\end{proof}
+
+\subsection{Target burden}
+
+Assume the equivalent conditions of T4. Define
+\begin{equation}
+\beta_A(L)=\min\bigl\{\norm c^2:\ Lz=\inner{Az}{c}\ \text{for all }z\in\X\bigr\}.
+\label{eq:burden}
+\end{equation}
+
+\begin{theorem}[T5B: bounded target support]
+The following are equivalent:
+\begin{equation}
+\beta_A(L)\le1
+\qquad\Longleftrightarrow\qquad
+A^*A-L^*L\succeq0.
+\label{eq:support}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+If $Lz=\inner{Az}{c}$ with $\norm c\le1$, then Cauchy--Schwarz gives
+\[
+|Lz|^2\le\norm{Az}^2\norm c^2\le\norm{Az}^2,
+\]
+which is equivalent to $\inner{(A^*A-L^*L)z}{z}\ge0$. Conversely, the operator inequality implies $|Lz|\le\norm{Az}$ for every $z$. Thus $L$ vanishes on $\ker A$ and induces a functional of norm at most one on $\operatorname{Ran}A$. Its Riesz vector has norm at most one, proving $\beta_A(L)\le1$.
+\end{proof}
+
+\begin{example}[A one-row blind target]
+Take $\X=\R^2$, $A(x,y)=x$, and $L(x,y)=y$. Then $(0,1)\in\ker A$ but $L(0,1)=1$, so $\mathfrak Q(A,L)\neq0$. Adding the second observation $y$ produces $A_L^{\sharp}(x,y)=(x,y)$, after which the target is determined exactly.
+\end{example}
