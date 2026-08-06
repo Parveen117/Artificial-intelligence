@@ -1,1 +1,85 @@
-PLACEHOLDER
+\documentclass[11pt]{article}
+\usepackage[margin=0.92in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\definecolor{darkblue}{RGB}{28,63,116}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=darkblue,
+  citecolor=darkblue,
+  urlcolor=darkblue,
+  pdftitle={Invariant-Gated State Transitions: Exact Admission, Curvature, and Persistent Records},
+  pdfauthor={Monty Dabas}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Invariant-Gated State Transitions}
+\rhead{Foundational Mathematics}
+\cfoot{\thepage\ of \pageref{LastPage}}
+\setlength{\headheight}{14pt}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{example}[definition]{Example}
+
+\newcommand{\X}{\mathcal X}
+\newcommand{\Y}{\mathcal Y}
+\newcommand{\Z}{\mathcal Z}
+\newcommand{\I}{\mathcal I}
+\newcommand{\Ldg}{\mathcal L}
+\newcommand{\E}{\mathcal E}
+\newcommand{\Cset}{\mathcal C}
+\newcommand{\Hset}{\mathcal H}
+\newcommand{\Jset}{\mathcal J}
+\newcommand{\Wset}{\mathcal W}
+\newcommand{\Fix}{\mathsf F}
+\newcommand{\Dset}{\mathcal D}
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\inner}[2]{\left\langle#1,#2\right\rangle}
+\newcommand{\Gate}{\mathsf G}
+\newcommand{\Val}{\mathsf V}
+\newcommand{\Adm}{\mathsf A}
+\newcommand{\Str}{\mathsf S}
+
+\title{\textbf{Invariant-Gated State Transitions:}\\
+Exact Admission, Curvature, and Persistent Records}
+\author{Monty Dabas\\Independent Researcher\\ORCID: 0009-0005-6948-209X}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We develop a finite-dimensional theorem chain for state systems in which a candidate update may be committed only after independently specified admissibility conditions close. The construction begins from a structured initial datum with no accepted claims, introduces an invariant-preserving transition law, separates candidates from their validators, and then proves exact conditions under which an observation operator determines a declared target. A quotient detects target-changing directions invisible to the observation, a canonical completion removes precisely those directions, and a positive-semidefinite inequality characterizes bounded target support. We next define an operational curvature by comparing two admissible local steps in opposite orders and prove that the resulting residue is exactly their commutator action. A finite proof-admission theorem is formulated on acyclic derivation graphs, followed by an all-obligation threshold theorem and a perturbation margin. A finite-dimensional time-average then gives a clock-independent fixed-state selector. These components produce a disjoint commit/hold/reject classification. Finally, an exact body-tail refinement identity and a replay-complete append-only journal yield a persistent record theorem. The resulting object is not assumed at the outset: it is obtained as a corollary of the preceding obligations.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+
+\input{sections/01_architecture_and_invariant}
+\input{sections/02_validator_and_target}
+\input{sections/03_curvature_and_proof}
+\input{sections/04_gate_and_status}
+\input{sections/05_refinement_persistence_main}
+
+\end{document}
