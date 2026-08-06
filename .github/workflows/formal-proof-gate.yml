@@ -25,6 +25,8 @@ jobs:
         run: |
           python -m unittest tests.test_formal_proof_challenge -v
           python -m unittest tests.test_formal_proof_finality -v
+          python -m unittest tests.test_fpg3_anchor -v
+          python -m unittest tests.test_fpg3_deployment -v
       - name: Verify valid fixture
         run: python -m formal_proof_challenge.verifier formal_proof_challenge/fixtures/valid_arithmetic.json --output formal-proof-certificate.json
       - name: Verify tamper is rejected
@@ -82,6 +84,45 @@ jobs:
           code=$?
           set -e
           test "$code" -eq 2
+      - name: Build and verify FPG3 external anchor
+        run: |
+          python -m formal_proof_challenge.anchor \
+            --ledger formal-proof-public-ledger.jsonl \
+            --output latest-anchor.json \
+            --source-revision "$GITHUB_SHA"
+          python -m formal_proof_challenge.anchor --verify latest-anchor.json
+      - name: Build self-contained Docker Space bundle
+        run: |
+          python formal_proof_challenge/deployment/build_hf_space_bundle.py \
+            --output dist/formal-proof-gate-space \
+            --source-revision "$GITHUB_SHA"
+          test -f dist/formal-proof-gate-space/Dockerfile
+          test -f dist/formal-proof-gate-space/SPACE_MANIFEST.json
+      - name: Hosted app smoke test
+        run: |
+          FPG_PUBLIC_MODE=1 FPG_ALLOW_SEAL=0 \
+            python -m formal_proof_challenge.app \
+            --host 127.0.0.1 --port 8765 \
+            --ledger formal-proof-public-ledger.jsonl \
+            --public --read-only \
+            > hosted-app.log 2>&1 &
+          pid=$!
+          trap 'kill $pid 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            curl --fail --silent http://127.0.0.1:8765/healthz > health.json && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8765/api/anchor > hosted-anchor.json
+          curl --fail --silent http://127.0.0.1:8765/api/config > hosted-config.json
+          python -m formal_proof_challenge.anchor --verify hosted-anchor.json
+          python - <<'PY'
+          import json
+          health=json.load(open('health.json',encoding='utf-8'))
+          config=json.load(open('hosted-config.json',encoding='utf-8'))
+          assert health['ok'] is True
+          assert config['public_mode'] is True
+          assert config['allow_seal'] is False
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: formal-proof-gate-python-${{ matrix.python-version }}
@@ -95,3 +136,9 @@ jobs:
             rejected-public-receipt.json
             tampered-public-receipt.json
             formal-proof-public-ledger.jsonl
+            latest-anchor.json
+            hosted-anchor.json
+            health.json
+            hosted-config.json
+            hosted-app.log
+            dist/formal-proof-gate-space/SPACE_MANIFEST.json
