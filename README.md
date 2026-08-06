@@ -10,6 +10,20 @@ This repository contains a deployable AI trust-enablement service for hallucinat
 >
 > **Public release boundary.** This repository is a selected public technical release and does not reproduce the complete private filing, research, hardware, or internal development record. See [`docs/PUBLIC_RELEASE_BOUNDARY.md`](docs/PUBLIC_RELEASE_BOUNDARY.md).
 
+## Break the Formal Proof Gate
+
+The new `formal_proof_challenge/` package is a no-dependency public red-team challenge for finite formal derivations.
+
+```bash
+python -m formal_proof_challenge.app
+```
+
+Open `http://127.0.0.1:8081`, load a valid proof, and press **Tamper one step**. The gate checks admitted syntax, declared assumptions, rule licensing, dependency cycles, arithmetic truth, and final-target equality before emitting a deterministic certificate.
+
+A real break is an invalid proof written in the admitted grammar that receives `VALID_PROOF`. Unsupported prose or an unknown rule correctly fails closed as `PARSE_NOT_ADMITTED`.
+
+This challenge does **not** claim to understand unrestricted natural-language mathematics. It certifies closure only inside the declared finite calculus. See [`formal_proof_challenge/README.md`](formal_proof_challenge/README.md).
+
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 - deterministic AI answer evaluation from context, prompt, and answer,
@@ -98,6 +112,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
+- `formal_proof_challenge/README.md` - finite formal-proof public challenge.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
@@ -117,6 +132,6 @@ Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Recognition-Residue
 
 ## Status
 
-Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, topological-memory diagnostics, Future Arrow forecasting, and integration into AI applications. It is not a standalone truth oracle and not a substitute for domain validation.
+Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, topological-memory diagnostics, Future Arrow forecasting, and integration into AI applications. The Formal Proof Gate is a finite-calculus challenge, not an unrestricted natural-language theorem prover. The repository is not a standalone truth oracle and not a substitute for domain validation.
 
 This public release is a technical and citation layer associated with inventor-controlled intellectual-property materials.
