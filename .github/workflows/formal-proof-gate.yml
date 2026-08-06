@@ -1,0 +1,40 @@
+name: Formal Proof Gate
+
+on:
+  push:
+    branches: [main, agent/formal-proof-gate]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run Formal Proof Gate tests
+        run: python -m unittest tests.test_formal_proof_challenge -v
+      - name: Verify valid fixture
+        run: python -m formal_proof_challenge.verifier formal_proof_challenge/fixtures/valid_arithmetic.json --output formal-proof-certificate.json
+      - name: Verify tamper is rejected
+        run: |
+          set +e
+          python -m formal_proof_challenge.verifier formal_proof_challenge/fixtures/valid_arithmetic.json --tamper --output formal-proof-tampered-certificate.json
+          code=$?
+          set -e
+          test "$code" -eq 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formal-proof-gate-python-${{ matrix.python-version }}
+          path: |
+            formal-proof-certificate.json
+            formal-proof-tampered-certificate.json

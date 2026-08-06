@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "proof_id": "false-arithmetic-7-plus-5",
+  "assumptions": [],
+  "target": {"op": "eq", "left": {"op": "add", "left": 7, "right": 5}, "right": 13},
+  "steps": [{"id": "S1", "rule": "ARITHMETIC_EVAL", "premises": [], "conclusion": {"op": "eq", "left": {"op": "add", "left": 7, "right": 5}, "right": 13}}],
+  "conclusion_step": "S1"
+}
