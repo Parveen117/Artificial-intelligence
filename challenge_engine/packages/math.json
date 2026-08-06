@@ -1,0 +1,14 @@
+{
+  "package": "math",
+  "version": "1.0",
+  "description": "Default exact/structured challenge package for mathematical claims and formal derivations.",
+  "default_mode": "certified",
+  "allowed_modes": ["exploratory", "adversarial", "certified"],
+  "requires_authorization": false,
+  "certification_requires_formal_adapter": true,
+  "required_obligations": {
+    "exploratory": ["structure", "target"],
+    "adversarial": ["structure", "target", "evidence"],
+    "certified": ["structure", "target", "evidence", "dependencies"]
+  }
+}

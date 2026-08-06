@@ -1,0 +1,14 @@
+{
+  "package": "code",
+  "version": "1.0",
+  "description": "Program/specification conformance package for testable software properties.",
+  "default_mode": "adversarial",
+  "allowed_modes": ["exploratory", "adversarial", "certified"],
+  "requires_authorization": false,
+  "certification_requires_formal_adapter": true,
+  "required_obligations": {
+    "exploratory": ["structure", "target", "evidence"],
+    "adversarial": ["structure", "target", "evidence"],
+    "certified": ["structure", "target", "evidence", "dependencies"]
+  }
+}

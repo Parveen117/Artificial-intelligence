@@ -24,6 +24,28 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 - Docker and docker-compose deployment files,
 - no-dependency regression tests.
 
+## Challenge Engine
+
+`challenge_engine/` is the testing front door for external challenges. It accepts a machine-readable Challenge Package and keeps three result levels separate:
+
+- `exploratory` for empirical or black-box evidence,
+- `adversarial` for declared targets plus negative controls,
+- `certified` for challenges that also close a formal adapter and formal support.
+
+The default package is `math`; `logic`, `code`, and authorization-gated `security_audit` packages are included. A connector can discover the contract with:
+
+```bash
+python challenge_engine/challenge.py --capabilities --compact
+```
+
+or stream one JSON challenge through stdin:
+
+```bash
+python challenge_engine/challenge.py - --compact
+```
+
+See `challenge_engine/CONNECTOR_CONTRACT.md`.
+
 ## Quick start
 
 ```bash
@@ -98,6 +120,8 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
+- `challenge_engine/README.md` - challenge packages, modes, flow probes, burden and completion checks.
+- `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout contract.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.

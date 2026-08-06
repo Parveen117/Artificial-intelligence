@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/challenge-engine/result.schema.json",
+  "title": "Challenge Engine Result",
+  "type": "object",
+  "required": ["engine_version", "result"],
+  "properties": {
+    "engine_version": {"type": "string"},
+    "schema_version": {"type": "string"},
+    "challenge_id": {"type": ["string", "null"]},
+    "package": {"type": "string"},
+    "mode": {"type": "string"},
+    "result": {"enum": ["OBSERVED", "ADVERSARIAL_PASS", "CERTIFIED", "INCOMPLETE", "FAILED", "INVALID", "BLOCKED_SCOPE"]},
+    "formal_promotion": {"type": "boolean"},
+    "checks": {"type": "array"},
+    "open_obligations": {"type": "array"},
+    "failed_obligations": {"type": "array"},
+    "blocked_obligations": {"type": "array"},
+    "claim_boundary": {"type": "string"}
+  },
+  "additionalProperties": true
+}

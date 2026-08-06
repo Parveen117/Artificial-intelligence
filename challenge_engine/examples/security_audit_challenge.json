@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "challenge_id": "security-demo-001",
+  "package": "security_audit",
+  "mode": "adversarial",
+  "scope": {
+    "authorization": "declared",
+    "target": "local-demo-service",
+    "allowed_actions": ["configuration_review", "test_fixture_execution", "protocol_validation"]
+  },
+  "target": {
+    "statement": "The declared session policy rejects an invalid test transition.",
+    "kind": "defensive-control"
+  },
+  "evidence": [
+    {"id": "policy", "type": "specification", "status": "pass", "formal": false},
+    {"id": "test-trace", "type": "trace", "status": "pass", "formal": false}
+  ],
+  "obligations": [
+    {"id": "structure", "status": "pass"},
+    {"id": "target", "status": "pass"},
+    {"id": "evidence", "status": "pass"},
+    {"id": "negative_controls", "status": "pass"}
+  ],
+  "negative_controls": [
+    {"id": "invalid-session-fixture", "status": "pass"}
+  ]
+}
