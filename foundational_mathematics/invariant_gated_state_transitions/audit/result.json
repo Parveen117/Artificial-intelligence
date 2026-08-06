@@ -1,0 +1,75 @@
+{
+  "results": {
+    "Mutation controls": {
+      "status": "PASS_MUTATIONS_DETECTED",
+      "trials": 3
+    },
+    "T1/T9/T12 static theorem contracts": {
+      "status": "PASS",
+      "trials": 5
+    },
+    "T10 exhaustive trichotomy": {
+      "status": "PASS {'COMMIT': 1, 'HOLD': 7, 'REJECT': 24}",
+      "trials": 32
+    },
+    "T11 exact refinement": {
+      "status": "PASS",
+      "trials": 30000
+    },
+    "T12 replay-complete journal": {
+      "status": "PASS",
+      "trials": 3000
+    },
+    "T2 telescoping invariant bound": {
+      "status": "PASS",
+      "trials": 20000
+    },
+    "T4 target determination": {
+      "status": "PASS",
+      "trials": 10000
+    },
+    "T5A exact completion kernel": {
+      "status": "PASS",
+      "trials": 8000
+    },
+    "T5B bounded target support": {
+      "status": "PASS",
+      "trials": 10000
+    },
+    "T6 covariance/Jacobi": {
+      "status": "PASS",
+      "trials": 10000
+    },
+    "T6 exact path-order residue": {
+      "status": "PASS",
+      "trials": 30000
+    },
+    "T7 proof admission + semantic lift": {
+      "status": "PASS",
+      "trials": 6
+    },
+    "T7 sound-rule assumption necessity": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 1
+    },
+    "T8 exact/robust gate": {
+      "status": "PASS",
+      "trials": 6400
+    },
+    "T8 necessity negative controls": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 3000
+    },
+    "T9 fixed-state averages": {
+      "status": "PASS",
+      "trials": 10000
+    },
+    "T9 skew-Hermitian assumption necessity": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 1
+    }
+  },
+  "seed": 20260807,
+  "status": "PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT",
+  "total_trials_or_exact_cases": 140448
+}
