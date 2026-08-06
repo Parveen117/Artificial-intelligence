@@ -12,12 +12,16 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from .finality import FormalProofFinalityLedger, tamper_receipt, verify_receipt
     from .verifier import tamper_one_step, verify_proof
 except ImportError:
+    from finality import FormalProofFinalityLedger, tamper_receipt, verify_receipt
     from verifier import tamper_one_step, verify_proof
 
 ROOT = Path(__file__).resolve().parent
 FIXTURE_DIR = ROOT / "fixtures"
+OUTPUT_DIR = ROOT / "outputs"
+LEDGER_PATH = OUTPUT_DIR / "formal_proof_public_receipts.jsonl"
 MAX_REQUEST_BYTES = 1_000_000
 
 HTML = r"""<!doctype html>
@@ -29,38 +33,48 @@ HTML = r"""<!doctype html>
 <style>
 :root{font-family:Inter,system-ui,sans-serif;color-scheme:dark;background:#090b10;color:#f4f7fb}
 body{margin:0;background:radial-gradient(circle at top,#182035,#090b10 55%);min-height:100vh}
-main{max-width:1100px;margin:auto;padding:32px 18px 60px}
+main{max-width:1180px;margin:auto;padding:32px 18px 60px}
 h1{font-size:clamp(2rem,6vw,4.4rem);line-height:.95;margin:.3em 0}.tag{color:#9fb6ff;font-weight:700}
-p{color:#c3cad8;max-width:760px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:820px){.grid{grid-template-columns:1fr}}
+p{color:#c3cad8;max-width:850px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:820px){.grid{grid-template-columns:1fr}}
 .card{background:rgba(16,20,30,.92);border:1px solid #30384c;border-radius:18px;padding:18px;box-shadow:0 15px 60px #0008}
 textarea,pre,select{width:100%;box-sizing:border-box;background:#080a0f;color:#e9eef9;border:1px solid #384158;border-radius:12px;padding:12px;font:13px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
-textarea{min-height:520px;resize:vertical}pre{min-height:520px;overflow:auto;white-space:pre-wrap}.row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
-button,select{width:auto;cursor:pointer}button{border:0;border-radius:999px;padding:11px 17px;font-weight:800;background:#d9e2ff;color:#11182a}button.secondary{background:#272f43;color:#eff3ff}button.danger{background:#ff6877;color:#21070a}
-.status{font-size:1.2rem;font-weight:900;margin:8px 0}.valid{color:#77f2b0}.rejected{color:#ff8994}.muted{font-size:.9rem;color:#99a4b9}code{color:#b8c8ff}
+textarea{min-height:560px;resize:vertical}pre{min-height:560px;overflow:auto;white-space:pre-wrap}.row{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+button,select{width:auto;cursor:pointer}button{border:0;border-radius:999px;padding:11px 17px;font-weight:800;background:#d9e2ff;color:#11182a}button.secondary{background:#272f43;color:#eff3ff}button.danger{background:#ff6877;color:#21070a}button.commit{background:#77f2b0;color:#062114}
+.status{font-size:1.2rem;font-weight:900;margin:8px 0}.valid{color:#77f2b0}.rejected{color:#ff8994}.muted{font-size:.9rem;color:#99a4b9}code{color:#b8c8ff}.ledger{padding:9px 13px;border:1px solid #30384c;border-radius:999px;color:#aab5cb}
 </style>
 </head>
 <body><main>
 <div class="tag">CLOSURE BEFORE COMMIT</div>
 <h1>Break the<br>Formal Proof Gate</h1>
-<p>Submit a proof in the declared finite grammar. A real break is an invalid derivation that receives <code>VALID_PROOF</code>. Strange prose or unsupported syntax correctly returns <code>PARSE_NOT_ADMITTED</code>.</p>
-<div class="row"><select id="fixture"></select><button id="load" class="secondary">Load fixture</button><button id="verify">Verify proof</button><button id="tamper" class="danger">Tamper one step</button></div>
-<div class="grid"><section class="card"><h2>Proof JSON</h2><textarea id="proof" spellcheck="false"></textarea></section><section class="card"><h2>Certificate</h2><div id="status" class="status muted">Not evaluated</div><pre id="result">Select a fixture and verify it.</pre></section></div>
+<p>Submit a proof in the declared finite grammar. A real break is an invalid derivation that receives <code>VALID_PROOF</code>. Seal a result to receive an ECL decision, IEL audit transition, and SHA-256 tamper/replay receipt.</p>
+<div class="row"><span id="ledger" class="ledger">Ledger loading…</span></div>
+<div class="row">
+<select id="fixture"></select><button id="load" class="secondary">Load fixture</button><button id="verify">Verify proof</button><button id="tamper" class="danger">Tamper proof</button><button id="seal" class="commit">Seal public receipt</button>
+</div>
+<div class="row"><button id="verifyReceipt" class="secondary">Verify receipt</button><button id="tamperReceipt" class="danger">Tamper receipt</button><button id="download" class="secondary">Download receipt</button></div>
+<div class="grid"><section class="card"><h2>Proof JSON</h2><textarea id="proof" spellcheck="false"></textarea></section><section class="card"><h2>Certificate / Receipt</h2><div id="status" class="status muted">Not evaluated</div><pre id="result">Select a fixture and verify it.</pre></section></div>
 </main>
 <script>
-const fixture=document.querySelector('#fixture'),proof=document.querySelector('#proof'),result=document.querySelector('#result'),statusEl=document.querySelector('#status');
+const fixture=document.querySelector('#fixture'),proof=document.querySelector('#proof'),result=document.querySelector('#result'),statusEl=document.querySelector('#status'),ledgerEl=document.querySelector('#ledger');
+let currentReceipt=null;
 async function request(path,body){const r=await fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const j=await r.json();if(!r.ok)throw new Error(j.error||r.statusText);return j}
-async function loadFixtures(){const r=await fetch('/api/fixtures');const j=await r.json();fixture.innerHTML=j.fixtures.map(x=>`<option value="${x}">${x}</option>`).join('');await loadFixture()}
-async function loadFixture(){const r=await fetch('/api/fixtures/'+encodeURIComponent(fixture.value));const j=await r.json();proof.value=JSON.stringify(j,null,2);statusEl.textContent='Loaded '+fixture.value;statusEl.className='status muted';result.textContent='Ready.'}
-async function verify(){try{const cert=await request('/api/verify',JSON.parse(proof.value));render(cert)}catch(e){renderError(e)}}
-async function tamper(){try{const out=await request('/api/tamper',JSON.parse(proof.value));proof.value=JSON.stringify(out.proof,null,2);render(out.certificate)}catch(e){renderError(e)}}
-function render(cert){statusEl.textContent=cert.status;statusEl.className='status '+(cert.status==='VALID_PROOF'?'valid':'rejected');result.textContent=JSON.stringify(cert,null,2)}
+async function refreshLedger(){const r=await fetch('/api/ledger');const j=await r.json();ledgerEl.textContent=`Ledger: ${j.checked||0} entries · ${j.status}`}
+async function loadFixtures(){const r=await fetch('/api/fixtures');const j=await r.json();fixture.innerHTML=j.fixtures.map(x=>`<option value="${x}">${x}</option>`).join('');await loadFixture();await refreshLedger()}
+async function loadFixture(){const r=await fetch('/api/fixtures/'+encodeURIComponent(fixture.value));const j=await r.json();proof.value=JSON.stringify(j,null,2);currentReceipt=null;statusEl.textContent='Loaded '+fixture.value;statusEl.className='status muted';result.textContent='Ready.'}
+async function verify(){try{const cert=await request('/api/verify',JSON.parse(proof.value));currentReceipt=null;render(cert,cert.status)}catch(e){renderError(e)}}
+async function tamper(){try{const out=await request('/api/tamper',JSON.parse(proof.value));proof.value=JSON.stringify(out.proof,null,2);currentReceipt=null;render(out.certificate,out.certificate.status)}catch(e){renderError(e)}}
+async function seal(){try{const out=await request('/api/seal',JSON.parse(proof.value));if(out.receipt)currentReceipt=out.receipt;const label=out.action?`${out.status} · ${out.action}`:out.status;render(out,label);await refreshLedger()}catch(e){renderError(e)}}
+async function verifyReceipt(){try{if(!currentReceipt)throw new Error('Seal a receipt first');const out=await request('/api/verify-receipt',currentReceipt);render(out,out.status)}catch(e){renderError(e)}}
+async function tamperReceipt(){try{if(!currentReceipt)throw new Error('Seal a receipt first');const out=await request('/api/tamper-receipt',currentReceipt);currentReceipt=out.receipt;render(out,out.verification.status)}catch(e){renderError(e)}}
+function downloadReceipt(){if(!currentReceipt){renderError(new Error('Seal a receipt first'));return}const blob=new Blob([JSON.stringify(currentReceipt,null,2)+'\n'],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(currentReceipt.proof_certificate?.proof_id||'formal-proof')+'-receipt.json';a.click();URL.revokeObjectURL(a.href)}
+function render(payload,label){statusEl.textContent=label;const good=['VALID_PROOF','VALID_RECEIPT','SEALED','COMMIT'].some(x=>String(label).includes(x))&&!String(label).includes('REJECT');statusEl.className='status '+(good?'valid':'rejected');result.textContent=JSON.stringify(payload,null,2)}
 function renderError(e){statusEl.textContent='REQUEST ERROR';statusEl.className='status rejected';result.textContent=String(e)}
-document.querySelector('#load').onclick=loadFixture;document.querySelector('#verify').onclick=verify;document.querySelector('#tamper').onclick=tamper;loadFixtures();
+document.querySelector('#load').onclick=loadFixture;document.querySelector('#verify').onclick=verify;document.querySelector('#tamper').onclick=tamper;document.querySelector('#seal').onclick=seal;document.querySelector('#verifyReceipt').onclick=verifyReceipt;document.querySelector('#tamperReceipt').onclick=tamperReceipt;document.querySelector('#download').onclick=downloadReceipt;loadFixtures();
 </script></body></html>"""
 
 
 class ChallengeHandler(BaseHTTPRequestHandler):
-    server_version = "FormalProofGate/1.0"
+    server_version = "FormalProofGate/2.0"
 
     def _json(self, payload: Any, status: int = HTTPStatus.OK) -> None:
         body = json.dumps(payload, indent=2, sort_keys=True).encode("utf-8")
@@ -68,6 +82,7 @@ class ChallengeHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
@@ -83,6 +98,9 @@ class ChallengeHandler(BaseHTTPRequestHandler):
             return
         if self.path == "/api/fixtures":
             self._json({"fixtures": sorted(path.name for path in FIXTURE_DIR.glob("*.json"))})
+            return
+        if self.path == "/api/ledger":
+            self._json(asdict(FormalProofFinalityLedger(LEDGER_PATH).verify()))
             return
         prefix = "/api/fixtures/"
         if self.path.startswith(prefix):
@@ -108,6 +126,16 @@ class ChallengeHandler(BaseHTTPRequestHandler):
                 proof = tamper_one_step(raw)
                 self._json({"proof": proof, "certificate": asdict(verify_proof(proof))})
                 return
+            if self.path == "/api/seal":
+                self._json(FormalProofFinalityLedger(LEDGER_PATH).seal_proof(raw))
+                return
+            if self.path == "/api/verify-receipt":
+                self._json(asdict(verify_receipt(raw)))
+                return
+            if self.path == "/api/tamper-receipt":
+                receipt = tamper_receipt(raw)
+                self._json({"receipt": receipt, "verification": asdict(verify_receipt(receipt))})
+                return
             self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             self._json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
@@ -117,12 +145,16 @@ class ChallengeHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    global LEDGER_PATH
     parser = argparse.ArgumentParser(description="Run the local Formal Proof Gate challenge")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8081)
+    parser.add_argument("--ledger", type=Path, default=LEDGER_PATH)
     args = parser.parse_args()
+    LEDGER_PATH = args.ledger
     server = ThreadingHTTPServer((args.host, args.port), ChallengeHandler)
     print(f"Formal Proof Gate running at http://{args.host}:{args.port}")
+    print(f"Receipt ledger: {LEDGER_PATH}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
