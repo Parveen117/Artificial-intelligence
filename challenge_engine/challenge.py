@@ -6,7 +6,10 @@ import json
 import sys
 from pathlib import Path
 
-from engine import ChallengeError, capabilities, evaluate_challenge
+try:
+    from .engine import ChallengeError, capabilities, evaluate_challenge
+except ImportError:
+    from engine import ChallengeError, capabilities, evaluate_challenge
 
 EXIT = {"OBSERVED":0,"ADVERSARIAL_PASS":0,"CERTIFIED":0,"INCOMPLETE":2,"FAILED":3,"INVALID":4,"BLOCKED_SCOPE":5}
 
