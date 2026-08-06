@@ -1,0 +1,113 @@
+\section{Purpose and theorem order}
+
+The aim is to isolate a minimal mathematical architecture for guarded state change. The development order is
+\begin{equation}
+\boxed{
+\begin{gathered}
+\text{initial datum}\to
+\text{invariant}\to
+\text{validator}\to
+\text{target support}\to
+\text{curvature}\\
+\to\text{proof admission}\to
+\text{gate}\to
+\text{fixed state}\to
+\text{persistent record}
+\end{gathered}}
+\label{eq:chain}
+\end{equation}
+A later object is never used to redefine an earlier one after a defect has been observed.
+
+\begin{longtable}{p{0.12\textwidth}p{0.35\textwidth}p{0.43\textwidth}}
+\toprule
+Result & Mathematical obligation & Consequence \\
+\midrule
+T1 & Structured initial datum & No accepted content is assumed. \\
+T2 & Invariant transition bound & Local admissibility accumulates controllably. \\
+T3 & Candidate--validator separation & A candidate cannot certify itself. \\
+T4 & Exact target determination & Invisible target-changing directions are detected. \\
+T5 & Exact completion and support & Missing target information is repaired explicitly and bounded. \\
+T6 & Path-order curvature & Directional order leaves an exact commutator residue. \\
+T7 & Finite proof admission & Licensed acyclic derivations close syntactically; sound rules lift closure semantically. \\
+T8 & All-obligation threshold & Positive margin is necessary and sufficient; the midpoint threshold is robust. \\
+T9 & Clock-independent fixed selector & Readiness is intrinsic to the state rather than periodic timing. \\
+T10 & Disjoint status classification & Every typed event is exactly commit, hold, or reject. \\
+T11 & Exact refinement & Valid correction transfers residue without changing the total object. \\
+T12 & Replay-complete append-only persistence & Earlier states remain reconstructible from immutable journal prefixes. \\
+T13 & Persistent-record theorem & The complete record follows from T1--T12. \\
+\bottomrule
+\end{longtable}
+
+\section{Structured initial datum}
+
+\begin{definition}[Foundational datum]
+Fix once and for all
+\begin{equation}
+\mathfrak F=(\mathfrak T,\mathfrak V,\Theta,\I_0,h_0),
+\label{eq:foundation}
+\end{equation}
+where $\mathfrak T$ is a type system, $\mathfrak V$ a validator family, $\Theta$ a collection of gate parameters, $\I_0$ an invariant reference, and $h_0$ a lineage origin.
+\end{definition}
+
+\begin{definition}[Dynamic state record]
+At causal index $k$, let
+\begin{equation}
+\Ldg_k=(\Wset_k,\E_k,\Cset_k,\Hset_k,\Jset_k,\Dset_k,\I_k,h_k),
+\label{eq:record}
+\end{equation}
+where $\Wset_k$ is an immutable transition journal, $\E_k$ the set of addressable events, $\Cset_k$ the committed events, $\Hset_k$ the held events, $\Jset_k$ the rejected events, $\Dset_k$ a dependency relation, $\I_k$ the current invariant datum, and $h_k$ the current lineage identifier.
+\end{definition}
+
+\begin{definition}[Structured genesis pair]
+The dynamic genesis state is
+\begin{equation}
+\Ldg_0=(\Wset_0,\E_0,\Cset_0,\Hset_0,\Jset_0,\Dset_0,\I_0,h_0),
+\qquad
+\Wset_0=\E_0=\Cset_0=\Hset_0=\Jset_0=\Dset_0=\varnothing.
+\label{eq:initial}
+\end{equation}
+The complete genesis datum is the pair
+\begin{equation}
+\mathfrak G_0=(\mathfrak F,\Ldg_0).
+\label{eq:genesis-pair}
+\end{equation}
+\end{definition}
+
+\begin{theorem}[T1: non-vacuity and type consistency of genesis]
+The genesis pair $\mathfrak G_0$ is mathematically nonempty even though no event has yet been committed, and $\Ldg_0$ has the same dynamic record type as every later $\Ldg_k$.
+\end{theorem}
+
+\begin{proof}
+The fixed component $\mathfrak F$ contains $\mathfrak T$, $\mathfrak V$, $\Theta$, $\I_0$, and $h_0$, so the admissibility structure is nonempty. The dynamic component $\Ldg_0$ has exactly the fields displayed in \cref{eq:record}, with the event-bearing fields initialized to the empty set and the invariant and lineage fields initialized to $\I_0,h_0$. Thus no committed content is assumed, but the genesis state is a well-typed member of the same state family used at later indices.
+\end{proof}
+
+\section{Invariant-admissible transitions}
+
+Let $(\X,d_\X)$ be a state space and $(\Z,d_\I)$ an invariant-value space. Let
+\[
+\I:\X\to\Z
+\]
+be fixed before evaluation. For an event $e$, let $F_e:\X\to\X$ be its candidate transition map.
+
+\begin{definition}[Local invariant admissibility]
+The transition $F_e$ is $\varepsilon_e$-admissible at $x$ when
+\begin{equation}
+d_\I\bigl(\I(F_ex),\I(x)\bigr)\le \varepsilon_e.
+\label{eq:local-invariant}
+\end{equation}
+The exact case is $\varepsilon_e=0$.
+\end{definition}
+
+\begin{theorem}[T2: telescoping invariant bound]
+Suppose $x_{k+1}=F_{e_k}x_k$ and every accepted transition satisfies \cref{eq:local-invariant}. Then for every $n\ge1$,
+\begin{equation}
+d_\I\bigl(\I(x_n),\I(x_0)\bigr)
+\le \sum_{k=0}^{n-1}\varepsilon_{e_k}.
+\label{eq:telescope}
+\end{equation}
+In particular, exact local invariance implies $\I(x_n)=\I(x_0)$ for all $n$.
+\end{theorem}
+
+\begin{proof}
+Insert the intermediate values $\I(x_1),\ldots,\I(x_{n-1})$ and apply the triangle inequality. Each consecutive term is bounded by the corresponding $\varepsilon_{e_k}$. If all bounds vanish, every consecutive invariant value agrees.
+\end{proof}
