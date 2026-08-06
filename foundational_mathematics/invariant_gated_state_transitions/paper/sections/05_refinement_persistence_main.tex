@@ -1,0 +1,132 @@
+\section{Exact refinement}
+
+Let $(\mathbb G,+)$ be an abelian group and let $F,M_r,T_r,q_{r+1}\in\mathbb G$. At refinement depth $r$, split
+\begin{equation}
+F=M_r+T_r,
+\label{eq:body-tail}
+\end{equation}
+where $M_r$ is the currently admitted body and $T_r$ the explicit open residue. If a newly validated increment $q_{r+1}$ is transferred from the residue to the body, define
+\begin{equation}
+M_{r+1}=M_r+q_{r+1},\qquad
+T_{r+1}=T_r-q_{r+1}.
+\label{eq:refinement}
+\end{equation}
+
+\begin{theorem}[T11: exact refinement invariance]
+Every transfer in \cref{eq:refinement} preserves the total object:
+\begin{equation}
+M_{r+1}+T_{r+1}=M_r+T_r=F.
+\label{eq:refinement-invariance}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Substitution gives
+\[
+(M_r+q_{r+1})+(T_r-q_{r+1})=M_r+T_r.
+\]
+\end{proof}
+
+\begin{corollary}[No unexplained correction]
+If the admitted body changes by $Q$ while the recorded residue does not change by $-Q$, then the total object changes by exactly $Q$. Thus an unexplained correction is not an invariant refinement.
+\end{corollary}
+
+\section{Replay-complete append-only persistence}
+
+\begin{definition}[Replay-complete journal]
+A journal $\Wset_k=(w_1,\ldots,w_k)$ is replay-complete relative to the fixed datum $\mathfrak F$ when each entry contains sufficient immutable transition data to determine the next state from the preceding state, and there is a fixed deterministic map
+\[
+\operatorname{Replay}(\mathfrak F,\Wset_k)=\Ldg_k.
+\]
+The journal is append-only when $\Wset_k$ is a prefix of $\Wset_{k+1}$ for every $k$.
+\end{definition}
+
+\begin{theorem}[T12: persistence by journal prefixes]
+If the journal is replay-complete and append-only, then for every $0\le j\le n$ the prefix $\Wset_j$ remains uniquely identifiable inside $\Wset_n$ and
+\begin{equation}
+\Ldg_j=\operatorname{Replay}(\mathfrak F,\Wset_j).
+\label{eq:replay}
+\end{equation}
+Consequently every earlier state, event, validation route, and status transition recorded in that prefix is reconstructible from the later journal.
+\end{theorem}
+
+\begin{proof}
+Append-only growth gives the canonical prefix injections
+\[
+\Wset_0\hookrightarrow\Wset_1\hookrightarrow\cdots\hookrightarrow\Wset_n.
+\]
+Hence the first $j$ immutable entries of $\Wset_n$ recover $\Wset_j$ exactly. Replay completeness then determines $\Ldg_j$ uniquely from the fixed datum $\mathfrak F$ and that prefix.
+\end{proof}
+
+\begin{corollary}[Refutation without erasure]
+A later entry may change the active accepted view by recording a typed refutation of an earlier event. Since the earlier journal prefix is not rewritten, both the historical acceptance and the later correction remain reconstructible.
+\end{corollary}
+
+\section{Main persistent-record theorem}
+
+\begin{theorem}[T13: invariant-gated persistent record]
+Assume:
+\begin{enumerate}[label=(\roman*)]
+\item the structured initial datum of T1;
+\item local invariant admissibility as in T2;
+\item external validation as in T3;
+\item exact target determination or explicit completion as in T4--T5;
+\item any declared path-order bound is checked using T6;
+\item formal derivations are admitted only by T7;
+\item mandatory closure is controlled by a positive gate margin as in T8;
+\item fixed-state readiness is evaluated as in T9;
+\item status is assigned by the trichotomy T10;
+\item correction obeys T11; and
+\item state evolution is recorded in a replay-complete append-only journal as in T12.
+\end{enumerate}
+Then the resulting sequence $(\Ldg_k)_{k\ge0}$ is a persistent guarded state record satisfying:
+\begin{enumerate}[label=(\alph*)]
+\item no accepted event is assumed initially;
+\item every committed transition obeys its declared invariant bound;
+\item no candidate can create validity by self-declaration;
+\item no target-changing invisible direction is silently admitted;
+\item any declared curvature bound is explicit in the transition data;
+\item no derivation is admitted without a licensed acyclic route to its exact target;
+\item incomplete mandatory closure cannot commit;
+\item bounded gate disturbance is tolerated at the fixed midpoint threshold whenever $\Delta_\Theta>2\eta$;
+\item wall-clock relabeling preserving causal order does not alter status;
+\item every event is exactly committed, held, or rejected;
+\item lawful refinement preserves the total body-plus-residue object; and
+\item earlier states remain reconstructible from immutable journal prefixes after later correction.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Apply T1 to the initial state. T2 controls invariant drift. T3 separates candidate content from validation. T4 and T5 eliminate or expose target-changing blind directions and bound target support. T6 measures path-order residue. T7 licenses finite derivations. T8 supplies exact all-obligation admission and its perturbation margin. T9 identifies intrinsic fixed-state readiness and supplies the predicate used explicitly in T10. T10 gives a total disjoint status rule. T11 preserves the complete object under refinement, and T12 preserves earlier records. The listed properties follow componentwise.
+\end{proof}
+
+\begin{remark}[Finite scope]
+All linear-algebraic statements above are finite-dimensional unless explicitly stated otherwise. The persistent-record theorem is relative to the declared invariant, observation operator, target, rule set, gate function, and append-only policy. It is a theorem about disciplined state transition, not an oracle for unrestricted truth.
+\end{remark}
+
+\section{Exact finite examples}
+
+The following examples are deliberately small. Their purpose is to expose the theorem wiring without numerical fitting.
+
+\subsection{Target completion}
+With $A(x,y)=x$ and $L(x,y)=y$, the vector $(0,1)$ is invisible to $A$ but changes $L$. The quotient $\mathfrak Q(A,L)$ is one-dimensional. The completed observation $(x,y)$ makes the quotient vanish.
+
+\subsection{Curvature}
+For the matrices in the T6 example, the path-order residue is exactly $(-1/6,1/6)^{\mathsf T}$. Replacing $B$ by a scalar multiple of $A$ gives zero residue.
+
+\subsection{Gate margin}
+For $m=4$ and $S(q)=q_1+q_2+q_3+q_4$, the fully closed state has score $4$ while the largest incomplete score is $3$. Thus $\Delta=1$, any threshold in $(3,4)$ is exact, and every uniform disturbance smaller than $1/2$ preserves a separating threshold.
+
+\subsection{Fixed-state selector}
+For
+\[
+G=\operatorname{diag}(0,i,-2i),
+\]
+the time average in T9 converges to $\operatorname{diag}(1,0,0)$, projecting exactly onto the zero-action coordinate.
+
+\subsection{Refinement}
+If $F=(5,7)$, $M_0=(2,3)$, and $T_0=(3,4)$, then transferring $q_1=(1,2)$ gives $M_1=(3,5)$ and $T_1=(2,2)$; both decompositions sum to $F$ exactly.
+
+\section{Conclusion}
+
+The central point is structural. A persistent record need not be postulated as an external database primitive. In finite form it can be derived from a sequence of independent obligations: an initial admissibility structure, an invariant transition law, external validation, exact target determination, explicit path-order curvature, finite proof admission, an all-obligation gate with a positive margin, an intrinsic fixed-state selector, a complete status trichotomy, exact refinement, and replay-complete append-only persistence. The main theorem is therefore deliberately last. Its content is not a new assumption; it is the intersection of the obligations proved before it.
