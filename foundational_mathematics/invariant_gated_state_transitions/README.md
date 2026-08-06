@@ -7,7 +7,7 @@ This folder contains the mathematics-only foundational paper for guarded state t
 **Invariant-Gated State Transitions: Exact Admission, Curvature, and Persistent Records**  
 Monty Dabas, 2026.
 
-The paper develops the result as a theorem chain rather than as a single system claim:
+The finite guarded-record core develops the result as a theorem chain rather than as a single system claim:
 
 1. structured initial datum;
 2. invariant transition bound;
@@ -23,11 +23,22 @@ The paper develops the result as a theorem chain rather than as a single system 
 12. replay-complete append-only persistence;
 13. persistent-record theorem.
 
+The paper now also contains an arbitrary-Hilbert-space extension of the target-support layer:
+
+14. finite-channel Hilbert-space compression;
+15. minimal target-repair dimension;
+16. strict finite-channel reserve;
+17. projection-defect positivity.
+
+The central extension is deliberately conditional rather than magical: if the target-relevant adverse information factors through `m` channels, the ambient Hilbert-space positivity problem is equivalent to an `m x m` Hermitian certificate. Five dimensions are therefore a five-channel consequence, not a claim that every infinite-dimensional problem reduces to five dimensions.
+
+When the positive source operator is boundedly invertible, the Hermitian compression takes the classical inverse form `B = V* S^{-1} V`; the paper treats this as a Birman-Schwinger/Schur-complement identification of the more general minimum-source-lift theorem.
+
 This directory is intentionally mathematics only. It contains no device architecture, fabrication claim, thermodynamic embodiment, or later-framework terminology.
 
-## Adversarial audit
+## Adversarial audits
 
-The theorem chain has a reproducible hostile-review audit under `audit/`.
+Finite-core audit:
 
 ```bash
 python audit/run_adversarial_audit.py
@@ -42,9 +53,25 @@ exact/random/exhaustive cases = 140448
 false commits = 0
 ```
 
-The audit includes exact rational algebra, exhaustive Boolean status enumeration, randomized exact fixtures, assumption-breaking negative controls, and deliberate mutation controls.
+Hilbert finite-channel extension audit:
 
-The repository workflow `.github/workflows/foundational-math-audit.yml` reruns the adversarial audit whenever this mathematics package changes.
+```bash
+python audit/run_hilbert_extension_audit.py
+```
+
+Pinned status:
+
+```text
+PASS_HILBERT_FINITE_CHANNEL_EXTENSION_AUDIT
+seed = 20260824
+exact/random/exhaustive cases = 41000
+```
+
+Combined adversarial case count: **181448**.
+
+The extension audit checks exact factorization, the inverse-form matrix shadow, positive and negative spectral channels, failure outside the source support, minimal repair rank, sharp reserve witnesses, and positive projection-defect Gram identities.
+
+The existing repository workflow reruns the finite-core adversarial audit whenever this mathematics package changes. The Hilbert extension audit is separately reproducible from the command above and is pinned in `audit/hilbert_extension_result.json`.
 
 ## Build
 

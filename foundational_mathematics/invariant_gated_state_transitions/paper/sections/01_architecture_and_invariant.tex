@@ -12,11 +12,12 @@ The aim is to isolate a minimal mathematical architecture for guarded state chan
 \to\text{proof admission}\to
 \text{gate}\to
 \text{fixed state}\to
-\text{persistent record}
+\text{persistent record}\to
+\text{finite-channel Hilbert extension}
 \end{gathered}}
 \label{eq:chain}
 \end{equation}
-A later object is never used to redefine an earlier one after a defect has been observed.
+A later object is never used to redefine an earlier one after a defect has been observed.  The Hilbert-space extension is placed after the finite record theorem because it strengthens the target-support layer without being needed to define the finite record itself.
 
 \begin{longtable}{p{0.12\textwidth}p{0.35\textwidth}p{0.43\textwidth}}
 \toprule
@@ -34,7 +35,11 @@ T9 & Clock-independent fixed selector & Readiness is intrinsic to the state rath
 T10 & Disjoint status classification & Every typed event is exactly commit, hold, or reject. \\
 T11 & Exact refinement & Valid correction transfers residue without changing the total object. \\
 T12 & Replay-complete append-only persistence & Earlier states remain reconstructible from immutable journal prefixes. \\
-T13 & Persistent-record theorem & The complete record follows from T1--T12. \\
+T13 & Persistent-record theorem & The complete finite record follows from T1--T12. \\
+T14 & Finite-channel Hilbert compression & Infinite ambient positivity is reduced to an $m\times m$ Hermitian certificate when the adverse information has $m$ channels. \\
+T15 & Minimal target-repair dimension & The exact channel count is the target-relevant blind dimension. \\
+T16 & Strict channel reserve & $\beta<1$ yields a quantitative source-relative positivity margin. \\
+T17 & Projection-defect positivity & Orthogonal source completion leaves a positive Gram defect. \\
 \bottomrule
 \end{longtable}
 
