@@ -12,17 +12,29 @@ This repository contains a deployable AI trust-enablement service for hallucinat
 
 ## Break the Formal Proof Gate
 
-The new `formal_proof_challenge/` package is a no-dependency public red-team challenge for finite formal derivations.
+The `formal_proof_challenge/` package is a no-dependency public red-team challenge for finite formal derivations.
 
 ```bash
 python -m formal_proof_challenge.app
 ```
 
-Open `http://127.0.0.1:8081`, load a valid proof, and press **Tamper one step**. The gate checks admitted syntax, declared assumptions, rule licensing, dependency cycles, arithmetic truth, and final-target equality before emitting a deterministic certificate.
+Open `http://127.0.0.1:8081`, load a valid proof, and press **Tamper proof**. The gate checks admitted syntax, declared assumptions, rule licensing, dependency cycles, arithmetic truth, and final-target equality before emitting a deterministic certificate.
+
+FPG2 adds a complete public receipt chain:
+
+```text
+Formal proof certificate
+→ ECL COMMIT / REJECT decision
+→ IEL State(I,E,theta) audit transition
+→ SHA-256 previous-entry and payload binding
+→ tamper and replay verification
+```
+
+Use **Seal public receipt** to append either a valid `COMMIT` or a typed `REJECT` decision. Use **Tamper receipt** to alter one bound field and expose the resulting hash, state-transition, and decision mismatches. Duplicate proof certificates return `REPLAY_REJECTED` without changing the ledger.
 
 A real break is an invalid proof written in the admitted grammar that receives `VALID_PROOF`. Unsupported prose or an unknown rule correctly fails closed as `PARSE_NOT_ADMITTED`.
 
-This challenge does **not** claim to understand unrestricted natural-language mathematics. It certifies closure only inside the declared finite calculus. See [`formal_proof_challenge/README.md`](formal_proof_challenge/README.md).
+This challenge does **not** claim to understand unrestricted natural-language mathematics. The SHA-256 receipt is tamper-evident, not a digital signature, identity proof, trusted timestamp, consensus protocol, or legal notarization. See [`formal_proof_challenge/README.md`](formal_proof_challenge/README.md).
 
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
@@ -74,8 +86,8 @@ from ai_trust_enablement.ecl_commit_adapter import ECLCommitAdapter
 engine = AIHallucinationRecognitionEngine()
 certificate = asdict(engine.evaluate(
     reference_text="The Eiffel Tower is located in Paris. It was completed in 1889.",
-    prompt="Answer using only the supplied context.",
-    answer="The Eiffel Tower is located in Berlin. It was completed in 1789.",
+    prompt_text="Answer using only the supplied context.",
+    answer_text="The Eiffel Tower is located in Berlin. It was completed in 1789.",
 ))
 
 commit = ECLCommitAdapter().commit_certificate(certificate)
@@ -112,7 +124,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
-- `formal_proof_challenge/README.md` - finite formal-proof public challenge.
+- `formal_proof_challenge/README.md` - finite formal-proof public challenge and FPG2 finality receipt chain.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
