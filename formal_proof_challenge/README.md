@@ -89,6 +89,43 @@ receipt hash
 
 The same proof certificate cannot be appended twice. A duplicate attempt returns `REPLAY_REJECTED` without changing the ledger.
 
+## FPG3 hosted red team and external anchor
+
+Hosted mode binds to `0.0.0.0:7860`, exposes health/stats/anchor endpoints, removes local filesystem paths from public responses, and supports a configurable ledger cap and read-only mode.
+
+```bash
+FPG_PUBLIC_MODE=1 \
+FPG_LEDGER_PATH=/data/formal_proof_public_receipts.jsonl \
+python -m formal_proof_challenge.app
+```
+
+Public endpoints:
+
+```text
+/healthz
+/api/config
+/api/stats
+/api/anchor
+```
+
+Build the Docker Space bundle:
+
+```bash
+python formal_proof_challenge/deployment/build_hf_space_bundle.py \
+  --output dist/formal-proof-gate-space
+```
+
+Build and verify an independently publishable ledger checkpoint:
+
+```bash
+python -m formal_proof_challenge.anchor \
+  --ledger outputs/formal-proof-receipts.jsonl \
+  --output latest-anchor.json
+python -m formal_proof_challenge.anchor --verify latest-anchor.json
+```
+
+The external anchor binds the active calculus, ECL policy, IEL invariant, receipt counts, action totals, receipt Merkle root, final IEL state and ledger head. See [`FPG3_PUBLIC_LAUNCH.md`](FPG3_PUBLIC_LAUNCH.md) for the Space, GitHub Pages, Issue Form, persistence, and launch sequence.
+
 ## CLI
 
 Verify a proof:
@@ -130,6 +167,8 @@ python -m formal_proof_challenge.finality \
 ```bash
 python -m unittest tests.test_formal_proof_challenge -v
 python -m unittest tests.test_formal_proof_finality -v
+python -m unittest tests.test_fpg3_anchor -v
+python -m unittest tests.test_fpg3_deployment -v
 ```
 
 ## Certificate boundary
