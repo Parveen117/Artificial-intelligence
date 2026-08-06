@@ -1,0 +1,142 @@
+\section{All-obligation gate}
+
+Let $q=(q_1,\ldots,q_m)\in\{0,1\}^m$ be a finite vector of mandatory closure conditions, and let
+\[
+S_\Theta:\{0,1\}^m\to\R
+\]
+be a fixed accumulated-state function.
+
+\begin{definition}[Gate margin]
+Write $\one=(1,\ldots,1)$ and define
+\begin{equation}
+\Delta_\Theta=S_\Theta(\one)-\max_{q\neq\one}S_\Theta(q).
+\label{eq:margin}
+\end{equation}
+\end{definition}
+
+\begin{theorem}[T8A: exact threshold criterion]
+There exists a scalar threshold $S_{\mathrm{th}}$ for which
+\begin{equation}
+\Gate(q)=\one\{S_\Theta(q)>S_{\mathrm{th}}\}=1
+\quad\Longleftrightarrow\quad q=\one
+\label{eq:gate}
+\end{equation}
+if and only if $\Delta_\Theta>0$. When $\Delta_\Theta>0$, every threshold satisfying
+\begin{equation}
+\max_{q\neq\one}S_\Theta(q)<S_{\mathrm{th}}<S_\Theta(\one)
+\label{eq:threshold}
+\end{equation}
+is exact.
+\end{theorem}
+
+\begin{proof}
+If $\Delta_\Theta>0$, the open interval in \cref{eq:threshold} is nonempty. The all-closed state lies above every threshold in that interval, while every incomplete state lies below it, proving \cref{eq:gate}. Conversely, suppose some threshold accepts exactly $\one$. Then $S_\Theta(\one)>S_{\mathrm{th}}$, whereas $S_\Theta(q)\le S_{\mathrm{th}}$ for every $q\neq\one$. Hence
+\[
+S_\Theta(\one)>\max_{q\neq\one}S_\Theta(q),
+\]
+so $\Delta_\Theta>0$.
+\end{proof}
+
+\begin{theorem}[T8B: fixed-threshold robustness under bounded disturbance]
+Let
+\[
+M_\Theta=\max_{q\neq\one}S_\Theta(q),
+\qquad
+S_{\mathrm{mid}}=\frac{S_\Theta(\one)+M_\Theta}{2},
+\]
+and let $\widetilde S_\Theta$ satisfy
+\begin{equation}
+|\widetilde S_\Theta(q)-S_\Theta(q)|\le\eta
+\qquad\text{for every }q\in\{0,1\}^m.
+\label{eq:disturbance}
+\end{equation}
+If $\Delta_\Theta>2\eta$, then the \emph{same fixed midpoint threshold} $S_{\mathrm{mid}}$ accepts exactly $q=\one$ for every such disturbance.
+\end{theorem}
+
+\begin{proof}
+Since $S_{\mathrm{mid}}=M_\Theta+\Delta_\Theta/2$, every disturbed incomplete score is at most
+\[
+M_\Theta+\eta<S_{\mathrm{mid}}.
+\]
+Likewise every disturbed all-closed score is at least
+\[
+S_\Theta(\one)-\eta
+=M_\Theta+\Delta_\Theta-\eta
+>S_{\mathrm{mid}}.
+\]
+Thus no threshold retuning is required.
+\end{proof}
+
+\begin{example}[A canonical Boolean fixture]
+For $S(q)=\sum_{i=1}^m q_i$, one has
+\[
+S(\one)=m,\qquad \max_{q\neq\one}S(q)=m-1,\qquad \Delta=1.
+\]
+Any $S_{\mathrm{th}}\in(m-1,m)$ admits exactly the all-closed state. The midpoint threshold $m-\tfrac12$ survives every uniform disturbance with $\eta<1/2$.
+\end{example}
+
+\section{Clock-independent fixed-state selection}
+
+Let $G$ be skew-Hermitian on a finite-dimensional complex inner-product space and let
+\begin{equation}
+U_t=e^{tG}.
+\label{eq:flow}
+\end{equation}
+
+\begin{theorem}[T9: fixed-state average]
+The limit
+\begin{equation}
+P_0=\lim_{T\to\infty}\frac1T\int_0^T U_t\,dt
+\label{eq:ergodic-average}
+\end{equation}
+exists and is the orthogonal projection onto $\ker G$. Hence
+\begin{equation}
+P_0x=x\quad\Longleftrightarrow\quad Gx=0.
+\label{eq:fixed}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Since $G$ is skew-Hermitian, it is unitarily diagonalizable with eigenvalues $i\omega_j$, $\omega_j\in\R$. On an eigenvector the average equals
+\[
+\frac1T\int_0^T e^{i\omega_jt}\,dt.
+\]
+It is identically $1$ when $\omega_j=0$ and tends to $0$ otherwise. Thus the limit is precisely the orthogonal projection onto the zero eigenspace.
+\end{proof}
+
+\begin{corollary}[Clock independence]
+Any status rule depending only on causal predecessors, fixed validation maps, gate closure, and the fixed-state condition \cref{eq:fixed} is unchanged by arbitrary alteration of wall-clock labels that preserves causal order.
+\end{corollary}
+
+\section{Disjoint commit, hold, and reject classification}
+
+For each typed event $e$, define four independently evaluated Boolean predicates:
+\begin{align}
+\Str(e)&=1 &&\text{if structural typing and dependency checks pass},\\
+\Val(e)&=1 &&\text{if the invariant condition passes},\\
+\Adm(e)&=1 &&\text{if target determination/support and any proof obligation pass},\\
+\Gate(e)&=1 &&\text{if every mandatory gate condition closes},\\
+\Fix(e)&=1 &&\text{if the state satisfies the fixed-readiness condition of T9}.
+\end{align}
+Define the status rule
+\begin{equation}
+\operatorname{Status}(e)=
+\begin{cases}
+\texttt{REJECT}, & \Str(e)=0\ \text{or}\ \Val(e)=0,\\[2pt]
+\texttt{COMMIT}, & \Str(e)=\Val(e)=\Adm(e)=\Gate(e)=\Fix(e)=1,\\[2pt]
+\texttt{HOLD}, & \Str(e)=\Val(e)=1\ \text{and}\ \Adm(e)\Gate(e)\Fix(e)=0.
+\end{cases}
+\label{eq:status}
+\end{equation}
+
+\begin{theorem}[T10: exact trichotomy]
+Every typed event receives exactly one status in \cref{eq:status}. The three branches are pairwise disjoint and exhaustive.
+\end{theorem}
+
+\begin{proof}
+If $\Str(e)=0$ or $\Val(e)=0$, exactly the first branch applies. Otherwise $\Str(e)=\Val(e)=1$. The product $\Adm(e)\Gate(e)\Fix(e)$ is Boolean, hence is either $1$ or $0$. In the first case the second branch applies; in the second case the third branch applies. No two cases can hold simultaneously.
+\end{proof}
+
+\begin{remark}[Why HOLD is necessary]
+A candidate may be structurally lawful and invariant-admissible while still lacking target support, a proof dependency, another mandatory closure, or fixed-state readiness. Such an event is not committed, but neither must it be erased. HOLD is the mathematically necessary third branch that makes the classification total without confusing incompleteness with contradiction.
+\end{remark}
