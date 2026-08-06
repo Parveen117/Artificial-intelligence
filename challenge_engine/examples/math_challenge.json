@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "challenge_id": "math-demo-001",
+  "package": "math",
+  "mode": "certified",
+  "target": {
+    "statement": "The submitted derivation reaches the declared target using licensed dependencies.",
+    "kind": "proof"
+  },
+  "evidence": [
+    {"id": "proof-object", "type": "derivation", "status": "pass", "formal": true}
+  ],
+  "obligations": [
+    {"id": "structure", "status": "pass"},
+    {"id": "target", "status": "pass"},
+    {"id": "evidence", "status": "pass"},
+    {"id": "dependencies", "status": "pass"}
+  ],
+  "negative_controls": [
+    {"id": "target-mismatch", "status": "pass"},
+    {"id": "cyclic-dependency", "status": "pass"}
+  ],
+  "formal_adapter": {"id": "finite-derivation-v1", "status": "pass"},
+  "burden": {"beta": 0.72, "threshold": 1.0},
+  "completion": {"enabled": true, "finite_upper": 0.83, "completion_error": 0.06, "threshold": 1.0}
+}
