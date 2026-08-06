@@ -22,7 +22,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Run Formal Proof Gate tests
-        run: python -m unittest tests.test_formal_proof_challenge -v
+        run: |
+          python -m unittest tests.test_formal_proof_challenge -v
+          python -m unittest tests.test_formal_proof_finality -v
       - name: Verify valid fixture
         run: python -m formal_proof_challenge.verifier formal_proof_challenge/fixtures/valid_arithmetic.json --output formal-proof-certificate.json
       - name: Verify tamper is rejected
@@ -32,9 +34,64 @@ jobs:
           code=$?
           set -e
           test "$code" -eq 2
+      - name: Seal valid and rejected public receipts
+        run: |
+          python -m formal_proof_challenge.finality formal_proof_challenge/fixtures/valid_arithmetic.json \
+            --ledger formal-proof-public-ledger.jsonl \
+            --output valid-seal-result.json
+          python -m formal_proof_challenge.finality formal_proof_challenge/fixtures/valid_arithmetic.json \
+            --tamper-proof \
+            --ledger formal-proof-public-ledger.jsonl \
+            --output rejected-seal-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for source, target in [
+              ("valid-seal-result.json", "valid-public-receipt.json"),
+              ("rejected-seal-result.json", "rejected-public-receipt.json"),
+          ]:
+              payload = json.loads(Path(source).read_text(encoding="utf-8"))
+              Path(target).write_text(json.dumps(payload["receipt"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+      - name: Verify receipt and ledger
+        run: |
+          python -m formal_proof_challenge.finality --verify-receipt valid-public-receipt.json
+          python -m formal_proof_challenge.finality --verify-receipt rejected-public-receipt.json
+          python -m formal_proof_challenge.finality --ledger formal-proof-public-ledger.jsonl --verify-ledger
+      - name: Verify replay is rejected without append
+        run: |
+          before=$(wc -l < formal-proof-public-ledger.jsonl)
+          set +e
+          python -m formal_proof_challenge.finality formal_proof_challenge/fixtures/valid_arithmetic.json \
+            --ledger formal-proof-public-ledger.jsonl \
+            --output replay-result.json
+          code=$?
+          set -e
+          after=$(wc -l < formal-proof-public-ledger.jsonl)
+          test "$code" -eq 2
+          test "$before" -eq "$after"
+          python - <<'PY'
+          import json
+          assert json.load(open("replay-result.json", encoding="utf-8"))["status"] == "REPLAY_REJECTED"
+          PY
+      - name: Verify receipt tamper is detected
+        run: |
+          python -m formal_proof_challenge.finality --tamper-receipt valid-public-receipt.json --output tampered-public-receipt.json
+          set +e
+          python -m formal_proof_challenge.finality --verify-receipt tampered-public-receipt.json
+          code=$?
+          set -e
+          test "$code" -eq 2
       - uses: actions/upload-artifact@v4
         with:
           name: formal-proof-gate-python-${{ matrix.python-version }}
           path: |
             formal-proof-certificate.json
             formal-proof-tampered-certificate.json
+            valid-seal-result.json
+            rejected-seal-result.json
+            replay-result.json
+            valid-public-receipt.json
+            rejected-public-receipt.json
+            tampered-public-receipt.json
+            formal-proof-public-ledger.jsonl
