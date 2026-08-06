@@ -1,22 +1,22 @@
 {
   "results": {
-    "T14 finite-channel compression / inverse-form shadow": {
+    "H1 finite-channel compression / inverse-form shadow": {
       "status": "PASS",
       "trials": 12000
     },
-    "T14 source-support necessity controls": {
+    "H1 source-support necessity controls": {
       "status": "PASS_NEGATIVE_CONTROL",
       "trials": 1000
     },
-    "T15 minimal target-repair dimension": {
+    "H2 target-repair dimension shadow": {
       "status": "PASS",
       "trials": 8000
     },
-    "T16 strict reserve and sharp top-channel witness": {
+    "H3 strict reserve and sharp top-channel witness": {
       "status": "PASS",
       "trials": 8000
     },
-    "T17 projection-defect positivity / Gram difference": {
+    "H4 projection-defect positivity / Gram difference": {
       "status": "PASS",
       "trials": 12000
     }

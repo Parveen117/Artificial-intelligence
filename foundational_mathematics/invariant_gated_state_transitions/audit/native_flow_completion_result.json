@@ -1,0 +1,55 @@
+{
+  "results": {
+    "Static theorem and term contracts": {
+      "status": "PASS",
+      "trials": 8
+    },
+    "T14 positive-form quotient/descended-map fixtures": {
+      "status": "PASS",
+      "trials": 5000
+    },
+    "T14 null-direction necessity controls": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 1000
+    },
+    "T15 bilateral flow / jet parity / exact nilpotent reconstruction": {
+      "status": "PASS",
+      "trials": 8000
+    },
+    "T15 wrong-involution bilateral controls": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 1000
+    },
+    "T16 operator-limit Gram error bounds": {
+      "status": "PASS",
+      "trials": 8000
+    },
+    "T17 no-hidden-memory convergence fixtures": {
+      "status": "PASS",
+      "trials": 6000
+    },
+    "T17 nonvanishing-faithfulness controls": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 1000
+    },
+    "T18 variational minimal-observer tail": {
+      "status": "PASS",
+      "trials": 6000
+    },
+    "T19 inertia / kernel / normalized margin": {
+      "status": "PASS",
+      "trials": 10000
+    },
+    "T20 outward finite promotion": {
+      "status": "PASS",
+      "trials": 8000
+    },
+    "T20 fixed-matrix-without-completion-error controls": {
+      "status": "PASS_NEGATIVE_CONTROL",
+      "trials": 1000
+    }
+  },
+  "seed": 20260825,
+  "status": "PASS_NATIVE_FLOW_COMPLETION_AUDIT",
+  "total_trials_or_exact_cases": 55008
+}

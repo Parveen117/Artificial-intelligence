@@ -1,7 +1,7 @@
 \subsection{Representation covariance of the finite certificate}
 
 \begin{corollary}[Unitary covariance]
-In the setting of T14, let $U:\mathcal H\to\mathcal H$ and $Q:\C^m\to\C^m$ be unitary.  Define
+In the finite-channel Hilbert compression corollary, let $U:\mathcal H\to\mathcal H$ and $Q:\C^m\to\C^m$ be unitary. Define
 \[
 S'=USU^*,
 \qquad
@@ -13,14 +13,14 @@ C'=UCQ,
 \]
 and the corresponding Hermitian compression is
 \begin{equation}
-B'=(C')^*C'=Q^*BQ.
+B_C'=(C')^*C'=Q^*B_CQ.
 \label{eq:compression-covariance}
 \end{equation}
-Consequently the spectrum of $B$, its largest eigenvalue, its threshold multiplicities, and every decision depending only on its unitary similarity class are independent of the ambient Hilbert-space representation and of the orthonormal channel labels.
+Consequently the spectrum of $B_C$, its largest eigenvalue, its threshold multiplicities, and every decision depending only on its unitary similarity class are independent of the ambient Hilbert-space representation and of the orthonormal channel labels.
 \end{corollary}
 
 \begin{proof}
-Functional calculus gives $(S')^{1/2}=US^{1/2}U^*$.  Hence
+Functional calculus gives $(S')^{1/2}=US^{1/2}U^*$. Hence
 \[
 (S')^{1/2}C'
 =US^{1/2}U^*UCQ
@@ -28,9 +28,9 @@ Functional calculus gives $(S')^{1/2}=US^{1/2}U^*$.  Hence
 =UVQ
 =V'.
 \]
-Moreover $UCQ$ takes values in $(\ker S')^\perp=U(\ker S)^\perp$, so uniqueness of the minimum source lift gives $C'=UCQ$.  The identity \cref{eq:compression-covariance} follows immediately.
+Moreover $UCQ$ takes values in $(\ker S')^\perp=U(\ker S)^\perp$, so uniqueness of the minimum source lift gives $C'=UCQ$. The identity \cref{eq:compression-covariance} follows immediately.
 \end{proof}
 
 \begin{remark}
-This covariance is why the finite Hermitian matrix is a certificate of the finite target-relevant obstruction rather than an artifact of one coordinate chart.  The special case $m=5$ remains five-dimensional after any unitary change of the ambient carrier, but no fixed value of $m$ is asserted when the target-relevant defect rank changes.
+This covariance is why the terminal finite Hermitian matrix is a certificate of the target-relevant obstruction rather than an artifact of one coordinate chart. If the variational observer theorem yields rank five, the certificate remains five-dimensional under every unitary change of the completed carrier, but no fixed matrix size is asserted when the target-relevant memory rank changes.
 \end{remark}
