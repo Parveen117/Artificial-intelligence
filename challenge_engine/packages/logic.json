@@ -1,0 +1,14 @@
+{
+  "package": "logic",
+  "version": "1.0",
+  "description": "Structured logical-derivation challenge package.",
+  "default_mode": "adversarial",
+  "allowed_modes": ["exploratory", "adversarial", "certified"],
+  "requires_authorization": false,
+  "certification_requires_formal_adapter": true,
+  "required_obligations": {
+    "exploratory": ["structure", "target"],
+    "adversarial": ["structure", "target", "evidence"],
+    "certified": ["structure", "target", "evidence", "dependencies"]
+  }
+}
