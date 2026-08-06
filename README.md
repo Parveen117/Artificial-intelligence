@@ -36,6 +36,8 @@ A real break is an invalid proof written in the admitted grammar that receives `
 
 This challenge does **not** claim to understand unrestricted natural-language mathematics. The SHA-256 receipt is tamper-evident, not a digital signature, identity proof, trusted timestamp, consensus protocol, or legal notarization. See [`formal_proof_challenge/README.md`](formal_proof_challenge/README.md).
 
+FPG3 adds hosted deployment, a formal red-team Issue Form, `/healthz`, `/api/stats`, `/api/anchor`, a self-contained Docker Space bundle, and a GitHub Pages workflow that can publish the latest verified ledger-head checkpoint. See [`formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md`](formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md).
+
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 - deterministic AI answer evaluation from context, prompt, and answer,
@@ -125,6 +127,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 ## Documentation
 
 - `formal_proof_challenge/README.md` - finite formal-proof public challenge and FPG2 finality receipt chain.
+- `formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md` - hosted red-team, Docker Space, Issue Form, and external-anchor launch guide.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
