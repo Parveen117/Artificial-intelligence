@@ -1,13 +1,13 @@
 # Foundational Mathematics: Invariant-Gated State Transitions
 
-This folder contains the mathematics-only foundational paper for guarded state transitions and persistent state records.
+This folder contains the mathematics-only foundational paper for guarded state transitions, target-faithful completion, and persistent state records.
 
 ## Paper
 
-**Invariant-Gated State Transitions: Exact Admission, Curvature, and Persistent Records**  
+**Invariant-Gated State Transitions: Exact Admission, Flow Completion, Curvature, and Persistent Records**  
 Monty Dabas, 2026.
 
-The finite guarded-record core develops the result as a theorem chain rather than as a single system claim:
+The finite guarded-record core is theorem driven:
 
 1. structured initial datum;
 2. invariant transition bound;
@@ -23,18 +23,48 @@ The finite guarded-record core develops the result as a theorem chain rather tha
 12. replay-complete append-only persistence;
 13. persistent-record theorem.
 
-The paper now also contains an arbitrary-Hilbert-space extension of the target-support layer:
+The stronger finite-to-infinite spine is downstream of that core:
 
-14. finite-channel Hilbert-space compression;
-15. minimal target-repair dimension;
-16. strict finite-channel reserve;
-17. projection-defect positivity.
+14. positive-form carrier completion;
+15. involution-graded bilateral flow and observer jets;
+16. corrected transported finite-to-infinite operator completion with explicit error bounds;
+17. no-hidden-memory completion from a vanishing faithfulness residual;
+18. variationally minimal faithful observer rank and Hilbert-Schmidt tail;
+19. exact infinite-to-finite inertia, kernel, and normalized margin;
+20. outward finite promotion using both the finite matrix top and a proved completion error.
 
-The central extension is deliberately conditional rather than magical: if the target-relevant adverse information factors through `m` channels, the ambient Hilbert-space positivity problem is equivalent to an `m x m` Hermitian certificate. Five dimensions are therefore a five-channel consequence, not a claim that every infinite-dimensional problem reduces to five dimensions.
+The key logical order is:
 
-When the positive source operator is boundedly invertible, the Hermitian compression takes the classical inverse form `B = V* S^{-1} V`; the paper treats this as a Birman-Schwinger/Schur-complement identification of the more general minimum-source-lift theorem.
+```text
+positive form
+-> completed carrier
+-> bilateral exponential flow
+-> observer jets
+-> transported finite packets
+-> operator-norm completion
+-> target-faithful finite memory
+-> variationally minimal observer
+-> finite Hermitian obstruction
+-> beta < 1 reserve
+```
 
-This directory is intentionally mathematics only. It contains no device architecture, fabrication claim, thermodynamic embodiment, or later-framework terminology.
+The ambient carrier may be infinite-dimensional. A finite certificate is allowed only after the target-relevant adverse information has been proved to lie in a finite observer range. The matrix size is therefore determined by the target-relevant obstruction rank, not by arbitrary truncation.
+
+The earlier Hilbert finite-channel formula is retained as a representation corollary. When a positive source `S` and a finite channel map `V` already satisfy `V = S^(1/2) C`, one has
+
+```text
+S - V V* >= 0  <=>  C* C <= I.
+```
+
+When `S` is boundedly invertible this becomes the familiar inverse form
+
+```text
+B = V* S^(-1) V.
+```
+
+The paper treats that matrix as downstream of completion and observer derivation, not as a device for guessing the correct finite dimension.
+
+This directory is intentionally mathematics only. It contains no device architecture, fabrication claim, thermodynamic embodiment, domain-specific terminal problem, or later-framework naming.
 
 ## Adversarial audits
 
@@ -44,34 +74,42 @@ Finite-core audit:
 python audit/run_adversarial_audit.py
 ```
 
-Pinned status:
-
 ```text
 PASS_FOUNDATIONAL_MATH_ADVERSARIAL_AUDIT
 seed = 20260807
-exact/random/exhaustive cases = 140448
+cases = 140448
 false commits = 0
 ```
 
-Hilbert finite-channel extension audit:
+Hilbert representation audit:
 
 ```bash
 python audit/run_hilbert_extension_audit.py
 ```
 
-Pinned status:
-
 ```text
 PASS_HILBERT_FINITE_CHANNEL_EXTENSION_AUDIT
 seed = 20260824
-exact/random/exhaustive cases = 41000
+cases = 41000
 ```
 
-Combined adversarial case count: **181448**.
+Native flow-completion audit:
 
-The extension audit checks exact factorization, the inverse-form matrix shadow, positive and negative spectral channels, failure outside the source support, minimal repair rank, sharp reserve witnesses, and positive projection-defect Gram identities.
+```bash
+python audit/run_native_flow_completion_audit.py
+```
 
-The existing repository workflow reruns the finite-core adversarial audit whenever this mathematics package changes. The Hilbert extension audit is separately reproducible from the command above and is pinned in `audit/hilbert_extension_result.json`.
+```text
+PASS_NATIVE_FLOW_COMPLETION_AUDIT
+seed = 20260825
+cases = 55008
+```
+
+Combined reproducible adversarial case count: **236456**.
+
+The native audit includes null-direction controls, wrong-involution controls, exact nilpotent bilateral flows, operator-limit Gram error bounds, persistent hidden-memory controls, variational observer tails, exact inertia/kernel/margin fixtures, and finite-top-without-completion-error counterexamples.
+
+The repository workflow `.github/workflows/foundational-math-audit.yml` runs all three audit families when this mathematics package changes.
 
 ## Build
 
