@@ -44,6 +44,8 @@ false commits = 0
 
 The audit includes exact rational algebra, exhaustive Boolean status enumeration, randomized exact fixtures, assumption-breaking negative controls, and deliberate mutation controls.
 
+The repository workflow `.github/workflows/foundational-math-audit.yml` reruns the adversarial audit whenever this mathematics package changes.
+
 ## Build
 
 ```bash
