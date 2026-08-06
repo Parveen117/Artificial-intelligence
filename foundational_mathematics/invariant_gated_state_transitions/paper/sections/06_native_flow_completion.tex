@@ -1,0 +1,340 @@
+\section{Derived carrier, bilateral flow, and recognition-complete limits}
+
+The finite state-transition core above was intentionally elementary. We now isolate the stronger operator-theoretic route needed when finite observations approximate a potentially infinite ambient problem. The order of construction matters: the positive carrier is completed first, the bilateral flow and its observer jets are then generated, finite packets are transported to one common carrier, target-relevant memory is completed, the minimum faithful observer is derived, and only at the end is a finite Hermitian obstruction matrix formed.
+
+\subsection{Positive-form completion}
+
+Let $\mathcal D$ be a complex vector space equipped with a positive semidefinite Hermitian form $q$. Define the null space
+\[
+\mathcal N_q=\{x\in\mathcal D:q(x,x)=0\}.
+\]
+
+\begin{theorem}[T14: positive-form carrier completion]
+The quotient $\mathcal D/\mathcal N_q$ carries the inner product
+\[
+\langle [x],[y]\rangle_q=q(x,y),
+\]
+and its completion is a Hilbert space $\mathcal H_q$. Every linear map $T:\mathcal D\to\mathcal Y$ satisfying
+\[
+\|Tx\|\le C\,q(x,x)^{1/2}
+\]
+vanishes on $\mathcal N_q$, descends uniquely to $\mathcal D/\mathcal N_q$, and extends uniquely to a bounded operator $\overline T:\mathcal H_q\to\mathcal Y$ with $\|\overline T\|\le C$.
+\end{theorem}
+
+\begin{proof}
+Cauchy--Schwarz for positive semidefinite Hermitian forms implies $q(x,y)=0$ whenever $x\in\mathcal N_q$, so the quotient inner product is well defined and positive definite. Completion gives $\mathcal H_q$. The stated bound forces $Tx=0$ on $\mathcal N_q$, so $T$ descends to the quotient and is bounded there. The continuous extension to the completion is unique.
+\end{proof}
+
+\begin{remark}[Role of Hilbert space]
+The Hilbert carrier used below is therefore a completed representation of a declared positive form. It is not required as an unexplained primitive datum.
+\end{remark}
+
+\subsection{Involution-graded bilateral flow and observer jets}
+
+Let $J=J^*=J^{-1}$ on $\mathcal H_q$ and let $G\in\mathcal B(\mathcal H_q)$. Put
+\[
+G_{\mathrm e}=\frac12(G+JGJ),\qquad
+G_{\mathrm o}=\frac12(G-JGJ),
+\]
+so $G=G_{\mathrm e}+G_{\mathrm o}$, $JG_{\mathrm e}J=G_{\mathrm e}$ and $JG_{\mathrm o}J=-G_{\mathrm o}$. Let
+\[
+U_t=e^{tG}.
+\]
+For a bounded observer $B:\mathcal H_q\to\mathcal Y$, define the observer jets
+\[
+\Lambda_k=BG^k,
+\qquad
+\mathcal A_Nx=(\Lambda_0x,\ldots,\Lambda_Nx).
+\]
+
+\begin{theorem}[T15: bilateral flow and monotone observer-jet recognition]
+Assume $JGJ=-G$ and $BJ=B$. Then
+\[
+JU_tJ=U_{-t},
+\qquad
+\Lambda_kJ=(-1)^k\Lambda_k.
+\]
+Moreover, for every $N\ge0$ and $t\ge0$,
+\[
+BU_t=
+\sum_{k=0}^{N}\frac{t^k}{k!}\Lambda_k+R_{N+1}(t),
+\]
+where
+\[
+R_{N+1}(t)=\frac1{N!}\int_0^t(t-s)^NBG^{N+1}U_s\,ds
+\]
+and
+\[
+\|R_{N+1}(t)\|
+\le
+\frac{t^{N+1}}{(N+1)!}\|B\|\,\|G\|^{N+1}e^{t\|G\|}.
+\]
+Finally,
+\[
+\ker\mathcal A_{N+1}\subseteq\ker\mathcal A_N.
+\]
+For a target $L$, the first recognition order
+\[
+\nu(L)=\inf\{N:\ker\mathcal A_N\subseteq\ker L\}
+\]
+is therefore well defined whenever some finite jet tower determines $L$.
+\end{theorem}
+
+\begin{proof}
+Functional calculus gives $JU_tJ=e^{tJGJ}=e^{-tG}=U_{-t}$. From $GJ=-JG$ one gets $G^kJ=(-1)^kJG^k$, and multiplication by $B$ with $BJ=B$ gives the jet parity. The expansion and remainder are the bounded-operator Taylor formula followed by left composition with $B$. The kernel inclusion holds because $\mathcal A_{N+1}$ contains all components of $\mathcal A_N$ plus one additional component.
+\end{proof}
+
+\begin{corollary}[Exact finite reconstruction]
+If $G^{d+1}=0$, then $R_{d+1}(t)=0$ and the order-$d$ jet reconstructs $BU_t$ exactly.
+\end{corollary}
+
+\subsection{Recognition-complete finite-to-infinite passage}
+
+Let $\mathcal H$ and $\mathcal K$ be Hilbert spaces obtained after the positive-form completion of T14. Suppose every finite packet has first been transported, by declared isometries, to the same recovered carrier. After that transport let
+\[
+Z_n:\mathcal H\to\mathcal K,
+\qquad
+P_n=P_n^*=P_n^2,
+\qquad
+Q_n=I-P_n,
+\]
+and define
+\[
+Y_n=P_nZ_n,
+\qquad
+M_n=Q_nZ_n.
+\]
+Let $C_n^{\rm rec},C_n^{\rm mem}$ be predeclared corrections and write
+\[
+\widetilde Y_n=Y_n+C_n^{\rm rec},
+\qquad
+\widetilde M_n=M_n+C_n^{\rm mem}.
+\]
+Assume that there are bounded limits $Y,M$ and outward error bounds
+\[
+\|Y-\widetilde Y_n\|\le\delta_n^{\rm rec},
+\qquad
+\|M-\widetilde M_n\|\le\delta_n^{\rm mem},
+\qquad
+\delta_n^{\rm rec}+\delta_n^{\rm mem}\to0.
+\]
+Define
+\[
+R_n=\widetilde Y_n^*\widetilde Y_n,
+\qquad
+D_n=\widetilde M_n^*\widetilde M_n,
+\qquad
+F_n=R_n-D_n,
+\]
+and $R=Y^*Y$, $D=M^*M$, $F=R-D$.
+
+\begin{theorem}[T16: recognition-complete operator limit]
+Under the preceding hypotheses,
+\[
+R_n\to R,\qquad D_n\to D,\qquad F_n\to F
+\]
+in operator norm. Quantitatively,
+\[
+\|R-R_n\|
+\le(\|Y\|+\|\widetilde Y_n\|)\delta_n^{\rm rec},
+\]
+\[
+\|D-D_n\|
+\le(\|M\|+\|\widetilde M_n\|)\delta_n^{\rm mem},
+\]
+and
+\[
+\|F-F_n\|
+\le(\|Y\|+\|\widetilde Y_n\|)\delta_n^{\rm rec}
+ +(\|M\|+\|\widetilde M_n\|)\delta_n^{\rm mem}.
+\]
+\end{theorem}
+
+\begin{proof}
+For bounded operators $A,B$,
+\[
+\|A^*A-B^*B\|
+\le(\|A\|+\|B\|)\|A-B\|.
+\]
+Apply this to $(Y,\widetilde Y_n)$ and $(M,\widetilde M_n)$ and then use the triangle inequality for the signed difference.
+\end{proof}
+
+\subsection{No-hidden-memory completion}
+
+Let $T_n:\mathcal K\to\C^\nu$ be coisometries,
+\[
+T_nT_n^*=I_\nu,
+\]
+with one fixed label orientation, and assume $T_n\to T$ in operator norm. Define the faithfulness residual
+\[
+\varepsilon_n^{\rm faith}
+=\|(I-T_n^*T_n)\widetilde M_n\|.
+\]
+
+\begin{theorem}[T17: no-hidden-memory completion]
+If $\varepsilon_n^{\rm faith}\to0$, then
+\[
+M=T^*TM.
+\]
+Consequently
+\[
+\overline{\operatorname{Ran}M}\subseteq\operatorname{Ran}T^*,
+\qquad
+\operatorname{rank}M\le\nu.
+\]
+Thus a finite target-relevant obstruction rank is a conclusion of the completion hypotheses, not an assumption about the ambient Hilbert dimension.
+\end{theorem}
+
+\begin{proof}
+Write
+\[
+(I-T^*T)M
+=(I-T^*T)(M-\widetilde M_n)
+ +(T_n^*T_n-T^*T)\widetilde M_n
+ +(I-T_n^*T_n)\widetilde M_n.
+\]
+The first term tends to zero by T16, the second because $T_n\to T$ and $(\widetilde M_n)$ is bounded, and the third by the faithfulness hypothesis. Hence $(I-T^*T)M=0$.
+\end{proof}
+
+\subsection{Variationally minimal faithful observer}
+
+For a bounded memory lift $M:\mathcal H\to\mathcal K$ and an orthogonal projection $P$ on $\mathcal K$, define
+\[
+\mathfrak a_\infty(P;M)=\|(I-P)M\|^2.
+\]
+If $M$ is Hilbert--Schmidt, also define
+\[
+\mathfrak a_2(P;M)=\|(I-P)M\|_{\rm HS}^2.
+\]
+
+\begin{theorem}[T18: minimal observer and variational tail]
+Let
+\[
+r=\dim\overline{\operatorname{Ran}M}<\infty.
+\]
+Then the minimum rank of an orthogonal observer projection $P$ satisfying
+\[
+\mathfrak a_\infty(P;M)=0
+\]
+is exactly $r$.
+
+If $M$ is compact Hilbert--Schmidt with singular values
+\[
+s_1(M)\ge s_2(M)\ge\cdots\ge0,
+\]
+then for every $\nu\ge0$,
+\[
+\inf_{\operatorname{rank}P=\nu}
+\mathfrak a_2(P;M)
+=\sum_{j>\nu}s_j(M)^2.
+\]
+A minimizer projects onto the first $\nu$ left singular directions. In particular, the minimum is zero exactly when $\operatorname{rank}M\le\nu$.
+\end{theorem}
+
+\begin{proof}
+Zero action is equivalent to $(I-P)M=0$, hence $\overline{\operatorname{Ran}M}\subseteq\operatorname{Ran}P$; this forces $\operatorname{rank}P\ge r$, and projection onto $\overline{\operatorname{Ran}M}$ attains rank $r$. For the Hilbert--Schmidt statement, let $G=MM^*$. Then
+\[
+\mathfrak a_2(P;M)
+=\operatorname{Tr}G-\operatorname{Tr}(PG).
+\]
+Ky Fan's maximum principle maximizes $\operatorname{Tr}(PG)$ over rank-$\nu$ projections by selecting the top $\nu$ eigenvalues $s_j(M)^2$, giving the displayed tail sum.
+\end{proof}
+
+\subsection{Exact finite obstruction and outward certificate}
+
+Assume now that T17 holds, put
+\[
+A=TM:\mathcal H\to\C^\nu,
+\qquad
+F=R-A^*A,
+\]
+and suppose the recognized reference has a uniform floor
+\[
+R\succeq mI,
+\qquad m>0.
+\]
+Define
+\[
+B=AR^{-1}A^*\in M_\nu(\C).
+\]
+For finite approximants let
+\[
+A_n=T_n\widetilde M_n,
+\qquad
+R_n\succeq mI,
+\qquad
+B_n=A_nR_n^{-1}A_n^*.
+\]
+
+\begin{theorem}[T19: exact infinite-to-finite inertia and margin]
+The infinite signed form $F$ and the finite Hermitian matrix $B$ satisfy
+\[
+N_-(F)=N_+(B-I_\nu),
+\]
+\[
+\dim\ker F=\dim\ker(I_\nu-B),
+\]
+and
+\[
+\inf_{x\ne0}
+\frac{\langle x,Fx\rangle}{\langle x,Rx\rangle}
+=\lambda_{\min}(I_\nu-B)
+=1-\lambda_{\max}(B).
+\]
+Therefore
+\[
+F\succeq0
+\iff
+\lambda_{\max}(B)\le1,
+\]
+and if $\beta:=\lambda_{\max}(B)<1$, then
+\[
+F\succeq(1-\beta)R.
+\]
+\end{theorem}
+
+\begin{proof}
+Let $C=AR^{-1/2}$. Congruence by $R^{-1/2}$ gives
+\[
+R^{-1/2}FR^{-1/2}=I-C^*C,
+\qquad
+B=CC^*.
+\]
+The nonzero spectra of $C^*C$ and $CC^*$ agree with multiplicity. Since $C$ has rank at most $\nu$, the spectral subspace of $I-C^*C$ below zero corresponds exactly to eigenvalues of $B$ above one, and its kernel corresponds to eigenvalue one. The Rayleigh quotient becomes the Rayleigh quotient of $I-C^*C$ after the change of variable $y=R^{1/2}x$, whose infimum is $1-\|C\|^2=1-\lambda_{\max}(B)$. The strict reserve follows immediately.
+\end{proof}
+
+\begin{theorem}[T20: finite matrix convergence and outward promotion]
+The finite matrices satisfy
+\[
+\|B_n-B\|
+\le
+m^{-1}(\|A_n\|+\|A\|)\|A_n-A\|
++m^{-2}\|A\|\,\|A_n\|\,\|R_n-R\|.
+\]
+If $u_n$ is an outward upper bound for $\lambda_{\max}(B_n)$ and $e_n$ is an outward upper bound for $\|B-B_n\|$, then
+\[
+\lambda_{\max}(B)\le u_n+e_n.
+\]
+Hence the strict finite certificate
+\[
+\boxed{u_n+e_n<1}
+\]
+implies
+\[
+F\succeq\bigl(1-u_n-e_n\bigr)R>0.
+\]
+A finite matrix top without the completion error $e_n$ is not, by itself, a certificate for the limiting operator.
+\end{theorem}
+
+\begin{proof}
+Use $\|R_n^{-1}\|,\|R^{-1}\|\le m^{-1}$ and the resolvent identity
+\[
+\|R_n^{-1}-R^{-1}\|
+\le m^{-2}\|R_n-R\|.
+\]
+Expand $B_n-B$ by adding and subtracting $AR_n^{-1}A_n^*$ and $AR^{-1}A_n^*$, then apply the triangle inequality. Weyl's norm bound gives $\lambda_{\max}(B)\le\lambda_{\max}(B_n)+\|B-B_n\|$. T19 converts the resulting strict upper bound into the source-relative positivity reserve.
+\end{proof}
+
+\begin{remark}[What is and is not finite]
+The ambient carrier may be infinite-dimensional. Finite certification occurs only after three separate obligations close: operator-norm completion of the transported packets, vanishing target-faithfulness residual, and finite target-relevant memory rank. The matrix dimension is therefore determined by the recognized adverse information, not by an arbitrary truncation.
+\end{remark}
