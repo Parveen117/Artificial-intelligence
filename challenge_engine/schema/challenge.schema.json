@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/challenge-engine/challenge.schema.json",
+  "title": "Challenge Engine Input",
+  "type": "object",
+  "required": ["challenge_id", "target"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "challenge_id": {"type": "string", "minLength": 1},
+    "package": {"type": "string", "default": "math"},
+    "mode": {"type": "string", "enum": ["exploratory", "adversarial", "certified"]},
+    "target": {
+      "type": "object",
+      "required": ["statement"],
+      "properties": {
+        "statement": {"type": "string", "minLength": 1},
+        "kind": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "scope": {"type": "object", "additionalProperties": true},
+    "evidence": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "properties": {
+          "id": {"type": "string"},
+          "status": {"enum": ["pass", "fail", "open"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "negative_controls": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+    "formal_adapter": {"type": "object", "additionalProperties": true},
+    "flow": {"type": "object", "additionalProperties": true},
+    "burden": {"type": "object", "additionalProperties": true},
+    "completion": {"type": "object", "additionalProperties": true}
+  },
+  "additionalProperties": true
+}
