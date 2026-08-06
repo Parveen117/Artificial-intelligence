@@ -57,3 +57,8 @@ formal-proof-public-ledger.jsonl
 *-public-receipt.json
 *-seal-result.json
 replay-result.json
+
+# FPG3 deployment and anchor build outputs
+dist/formal-proof-gate-space/
+latest-anchor.json
+_site/
