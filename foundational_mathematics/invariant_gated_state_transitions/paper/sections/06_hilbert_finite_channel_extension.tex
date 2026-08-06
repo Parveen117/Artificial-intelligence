@@ -1,239 +1,139 @@
-\section{Hilbert-space finite-channel extension}
+\section{Hilbert representation corollaries}
 
-The preceding target-support results were stated in finite dimension because the guarded-record construction itself was developed there.  The positivity mechanism does not require a finite-dimensional ambient state space.  This section isolates the exact hypothesis under which an arbitrary Hilbert-space sign problem is decided by a finite Hermitian certificate.
+The preceding section is the primary finite-to-infinite theorem spine.  This section retains the earlier Hilbert-space compression result as a downstream representation corollary.  It is useful when a finite adverse channel map is already known, but it does not replace the completion and faithfulness obligations of T16--T18.
 
-\subsection{Finite-channel Hermitian compression}
+\subsection{Finite-channel factorization corollary}
 
-Let $\mathcal H$ be a complex Hilbert space, possibly infinite-dimensional.  Let $S\in\mathcal B(\mathcal H)$ satisfy $S=S^*\succeq0$, and let
+Let $\mathcal H$ be a Hilbert space, let $S=S^*\succeq0$ be bounded, and let
 \[
-V:\C^m\longrightarrow\mathcal H
+V:\C^m\to\mathcal H
 \]
-be bounded.  Assume the finite-channel perturbation lies in the source support,
-\begin{equation}
+be bounded with
+\[
 \operatorname{Ran}V\subseteq\operatorname{Ran}S^{1/2}.
-\label{eq:source-support}
-\end{equation}
-For each column of $V$, choose its unique minimum-norm preimage under $S^{1/2}$.  Equivalently, there is a unique operator
-\begin{equation}
-C:\C^m\longrightarrow(\ker S)^\perp
-\qquad\text{such that}\qquad
-V=S^{1/2}C.
-\label{eq:minimal-lift}
-\end{equation}
-Define the finite Hermitian compression
-\begin{equation}
-B=C^*C\in M_m(\C).
-\label{eq:finite-hermitian-compression}
-\end{equation}
+\]
+Let $C:\C^m\to(\ker S)^\perp$ be the unique minimum-norm source lift satisfying
+\[
+V=S^{1/2}C,
+\]
+and set
+\[
+B_C=C^*C\in M_m(\C).
+\]
 
-\begin{theorem}[T14: finite-channel Hilbert-space compression]
-Under \cref{eq:source-support}--\cref{eq:finite-hermitian-compression}, the following are equivalent:
-\begin{equation}
+\begin{corollary}[Finite-channel Hilbert compression]
+The following are equivalent:
+\[
 S-VV^*\succeq0,
 \qquad
-B\preceq I_m,
+B_C\preceq I_m,
 \qquad
-\lambda_{\max}(B)\le1.
-\label{eq:t14-equivalence}
-\end{equation}
-Thus the ambient space $\mathcal H$ may be infinite-dimensional while the sign decision is carried by the $m\times m$ Hermitian matrix $B$.
-\end{theorem}
+\lambda_{\max}(B_C)\le1.
+\]
+If $\beta_C=\lambda_{\max}(B_C)<1$, then
+\[
+S-VV^*\succeq(1-\beta_C)S.
+\]
+More generally,
+\[
+S-VV^*\succeq\delta S
+\iff
+B_C\preceq(1-\delta)I_m
+\qquad(0\le\delta\le1).
+\]
+\end{corollary}
 
 \begin{proof}
-From $V=S^{1/2}C$,
-\begin{equation}
-S-VV^*=S^{1/2}(I-CC^*)S^{1/2}.
-\label{eq:t14-factor}
-\end{equation}
-If $C^*C\preceq I_m$, then $\|C\|\le1$, hence $CC^*\preceq I$ and \cref{eq:t14-factor} is nonnegative.
-
-Conversely, suppose $S-VV^*\succeq0$.  For every $x\in\mathcal H$,
+The factorization
 \[
-\|C^*S^{1/2}x\|^2
-=\|V^*x\|^2
-\le \langle Sx,x\rangle
-=\|S^{1/2}x\|^2.
+S-VV^*=S^{1/2}(I-CC^*)S^{1/2}
 \]
-Hence $C^*$ is contractive on $\operatorname{Ran}S^{1/2}$, and therefore on its closure.  Since $\operatorname{Ran}C\subseteq(\ker S)^\perp=\overline{\operatorname{Ran}S^{1/2}}$, the operator $C^*$ vanishes on the orthogonal complement of that closure.  Thus $\|C\|\le1$, so $C^*C\preceq I_m$.  The last equivalence follows because $B$ is finite-dimensional Hermitian.
+reduces the claim to contractivity of $C$.  The nonzero spectra of $CC^*$ and $C^*C$ agree.  The reserve statement follows from $CC^*\preceq\beta_C I$.
 \end{proof}
 
 \begin{corollary}[Strictly positive source form]
 If $S\succeq cI$ for some $c>0$, then
-\begin{equation}
+\[
 C=S^{-1/2}V,
 \qquad
-B=V^*S^{-1}V,
-\label{eq:inverse-form}
-\end{equation}
-and \cref{eq:t14-equivalence} becomes
+B_C=V^*S^{-1}V,
+\]
+so
 \[
 S-VV^*\succeq0
-\quad\Longleftrightarrow\quad
+\iff
 V^*S^{-1}V\preceq I_m.
 \]
 \end{corollary}
 
-\begin{remark}[Classical identification]
-The matrix in \cref{eq:inverse-form} is the familiar finite Birman--Schwinger/Schur-complement form.  The theorem is stated through the minimum source lift $C$ because that formulation remains valid when $S$ has a nontrivial kernel and no bounded inverse exists.
+\begin{remark}[Classical matrix form]
+The matrix $V^*S^{-1}V$ is the familiar finite Birman--Schwinger/Schur-complement form.  In the present paper it is downstream of source completion and target-faithful observer construction rather than the object from which the observer dimension is guessed.
 \end{remark}
 
-\begin{corollary}[Five-channel consequence]
-For $m=5$, the global operator inequality on $\mathcal H$ is equivalent to the five-dimensional certificate
-\[
-\lambda_{\max}(B)\le1,
-\qquad B\in M_5(\C).
-\]
-The number five is a channel count, not a claim that the ambient Hilbert space is five-dimensional.
-\end{corollary}
-
-\subsection{Minimal target-repair dimension}
-
-Let $A:\mathcal H\to\mathcal Y$ and $L:\mathcal H\to\mathcal Z$ be bounded maps between Hilbert spaces.  Put
-\[
-N=\ker A,
-\qquad
-N_0=\ker A\cap\ker L,
-\qquad
-\mathfrak Q(A,L)=N/N_0.
-\]
-Assume
-\begin{equation}
-r=\dim\mathfrak Q(A,L)<\infty.
-\label{eq:defect-rank-r}
-\end{equation}
-A supplemental observation $G:\mathcal H\to\C^k$ is target-faithful when
-\[
-\ker A\cap\ker G\subseteq\ker L.
-\]
-
-\begin{theorem}[T15: minimal target-repair dimension]
-Under \cref{eq:defect-rank-r}, every target-faithful scalar supplement $G:\mathcal H\to\C^k$ satisfies
-\begin{equation}
-k\ge r.
-\label{eq:minimal-channel-lower}
-\end{equation}
-Conversely, there exists a bounded supplement $G_0:\mathcal H\to\C^r$ such that
-\begin{equation}
-\ker A\cap\ker G_0=N_0.
-\label{eq:exact-repair}
-\end{equation}
-Thus the minimum number of independent scalar repair channels is exactly the target-relevant blind dimension $r$.
-\end{theorem}
-
-\begin{proof}
-Because $N_0$ is closed in $N$, write
-\[
-N=N_0\oplus D,
-\qquad \dim D=r.
-\]
-If $G$ is target-faithful and $d\in D$ satisfies $Gd=0$, then $Ad=0$ and target faithfulness gives $Ld=0$.  Hence $d\in N_0\cap D=\{0\}$.  Therefore $G|_D:D\to\C^k$ is injective, which forces $k\ge r$.
-
-For the converse, choose an orthonormal basis $e_1,\ldots,e_r$ of $D$ and set
-\[
-G_0x=(\langle x,e_1\rangle,\ldots,\langle x,e_r\rangle).
-\]
-If $x\in\ker A\cap\ker G_0$, then $x\in N$ and its $D$ component vanishes, so $x\in N_0$.  The reverse inclusion is immediate.
-\end{proof}
-
-\begin{corollary}[No universal finite reduction]
-If $\dim\mathfrak Q(A,L)=\infty$, no finite collection of scalar supplemental observations can in general produce a target-faithful repair.  Finite compression is therefore controlled by target-relevant defect rank, not by wishful truncation of the ambient space.
-\end{corollary}
-
-\subsection{Strict decoder reserve}
-
-\begin{theorem}[T16: strict finite-channel reserve]
-Under T14, let
-\begin{equation}
-\beta=\lambda_{\max}(B)=\|C\|^2.
-\label{eq:beta-channel}
-\end{equation}
-If $\beta<1$, then
-\begin{equation}
-S-VV^*\succeq(1-\beta)S.
-\label{eq:strict-reserve}
-\end{equation}
-More generally, for $0\le\delta\le1$,
-\begin{equation}
-S-VV^*\succeq\delta S
-\quad\Longleftrightarrow\quad
-B\preceq(1-\delta)I_m.
-\label{eq:reserve-equivalence}
-\end{equation}
-\end{theorem}
-
-\begin{proof}
-Since $B=C^*C\preceq\beta I_m$, one has $CC^*\preceq\beta I$ and therefore
-\[
-S-VV^*
-=S^{1/2}(I-CC^*)S^{1/2}
-\succeq(1-\beta)S.
-\]
-For the general equivalence, subtract $\delta S$ and use
-\[
-S-VV^*-\delta S
-=S^{1/2}\bigl((1-\delta)I-CC^*\bigr)S^{1/2}.
-\]
-The same density argument as in T14 shows that this operator is nonnegative exactly when $\|C\|^2\le1-\delta$, equivalently $B\preceq(1-\delta)I_m$.
-\end{proof}
-
 \begin{corollary}[Rank-one burden]
-When $m=1$, $B=[\beta]$ and T14--T16 reduce to
+For $m=1$, $B_C=[\beta]$ and
 \[
 S-vv^*\succeq0
-\quad\Longleftrightarrow\quad
+\iff
 \beta\le1,
 \]
-with the strict reserve
+with
 \[
 S-vv^*\succeq(1-\beta)S
 \qquad(\beta<1).
 \]
-Thus the scalar decoder-burden criterion is the one-channel shadow of the finite-channel Hermitian theorem.
+Thus the scalar decoder-burden inequality is the one-channel form of the finite obstruction theorem.
 \end{corollary}
 
-\subsection{Projection-defect positivity}
+\begin{corollary}[Five-channel representation]
+If T17--T18 determine a target-relevant memory rank $\nu=5$, then the terminal Hermitian certificate has size $5\times5$.  This dimension is forced by the recognized adverse range; it is not a reduction of the entire ambient carrier to five dimensions.
+\end{corollary}
 
-Let $\mathcal K$ be a Hilbert space, let $P=P^*=P^2$ be an orthogonal projection on $\mathcal K$, and let $R:\C^m\to\mathcal K$ be bounded.
+\subsection{Projection-defect corollary}
 
-\begin{theorem}[T17: projection-defect positivity]
-Define
-\begin{equation}
-K_{\mathrm{def}}=R^*(I-P)R\in M_m(\C).
-\label{eq:projection-defect}
-\end{equation}
-Then
-\begin{equation}
-0\preceq K_{\mathrm{def}}\preceq R^*R,
-\label{eq:projection-order}
-\end{equation}
-and
-\begin{equation}
-\ker K_{\mathrm{def}}
-=\{c\in\C^m:Rc\in\operatorname{Ran}P\}.
-\label{eq:projection-kernel}
-\end{equation}
-If a source-visible Gram $G_{\mathrm{src}}$ and total Gram $G_{\mathrm{tot}}$ satisfy
+Let $P=P^*=P^2$ on a Hilbert space $\mathcal K$ and let $R:\C^m\to\mathcal K$ be bounded.  Define
 \[
-G_{\mathrm{src}}=R^*PR,
+K_{\rm def}=R^*(I-P)R.
+\]
+
+\begin{corollary}[Positive projection defect]
+One has
+\[
+0\preceq K_{\rm def}\preceq R^*R,
+\]
+\[
+\ker K_{\rm def}
+=\{c\in\C^m:Rc\in\operatorname{Ran}P\},
+\]
+and, whenever
+\[
+G_{\rm src}=R^*PR,
 \qquad
-G_{\mathrm{tot}}=R^*R,
+G_{\rm tot}=R^*R,
 \]
 then
-\begin{equation}
-G_{\mathrm{tot}}-G_{\mathrm{src}}=K_{\mathrm{def}}\succeq0.
-\label{eq:gram-defect-positive}
-\end{equation}
-\end{theorem}
+\[
+G_{\rm tot}-G_{\rm src}=K_{\rm def}\succeq0.
+\]
+\end{corollary}
 
 \begin{proof}
-For every $c\in\C^m$,
+For every $c$,
 \[
-\langle c,K_{\mathrm{def}}c\rangle
-=\|(I-P)Rc\|^2\ge0,
+\langle c,K_{\rm def}c\rangle=\|(I-P)Rc\|^2.
 \]
-which proves the lower bound and \cref{eq:projection-kernel}.  Since $0\preceq I-P\preceq I$, congruence by $R$ gives \cref{eq:projection-order}.  The Gram identity follows by subtraction.
+The order bound follows from $0\preceq I-P\preceq I$, and the Gram identity follows by subtraction.
 \end{proof}
 
-\begin{remark}[Scope of the extension]
-T14--T17 do not assert that every infinite-dimensional problem admits a finite certificate.  They prove the exact conditional statement needed here: when the target-relevant adverse information factors through finitely many channels, the ambient Hilbert-space positivity problem reduces to a finite Hermitian matrix; T15 states when such a finite repair can and cannot exist.
+\begin{remark}[Hierarchy]
+The logical order of the paper is now
+\[
+\text{positive form}
+\to\text{completed carrier}
+\to\text{bilateral flow and observer jets}
+\to\text{finite-to-infinite completion}
+\to\text{faithful minimal observer}
+\to\text{finite Hermitian certificate}.
+\]
+The Hilbert formulas in this section are representation consequences of that hierarchy.
 \end{remark}
