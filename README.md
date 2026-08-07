@@ -238,7 +238,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Citation
 
-Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Challenge Engine, Recognition-Residue Evaluation, Release Control, and Finality Certificates* (Version 1.2.0). Zenodo. DOI: 10.5281/zenodo.21300179.
+Dabas, M. (2026). *Recognition Null Kernel Engine (RNKE): Challenge Engine and Foundational Verification* (Version 1.2.0). Zenodo. DOI: 10.5281/zenodo.21300179.
 
 ## Status
 
