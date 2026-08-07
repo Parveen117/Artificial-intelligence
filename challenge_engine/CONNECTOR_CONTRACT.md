@@ -2,6 +2,7 @@
 
 Protocol version: `1.0`
 Engine version: `1.2.0`
+Arithmetic protocol: `exact-rational-directed-enclosure-v1`
 
 This document defines the stable local process interface intended for connectors, CI systems and other tools.
 
@@ -23,7 +24,7 @@ not:
 arbitrary English prompt -> universal truth verdict
 ```
 
-## Strict JSON boundary
+## Strict JSON and numeric boundary
 
 Connector input is strict interoperable JSON. Before challenge evaluation the process rejects:
 
@@ -31,7 +32,9 @@ Connector input is strict interoperable JSON. Before challenge evaluation the pr
 - `NaN`, `Infinity`, and `-Infinity` tokens;
 - malformed explicit package/mode selections instead of silently replacing them with defaults.
 
-This is intentional. A payload containing two `mode` keys must not be allowed to mean `certified` to one parser and `exploratory` to another.
+Ordinary finite decimal JSON tokens retain their original numeric lexeme so exact declared-value threshold and canonical-contract decisions do not depend on a later binary floating representation. Numerically equivalent finite-decimal spellings canonicalize to the same exact rational value for Genesis.
+
+For genuinely arbitrary-precision proof values, use quoted exact decimal/rational strings inside `arithmetic_certificate`. A connector should not expect an ordinary platform float to preserve an unlimited decimal token merely because JSON looked very serious about it.
 
 ## Discover capabilities
 
@@ -39,7 +42,7 @@ This is intentional. A payload containing two `mode` keys must not be allowed to
 python challenge_engine/challenge.py --capabilities --compact
 ```
 
-Output is one JSON object containing `engine_version`, `schema_version`, default package (`math`), installed package manifests and their SHA-256 commitments, terminal result names, accepted break conditions, semantic default, Genesis contract information, parser/evaluation capabilities, and stdin/stdout support. No network call is made by the engine.
+Output is one JSON object containing `engine_version`, `schema_version`, default package (`math`), installed package manifests and their SHA-256 commitments, terminal result names, accepted break conditions, semantic default, Genesis contract information, parser/evaluation capabilities, arithmetic protocol, and stdin/stdout support. No network call is made by the engine.
 
 ## Evaluate by file
 
@@ -171,7 +174,7 @@ Every result contains:
 
 Genesis means the **rules of engagement are committed before candidate evaluation**. It is not a positive verdict on the target.
 
-The canonical hash commits to the contract declaration, the SHA-256 of the selected package manifest, and the strict-parser contract. Later pass/fail/open outcome statuses are intentionally not used to redefine the original rules.
+The canonical hash commits to the contract declaration, the SHA-256 of the selected package manifest, parser/arithmetic contracts, exact connector numeric declarations, and any declared arithmetic certificate. Later pass/fail/open outcome statuses are intentionally not used to redefine the original rules.
 
 A connector may pin a previously agreed contract:
 
@@ -211,15 +214,142 @@ The engine validates the parent hash format and carries it into the new evaluati
 
 ## Exact threshold boundary
 
-Burden and finite-to-limit threshold decisions use decimal-intent arithmetic derived from the declared JSON numeric values. This prevents binary floating-point from turning a mathematical equality into a false strict pass. For example, the declared boundary
+Burden, flow numeric checks and finite-to-limit threshold decisions use the exact declared decimal lexeme when the request came through the strict connector parser. This prevents binary floating-point from turning a mathematical equality into a false strict pass. For example:
 
 ```text
 0.1 + 0.7 = 0.8
 ```
 
-must remain a boundary (`INCOMPLETE` for a strict `<` promotion), even though ordinary binary floating-point may represent the sum as `0.7999999999999999`.
+remains a boundary and cannot satisfy a strict `< 0.8` promotion because of binary rounding.
+
+## Proof-bearing arithmetic certificate
+
+The arithmetic certificate is optional and is intended when numerical uncertainty itself is part of the challenge contract.
+
+Supported `kind` values:
+
+```text
+exact_rational
+exact_decimal
+directed_interval
+ball
+raw_float
+```
+
+The currently certified scalar relation is:
+
+```text
+upper_below_threshold
+```
+
+### Exact rational
+
+```json
+"arithmetic_certificate": {
+  "kind": "exact_rational",
+  "numerator": "7",
+  "denominator": "10",
+  "analytic_tail": "1/100",
+  "threshold": "4/5"
+}
+```
+
+The arithmetic radius is zero.
+
+### Exact decimal / arbitrary precision
+
+```json
+"arithmetic_certificate": {
+  "kind": "exact_decimal",
+  "value": "0.123456789012345678901234567890123456789",
+  "analytic_tail": "0",
+  "threshold": "0.123456789012345678901234567890123456790"
+}
+```
+
+String values are recommended when precision must exceed the ordinary connector float-compatible range.
+
+### Directed interval
+
+```json
+"arithmetic_certificate": {
+  "kind": "directed_interval",
+  "lower": "0.92",
+  "upper": "0.94",
+  "analytic_tail": "0.04",
+  "threshold": "1"
+}
+```
+
+### Validated ball
+
+```json
+"arithmetic_certificate": {
+  "kind": "ball",
+  "backend": "validated-backend-v1",
+  "center": "0.93",
+  "radius": "0.01",
+  "analytic_tail": "0.04",
+  "threshold": "1"
+}
+```
+
+The engine treats arithmetic uncertainty and analytic/truncation uncertainty as separate channels. For `upper_below_threshold`, promotion requires:
+
+```text
+enclosure_upper + analytic_tail < threshold
+```
+
+Equality returns `INCOMPLETE`; an outward upper above the threshold returns `FAILED`.
+
+### Raw floating point
+
+```json
+"arithmetic_certificate": {
+  "kind": "raw_float",
+  "center": "0.93",
+  "analytic_tail": "0.04",
+  "threshold": "1"
+}
+```
+
+Without a validated outward `radius`, this remains `INCOMPLETE`. If a separate validated error analysis supplies a radius, the value participates as the corresponding enclosure. The engine does not infer a rounding radius from the number of digits printed.
+
+### Independent enclosure paths
+
+A certificate may also carry:
+
+```json
+"independent_enclosures": [
+  {"id": "path-a", "lower": "0.92", "upper": "0.94"},
+  {"id": "path-b", "center": "0.935", "radius": "0.01"}
+]
+```
+
+The common scalar intersection must be nonempty. Disjoint claimed certified paths fail `arithmetic_path_overlap`. This is a necessary consistency condition; it does not authenticate the external backends themselves.
 
 ## Output
+
+When arithmetic evidence is present, the ordinary result object additionally contains:
+
+```json
+{
+  "arithmetic_protocol": "exact-rational-directed-enclosure-v1",
+  "arithmetic_summary": {
+    "kind": "ball",
+    "proof_bearing": true,
+    "enclosure_lower": "23/25",
+    "enclosure_upper": "47/50",
+    "arithmetic_radius": "1/100",
+    "analytic_tail": "1/25",
+    "outward_upper": "49/50",
+    "threshold": "1",
+    "reserve": "1/50"
+  }
+}
+```
+
+The core result envelope remains:
 
 ```json
 {
