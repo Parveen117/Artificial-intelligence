@@ -2,135 +2,198 @@
 
 Release date: 2026-08-07
 
-## Verified source state
+## Release status
 
-The theorem and engine integration used for this release were independently verified at these post-integration snapshots:
+Version 1.2.0 remains a pre-tag release candidate while the final hostile hardening sequence is completed. The current candidate includes Theorem-47 source-bound proof-carrying numerical validation in addition to the earlier parser/ledger, arithmetic-enclosure, and seam-quotient hardening.
 
-```text
-Recognition-Kernel-Framework/main
-0502a28042aaa8607b62b71bc1e7df0148438366
+The final GitHub tag / Zenodo archive must be created from the final `main` commit after this T47 integration and its post-merge CI. Do not archive an older pre-T47 commit merely because it once enjoyed the flattering title “final.” Humans have used that filename before.
 
-Artificial-intelligence/main post-integration/post-cleanup reference
-b4444a9cc53e7e8c00c3d488f8466ab66532cb92
-```
+## Theorem source
 
-The Recognition-Kernel theorem packet passed the proof-lab matrix on Python 3.11 and 3.12 plus the repository review workflow. The AI repository snapshot passed Challenge Engine, `ai-trust-enable-ci`, and CI Proof Pack v5. The Challenge Engine suite reported 112 tests, all passing.
-
-The eventual GitHub release tag / Zenodo archive should be created from the final `main` snapshot after any documentation-only synchronization that follows this note. It must not point to an implementation commit older than `b4444a9cc53e7e8c00c3d488f8466ab66532cb92`.
-
-## Release focus
-
-Version 1.2.0 promotes the repository from a primarily AI trust-enablement implementation to a connector-ready, fail-closed Challenge Engine backed by foundational theorem and adversarial-audit layers.
-
-The Challenge is defined narrowly: **break the declared claim-to-evidence closure contract, not the prose used to label the target.** Natural-language semantics are payload-only by default and enter the evaluation only through an explicitly declared semantic adapter.
-
-## Challenge Engine
-
-The release provides:
-
-- `math` as the default package;
-- `logic`, `code`, and authorization-gated `security_audit` packages;
-- `exploratory`, `adversarial`, and `certified` modes;
-- machine-readable threat models and break classes;
-- explicit formal/non-formal evidence boundaries;
-- strict connector JSON with duplicate-key and NaN/Infinity rejection;
-- exact connector decimal-lexeme preservation for declared-value decisions;
-- SHA-256 `CHALLENGE_GENESIS` records with zero accepted claims and frozen rules of engagement;
-- package-manifest hashing inside Genesis;
-- genesis pinning to detect later rule mutation;
-- SHA-256 `CHALLENGE_EVALUATION` records binding each input/result under its Genesis;
-- observer-flow probes, burden/reserve gates and finite-to-limit checks;
-- exact-rational / interval-ball arithmetic certificate support;
-- separate arithmetic-radius and analytic-tail channels;
-- first-visible-jet seam-quotient protocol for an exact finite-jet class of apparent `0/0` limits;
-- explicit rejection of raw algebraic `1/0` and raw algebraic `0/0` as finite values;
-- fail-closed handling of unresolved flat denominator jets and unvalidated approximate seam remainders;
-- machine binding of `target.toe` to authorized `scope.target` for scoped packages;
-- stable JSON stdin/stdout connector behavior;
-- explicit external evidence-authenticity and replay boundaries.
-
-Meaningful break classes remain `false_acceptance`, `blindness_escape`, `scope_escape`, `negative_control_escape`, `invalid_promotion`, `flow_consistency_escape`, and `ledger_integrity_failure`.
-
-## Hostile audit sequence
-
-The first hostile release pass repaired duplicate identifiers, implicit/empty evidence, failed-evidence masking, malformed numeric inputs, flow-probe ambiguity, Python truthiness, and incomplete Genesis commitment of enabled gates.
-
-The parser/ledger seal then repaired duplicate JSON-key differentials, non-standard JSON numbers, malformed package/mode fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, and a binary floating-point threshold false-pass route.
-
-The arithmetic-enclosure pass added the typed exact-rational / directed-enclosure contract, long-decimal preservation, interval/ball checks, explicit arithmetic/tail separation, missing-radius controls, and independent-enclosure consistency.
-
-The seam-quotient pass then consumed the separately verified Recognition-Kernel first-visible-jet theorem. The release now distinguishes:
+Recognition-Kernel Theorem 47 is on:
 
 ```text
-raw 1/0                              invalid
-raw 0/0                              invalid
-exact vanishing jets, equal order    finite leading-coefficient quotient
-numerator higher order               finite quotient zero
-numerator lower order                divergent / no finite quotient
-all denominator jets zero            incomplete / unresolved
-approximate remainder-bearing seam   incomplete until validator closure
+Parveen117/Recognition-Kernel-Framework
+main e0e0d051fecf9d7a87fe6386864c7153dd614324
 ```
 
-The seam adapter is deliberately narrower than the general theorem. It certifies only `exact_polynomial_jet`. Participant-supplied remainder/radius/tail claims do not become theorem hypotheses by declaration.
+The T47 proof packet passed the RKF proof-lab matrix on Python 3.11 and 3.12 and the independent Recognition Kernel Review workflow.
 
-Current audit statuses:
+The theorem chain relevant to the numerical trust layer is:
 
 ```text
-PASS_FINAL_CHALLENGE_SEAL_AUDIT
-PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
-PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
+T34 common-chart source binding
+-> T38 source-relative domination
+-> T39 no-blindness
+-> T43 explicit remainder
+-> T44 body-tail preservation
+-> T45 arithmetic + analytic enclosure
+-> T46 seam quotient
+-> T47 source-bound proof-carrying numerical validation
 ```
 
-Current Challenge Engine workflow:
+## Challenge Engine scope
+
+The engine remains a fail-closed evaluator of declared claim-to-evidence closure contracts, not a universal natural-language truth oracle.
+
+Core release features include:
+
+- `math`, `logic`, `code`, and authorization-gated `security_audit` packages;
+- exploratory, adversarial, and certified modes;
+- strict JSON with duplicate-key and nonstandard-number rejection;
+- exact connector decimal-lexeme preservation;
+- Challenge Genesis and Challenge Evaluation SHA-256 records;
+- package-manifest commitment and Genesis pinning;
+- target-of-evaluation binding for scoped security challenges;
+- observer-flow, burden and finite-to-limit gates;
+- exact rational/decimal numerical carriers;
+- fail-closed legacy approximate arithmetic;
+- T47 source-bound proof-carrying numerical traces;
+- T46 exact finite-jet seam quotient classification;
+- explicit replay, external-source and rights boundaries.
+
+## T47 source-bound numerical hardening
+
+The previous arithmetic layer correctly carried:
 
 ```text
-Ran 112 tests
-OK
+arithmetic radius + analytic tail
 ```
 
-The foundational mathematics/audit layer remains separately recorded at:
+outward, but a participant could still submit a syntactically valid radius/tail. T47 closes that formal-promotion gap for an admitted exact proof-carrying subset.
+
+New protocol:
 
 ```text
-236,456 exact/random/exhaustive adversarial cases
+source-bound-proof-carrying-numerics-v1
 ```
 
-The two counts are intentionally not collapsed into one homogeneous number because they represent different kinds of evidence.
-
-## Numerical claim boundary
-
-The arithmetic protocol is:
+Initial source model:
 
 ```text
-exact-rational-directed-enclosure-v1
+exact_expression_v1
 ```
 
-For the scalar upper-threshold relation, the declared closure rule is:
+Admitted exact interval-DAG operations:
 
 ```text
-enclosure_upper + analytic_tail < threshold
+add
+sub
+mul
+neg
+div
 ```
 
-Exact values have zero arithmetic radius. A raw floating-point centre without an outward radius remains incomplete. The engine does not independently authenticate arbitrary external interval/ball backends or prove every participant-supplied radius/tail; those remain source/adapter trust obligations pending the dedicated validator layer.
+At each operation node the engine recomputes the exact rational enclosure. The participant may provide a wider enclosure but cannot shrink it below the verifier-computed result.
 
-## Seam-quotient claim boundary
+Division is rejected when the denominator enclosure contains zero.
 
-The seam protocol is:
+Current proof-bearing tail rules:
+
+```text
+zero
+geometric_tail
+```
+
+For a geometric tail the first omitted magnitude and ratio upper bound must be verified DAG nodes; the engine derives the tail itself.
+
+The strict T47 threshold logic is:
+
+```text
+U < threshold                  PASS
+L >= threshold                 FAIL
+L = U = threshold              FAIL for strict <
+L < threshold <= U             INCOMPLETE
+```
+
+Thus exact equality is recognized as falsity of a strict inequality, while uncertain boundary contact remains incomplete.
+
+## Legacy arithmetic compatibility change
+
+The legacy protocol `exact-rational-directed-enclosure-v1` remains readable, but its proof-bearing behavior is tightened.
+
+Still intrinsically exact:
+
+```text
+exact_rational + analytic_tail = 0
+exact_decimal  + analytic_tail = 0
+```
+
+Held at `INCOMPLETE` when it would otherwise promote without source proof:
+
+```text
+directed_interval
+ball
+raw_float with participant radius
+exact value with participant nonzero analytic_tail
+```
+
+Independent-enclosure overlap remains a consistency check only. Disjoint enclosures can fail; overlapping participant claims do not authenticate one another.
+
+The old `arithmetic_ball_challenge.json` example is therefore intentionally incomplete under T47. The new `source_bound_numerics_challenge.json` example is the proof-bearing numerical example.
+
+## Implementation fingerprint
+
+Every Challenge Genesis now commits the current:
+
+```text
+implementation_manifest_sha256
+```
+
+The manifest fingerprints the parser/current engine numerical layers, primary schema, and installed package manifests. This deliberately advances pre-T47 Genesis hashes before release.
+
+The fingerprint provides implementation integrity under an externally pinned expected release. It is not an authenticity oracle if an attacker controls both executable and the hash it reports.
+
+## Seam-quotient boundary
+
+The T46 protocol remains:
 
 ```text
 first-visible-jet-seam-quotient-v1
 ```
 
-It is a theorem-backed limit classification for declared vanishing functions on a named seam, not a redefinition of field arithmetic. The exact finite-jet adapter cannot resolve flat-function cases and does not claim uniqueness across genuinely different seams. The general quantitative quotient enclosure remains gated until its remainder and denominator-separation hypotheses are source-validated.
+Raw algebraic `1/0` and `0/0` remain invalid. Exact polynomial jets are classified by first-visible order. Flat/unresolved denominator jets remain incomplete. Approximate/remainder-bearing seams remain incomplete until their remainder sources are bound by an admitted validator. T47 supplies the architecture for that future step but does not magically validate arbitrary remainder fields.
 
-## General claim boundary
+## Verification evidence
 
-This release does not claim unrestricted English-language understanding, universal semantic truth, universal correctness, automatic authentication of participant-supplied evidence, universal numerical stability, correctness of arbitrary external numerical backends, or stateless replay detection.
+Current T47 development Challenge Engine suite:
 
-`CHALLENGE_EVALUATION` gives each evaluated input/result a reproducible hash and optional parent link. Detecting reuse of an old valid evaluation as a new request requires persistent connector/ledger memory.
+```text
+Ran 131 tests
+OK
+```
 
-## Rights boundary
+The foundational mathematics/audit campaign remains separately recorded at:
 
-The Challenge protocol does not create a new licence. Repository use remains governed by `LICENSE`, `PATENT_NOTICE.md`, `COPYRIGHT_NOTICE.md`, and any separately issued written challenge authorization or scope.
+```text
+236,456 exact/random/exhaustive adversarial cases
+```
+
+The two counts remain separate because they are different evidence classes.
+
+Current audit sequence:
+
+```text
+PASS_FINAL_CHALLENGE_SEAL_AUDIT
+PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
+PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
+PASS_SOURCE_BOUND_NUMERICS_T47_AUDIT
+```
+
+## Remaining pre-public-endpoint boundaries
+
+The release does not claim:
+
+- unrestricted English-language truth;
+- arbitrary real-world evidence authenticity;
+- correctness of arbitrary external numerical backends;
+- universal source-completeness validation;
+- proof of arbitrary participant-supplied norm/remainder premises;
+- external executable authenticity from an internal hash alone;
+- stateless replay rejection;
+- complete input-size/nesting/digit/exponent/CPU/memory/request-rate denial-of-service hardening.
+
+The last item remains the next engineering hardening gate after T47.
 
 ## Reproducibility entry points
 
@@ -139,18 +202,17 @@ python challenge_engine/challenge.py --capabilities --compact
 python -m unittest discover -s challenge_engine/tests -v
 python challenge_engine/challenge.py challenge_engine/examples/math_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json --compact
+python challenge_engine/challenge.py challenge_engine/examples/source_bound_numerics_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/seam_quotient_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/nonformal_behavioral_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/security_audit_challenge.json --compact
 ```
 
-See:
+Important files:
 
-- `challenge_engine/README.md`
-- `challenge_engine/RED_TEAM_RULES.md`
-- `challenge_engine/CONNECTOR_CONTRACT.md`
-- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`
-- `challenge_engine/FINAL_SEAL_AUDIT.md`
+- `challenge_engine/SOURCE_BOUND_NUMERICS_AUDIT.md`
+- `challenge_engine/schema/source_bound_numerics.schema.json`
 - `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`
 - `challenge_engine/SEAM_QUOTIENT_AUDIT.md`
-- `foundational_mathematics/invariant_gated_state_transitions/`
+- `challenge_engine/CONNECTOR_CONTRACT.md`
+- `challenge_engine/PUBLIC_CHALLENGE_SCOPE.md`
