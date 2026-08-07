@@ -35,6 +35,10 @@ jobs:
           data = json.load(open('/tmp/capabilities.json'))
           assert data['default_package'] == 'math'
           assert data['schema_version'] == '1.0'
+          assert data['semantic_default'] == 'payload_only'
+          assert data['challenge_genesis']['accepted_claims'] == 0
+          assert 'false_acceptance' in data['break_conditions']
+          assert 'ledger_integrity_failure' in data['break_conditions']
           names = {p['package'] for p in data['packages']}
           assert {'math','logic','code','security_audit'} <= names
           PY
@@ -47,6 +51,9 @@ jobs:
           data = json.load(open('/tmp/math.json'))
           assert data['result'] == 'CERTIFIED'
           assert data['formal_promotion'] is True
+          assert data['challenge_genesis']['accepted_claims'] == 0
+          assert data['challenge_genesis']['rules_frozen'] is True
+          assert len(data['challenge_genesis']['genesis_hash']) == 64
           PY
 
       - name: Non-formal adversarial example
@@ -57,6 +64,8 @@ jobs:
           data = json.load(open('/tmp/nonformal.json'))
           assert data['result'] == 'ADVERSARIAL_PASS'
           assert data['formal_promotion'] is False
+          semantic = next(x for x in data['checks'] if x['id'] == 'semantic_scope')
+          assert semantic['status'] == 'pass'
           PY
 
       - name: Authorized security-audit example
@@ -66,4 +75,22 @@ jobs:
           import json
           data = json.load(open('/tmp/security.json'))
           assert data['result'] == 'ADVERSARIAL_PASS'
+          threat = next(x for x in data['checks'] if x['id'] == 'threat_model')
+          assert threat['status'] == 'pass'
+          PY
+
+      - name: Reject undeclared semantics
+        run: |
+          python - <<'PY' > /tmp/semantic.json
+          import json
+          from challenge_engine.engine import evaluate_challenge
+          challenge = json.load(open('challenge_engine/examples/nonformal_behavioral_challenge.json'))
+          challenge['semantics'] = {'mode':'adapter_declared'}
+          challenge.pop('semantic_adapter', None)
+          print(json.dumps(evaluate_challenge(challenge)))
+          PY
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/semantic.json'))
+          assert data['result'] == 'SEMANTICS_NOT_IN_SCOPE'
           PY
