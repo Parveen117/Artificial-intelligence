@@ -92,14 +92,35 @@ The seam-quotient suite tests:
 
 ## Verification result
 
-On branch head `af1ac336dcd26346e3871c46ded862cd73f98d10`, the Challenge Engine workflow reports:
+The seam implementation was merged through PR #14. The post-merge implementation snapshot was:
+
+```text
+Artificial-intelligence/main
+dc3b02a2efb4c23b02133828dce544d7e22beaca
+```
+
+A documentation-only workflow-trigger cleanup then advanced `main` to:
+
+```text
+b4444a9cc53e7e8c00c3d488f8466ab66532cb92
+```
+
+On that exact post-cleanup `main` snapshot, all three release workflows passed:
+
+```text
+Challenge Engine      SUCCESS
+ai-trust-enable-ci    SUCCESS
+CI Proof Pack v5      SUCCESS
+```
+
+The Challenge Engine workflow reports:
 
 ```text
 Ran 112 tests
 OK
 ```
 
-The workflow also separately exercised the exact seam quotient example and obtained:
+The workflow separately exercised the exact seam quotient example and obtained:
 
 ```text
 result          CERTIFIED
@@ -107,7 +128,11 @@ classification  FINITE_SEAM_QUOTIENT
 quotient        1/2
 ```
 
-The corresponding Recognition-Kernel Theorem 46 proof packet passed on Python 3.11 and Python 3.12, and both Recognition-Kernel post-main workflows passed after the theorem was fast-forwarded to `main` at commit `0502a28042aaa8607b62b71bc1e7df0148438366`.
+The corresponding Recognition-Kernel Theorem 46 proof packet passed on Python 3.11 and Python 3.12, and both Recognition-Kernel post-main workflows passed after the theorem was placed on `main` at commit:
+
+```text
+0502a28042aaa8607b62b71bc1e7df0148438366
+```
 
 ## Claim boundary
 
@@ -120,5 +145,7 @@ This audit establishes a fail-closed engine adapter for the exact finite-jet sub
 - correctness of participant-asserted remainder bounds;
 - correctness of participant-asserted arithmetic radii or analytic tails;
 - correctness of an arbitrary external interval/ball implementation.
+
+The general approximate numerical path therefore remains a pre-release validator obligation rather than being silently inherited from the exact seam theorem.
 
 **Release status for the exact seam adapter: `PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT`.**
