@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "challenge_id": "arithmetic-ball-demo-001",
+  "package": "math",
+  "mode": "certified",
+  "target": {
+    "statement": "The declared scalar upper bound remains strictly below the promotion threshold after arithmetic and analytic uncertainty are included.",
+    "kind": "numeric-bound"
+  },
+  "semantics": {"mode": "payload_only"},
+  "threat_model": {
+    "goal": "Force a strict numerical promotion without closing the outward arithmetic enclosure and analytic tail.",
+    "break_conditions": ["false_acceptance", "invalid_promotion", "ledger_integrity_failure"]
+  },
+  "evidence": [
+    {"id": "numeric-reduction", "type": "bound-certificate", "status": "pass", "formal": true}
+  ],
+  "obligations": [
+    {"id": "structure", "status": "pass"},
+    {"id": "target", "status": "pass"},
+    {"id": "evidence", "status": "pass"},
+    {"id": "dependencies", "status": "pass"}
+  ],
+  "negative_controls": [
+    {"id": "threshold-boundary", "status": "pass"},
+    {"id": "missing-radius", "status": "pass"}
+  ],
+  "formal_adapter": {"id": "validated-bound-v1", "status": "pass"},
+  "arithmetic_certificate": {
+    "kind": "ball",
+    "backend": "validated-demo-backend",
+    "center": "0.93",
+    "radius": "0.01",
+    "analytic_tail": "0.04",
+    "threshold": "1",
+    "independent_enclosures": [
+      {"id": "path-a", "lower": "0.92", "upper": "0.94"},
+      {"id": "path-b", "center": "0.935", "radius": "0.01"}
+    ]
+  }
+}
