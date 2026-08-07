@@ -2,6 +2,25 @@
 
 This document defines the technical scope to publish alongside a public Challenge invitation. It does **not** replace or modify the repository `LICENSE`, `PATENT_NOTICE.md`, or `COPYRIGHT_NOTICE.md`, and it does not by itself grant repository-use rights beyond those documents or a separate written authorization.
 
+## Relation to RNKE
+
+The Challenge Engine is a public adversarial benchmark for the **Recognition Null Kernel Engine (RNKE)** verification architecture. It is not the full scope of RNKE.
+
+RNKE is intended as a general verification architecture for formalizable systems whose claims, evidence, dependencies, governing rules, admissible transitions, and committed state can be represented explicitly. A domain adapter maps those objects into the RNKE verification contract. Domain-specific semantics and source authenticity remain obligations of the corresponding adapter.
+
+The present Challenge deliberately emphasizes mathematics and other formal systems because they provide sharp ground truth for adversarial testing. Within the mathematical package, a successful attack can be interpreted as a **mathematical hallucination** if the engine promotes a conclusion whose admitted proof flow does not justify it. A formal numeric overclaim, unproved remainder, hidden dependency, illegal `0/0` step, or unsupported proof transition are examples of this larger class.
+
+The scope relation is:
+
+```text
+RNKE
+  -> formal-system verification
+      -> mathematical hallucination detection
+          -> current public Challenge
+```
+
+**The Challenge demonstrates RNKE. It does not define RNKE.**
+
 ## Target of evaluation
 
 The designated Challenge Engine endpoint or connector instance running the published release candidate.
@@ -39,6 +58,8 @@ Natural-language ambiguity, rhetorical tricks, or semantic disagreement are not 
 
 For numerical challenges, a meaningful break includes demonstrating that the engine grants a strict promotion even though the declared outward arithmetic enclosure plus analytic tail reaches or crosses the threshold, or that mutually disjoint claimed certified paths are nevertheless accepted as compatible.
 
+For proof-carrying numerical challenges, a meaningful break also includes promoting an approximate numerical claim from a participant-asserted radius, tail, backend label, or narrowed interval without the admitted source-bound validation trace closing.
+
 For the seam-quotient protocol, a meaningful break includes making raw division by zero receive a finite certified value, making an unresolved all-zero denominator jet receive a finite value, making a divergent order mismatch receive a finite quotient, or making an approximate/remainder-bearing seam certify without its required validator.
 
 ## Allowed technical interaction
@@ -50,7 +71,7 @@ For a publicly activated endpoint, the invitation should state exactly which of 
 - vary targets, evidence, obligations, negative controls, flow probes, burden values, completion values, arithmetic certificates, seam-quotient certificates and threat-model fields within the published protocol;
 - attempt malformed, adversarial, boundary, mutation, parser-differential and fail-closed test cases against the designated Challenge interface;
 - attempt duplicate-key, exact-decimal, rational, interval/ball and numeric-boundary inputs against the documented connector interface without resource-exhaustion behavior;
-- attempt invalid arithmetic promotion using missing radii, exact equality, negative radii, malformed rational denominators or disjoint certified enclosures;
+- attempt invalid arithmetic promotion using missing radii, exact equality, negative radii, malformed rational denominators, narrowed proof-DAG intervals, unproved analytic tails, or disjoint certified enclosures;
 - attempt seam-quotient attacks using unequal first-visible orders, all-zero denominator jets, nonzero endpoints, missing seam identity, zero rational denominators, and unvalidated approximate remainder claims;
 - report reproducible findings with the relevant release/version, Genesis hash and Evaluation hash.
 
@@ -66,7 +87,7 @@ Do not infer authorization for any activity not explicitly listed in the public 
 - attacks on unrelated services, accounts, networks, or data;
 - claims that unrestricted English semantics are part of the engine when `semantics.mode = payload_only`;
 - treating a participant-supplied evidence status as independently authenticated when the selected connector/package provides no provenance or attestation mechanism;
-- treating a participant-supplied interval, ball, radius, analytic tail or remainder as independently validated merely because the field is present. Backend/source validation is a separate connector/package obligation;
+- treating a participant-supplied interval, ball, radius, analytic tail or remainder as independently validated merely because the field is present. Proof-bearing approximate promotion requires the admitted source-bound validator; arbitrary external backend/source authenticity remains a separate adapter obligation;
 - treating the stateless engine as a replay database. Replay rejection requires the persistent connector/ledger to remember prior Evaluation hashes.
 
 ## Evidence standard for a reported break
@@ -82,8 +103,9 @@ A report should include:
 7. observed outcome;
 8. the break class being claimed;
 9. for a numerical break, the exact rational/decimal/enclosure values and arithmetic/analytic uncertainty channels involved;
-10. for a seam-quotient break, the seam identity, model, exact coefficient arrays and expected first-visible-order classification;
-11. enough information to reproduce the result without expanding scope.
+10. for a proof-carrying numerical break, the source class, proof-DAG operations, source-completeness state, and tail rule involved;
+11. for a seam-quotient break, the seam identity, model, exact coefficient arrays and expected first-visible-order classification;
+12. enough information to reproduce the result without expanding scope.
 
 A parser error or crash is a software defect if it violates the documented connector contract, but it is not automatically a theorem-level false acceptance.
 
@@ -97,9 +119,9 @@ parent = null
 rules_frozen = true
 ```
 
-The sealed Genesis commits the selected package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic or seam-quotient certificate.
+The sealed Genesis commits the selected package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic, proof-carrying numerical, or seam-quotient certificate.
 
-If a participant changes a committed target, scope, threat model, adapter identity, enabled gate, threshold, arithmetic enclosure, analytic tail, seam identity, seam coefficients, package rules, or scoped TOE identifier, the Genesis commitment should change. Changing an outcome/status under the same rules should not redefine Genesis.
+If a participant changes a committed target, scope, threat model, adapter identity, enabled gate, threshold, arithmetic enclosure, analytic tail, proof trace, validator-manifest identity, seam identity, seam coefficients, package rules, or scoped TOE identifier, the Genesis commitment should change. Changing an outcome/status under the same rules should not redefine Genesis.
 
 ## Evaluation record and replay boundary
 
@@ -117,13 +139,15 @@ Exact finite decimals are interpreted by declared value for strict threshold dec
 
 is a boundary, not a pass.
 
-For an approximate numerical result the current declared arithmetic rule is:
+For an approximate numerical result the declared arithmetic rule is:
 
 ```text
 enclosure_upper + analytic_tail < threshold
 ```
 
-A raw floating-point centre without an outward radius remains incomplete. Independent claimed scalar enclosures must have a nonempty common intersection. External validation of a claimed radius/tail is a separate trust obligation and must not be inferred from the field name.
+A raw floating-point centre without an outward radius remains incomplete. More importantly, a supplied radius or analytic tail does not certify itself. Approximate formal promotion requires the admitted `proof-carrying-numeric-closure-v1` validation path or another explicitly trusted adapter that establishes the corresponding source and tail obligations. Independent claimed scalar enclosures must have a nonempty common intersection, but overlap is consistency evidence only, not proof of target containment.
+
+For a strict claim, exact equality at the threshold is a failure of the strict inequality. If a non-singleton verified enclosure merely touches or crosses the threshold while retaining sub-threshold values, the result remains incomplete pending lawful refinement.
 
 ## Seam-quotient boundary expectation
 

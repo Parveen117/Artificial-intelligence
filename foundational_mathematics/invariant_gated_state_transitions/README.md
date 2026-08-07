@@ -1,10 +1,12 @@
-# Foundational Mathematics: Invariant-Gated State Transitions
+# Foundational Mathematics of the Recognition Null Kernel Engine (RNKE)
 
-This folder contains the mathematics-only foundational paper for guarded state transitions, target-faithful completion, and persistent state records.
+This folder contains the mathematics-only foundational paper for the **Recognition Null Kernel Engine (RNKE)** interpretation of guarded state transitions, target-faithful completion, and persistent verification records.
+
+RNKE is used here as a general verification architecture for formalizable claim-evidence-dependency systems. The current public mathematical Challenge is a deliberately narrow benchmark of that architecture, not its full scope. The paper does not claim that external real-world evidence becomes trustworthy merely by being supplied to an RNKE adapter.
 
 ## Paper
 
-**Invariant-Gated State Transitions: Exact Admission, Flow Completion, Curvature, and Persistent Records**  
+**Recognition Null Kernel Engine (RNKE): Invariant-Gated State Transitions, Exact Admission, Flow Completion, and Persistent Verification**  
 Monty Dabas, 2026.
 
 The finite guarded-record core is theorem driven:
@@ -64,7 +66,7 @@ B = V* S^(-1) V.
 
 The paper treats that matrix as downstream of completion and observer derivation, not as a device for guessing the correct finite dimension.
 
-This directory is intentionally mathematics only. It contains no device architecture, fabrication claim, thermodynamic embodiment, domain-specific terminal problem, or later-framework naming.
+This directory is intentionally mathematics only. It contains no device architecture, fabrication claim, thermodynamic embodiment, private domain-specific terminal problem, or device-enabling construction. RNKE appears only as the public verification interpretation of the mathematical theorem chain.
 
 ## Adversarial audits
 
