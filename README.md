@@ -34,7 +34,11 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 The Challenge is **not** “make the English sentence confusing.” The object under attack is the declared claim-to-evidence closure contract. Natural-language text is payload by default; unrestricted English semantics are not claimed unless a semantic adapter is explicitly declared and closed.
 
-Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim.
+Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim. The Genesis contract now also commits the installed package manifest hash and the strict-parser contract.
+
+Each evaluated input/result also emits a SHA-256 `CHALLENGE_EVALUATION` record binding the Genesis hash, normalized input hash, result, and computed checks. An optional parent evaluation hash allows an external connector or persistent ledger to chain outcomes. The engine is stateless, so cross-request replay detection remains the responsibility of that persistent connector/ledger.
+
+Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Explicit malformed package or mode values do not silently fall back to defaults. Authorization-gated security challenges bind `target.toe` to the authorized `scope.target` identifier.
 
 The default package is `math`; `logic`, `code`, and authorization-gated `security_audit` packages are included. A connector can discover the contract with:
 
@@ -52,15 +56,17 @@ Meaningful break classes include false acceptance, blindness escape, scope escap
 
 ### Verification boundary
 
-The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The final Challenge Engine release workflow adds **57 unit/adversarial tests**, including 35 dedicated hostile pre-release attacks. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
+The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The final Challenge Engine workflow now carries **84 unit/adversarial tests** after the parser/ledger seal pass. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
 
-Final hostile release audit status:
+Final seal status:
 
 ```text
-PASS_FINAL_CHALLENGE_RELEASE_AUDIT
+PASS_FINAL_CHALLENGE_SEAL_AUDIT
 ```
 
-The audit does not claim universal correctness, unrestricted semantic truth, or real-world authenticity of self-asserted evidence. It establishes fail-closed behavior against the documented attack classes and leaves external evidence authenticity to the relevant connector/package unless separately authenticated. See [`challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md).
+The final seal found and repaired additional real issues beyond the earlier hostile pass, including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, and a binary floating-point boundary case where `0.1 + 0.7` could be represented as `0.7999999999999999` and incorrectly create a strict reserve below `0.8`. Threshold promotion now uses decimal-intent arithmetic for the declared numeric values.
+
+The audits do not claim universal correctness, unrestricted semantic truth, real-world authenticity of self-asserted evidence, or stateless replay detection. They establish fail-closed behavior against the documented attack classes and leave external evidence authenticity and replay memory to the relevant connector/package or persistent ledger unless separately authenticated. See [`challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md) and [`challenge_engine/FINAL_SEAL_AUDIT.md`](challenge_engine/FINAL_SEAL_AUDIT.md).
 
 ## Quick start
 
@@ -139,7 +145,8 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 - `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, burden and completion checks.
 - `challenge_engine/RED_TEAM_RULES.md` - red-team rules of engagement and meaningful break classes.
 - `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout contract.
-- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - final hostile pre-release audit.
+- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - first hostile pre-release audit.
+- `challenge_engine/FINAL_SEAL_AUDIT.md` - final parser, threshold, scoped-TOE, Genesis and evaluation-ledger seal audit.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
@@ -155,7 +162,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Citation
 
-Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates* (Version 1.2.0). Zenodo. DOI: 10.5281/zenodo.21300179.
+Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Challenge Engine, Recognition-Residue Evaluation, Release Control, and Finality Certificates* (Version 1.2.0). Zenodo. DOI: 10.5281/zenodo.21300179.
 
 ## Status
 
