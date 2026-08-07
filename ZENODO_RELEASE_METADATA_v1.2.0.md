@@ -24,6 +24,24 @@ ORCID: 0009-0005-6948-209X
 
 Software
 
+## Release snapshot rule
+
+The separately verified theorem source is present on `Parveen117/Recognition-Kernel-Framework` at post-main theorem commit:
+
+```text
+0502a28042aaa8607b62b71bc1e7df0148438366
+```
+
+The post-integration AI implementation was verified on `Parveen117/Artificial-intelligence/main` at:
+
+```text
+b4444a9cc53e7e8c00c3d488f8466ab66532cb92
+```
+
+with Challenge Engine, `ai-trust-enable-ci`, and CI Proof Pack v5 all successful. The Challenge Engine suite reported 112 tests, all passing.
+
+When creating the GitHub release / Zenodo archive, tag the final `main` snapshot after this metadata synchronization. The archived source must therefore contain the Theorem 46 seam-quotient integration and must not point to an implementation commit older than `b4444a9cc53e7e8c00c3d488f8466ab66532cb92`.
+
 ## Description
 
 Artificial Intelligence Trust Enablement v1.2.0 adds a connector-ready, fail-closed Challenge Engine to the existing AI trust-enablement repository. The engine evaluates declared claim-to-evidence closure contracts rather than unrestricted natural-language truth. It supports exploratory, adversarial and certified modes; mathematics, logic, code and authorization-gated security-audit packages; explicit formal/non-formal evidence boundaries; SHA-256 Challenge Genesis and Challenge Evaluation records; observer-flow probes; burden/reserve checks; finite-to-limit completion gates; strict JSON connector parsing; package-manifest commitment; and scoped target-of-evaluation binding.
