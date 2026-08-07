@@ -4,12 +4,12 @@
   "package": "math",
   "mode": "certified",
   "target": {
-    "statement": "The declared scalar upper bound remains strictly below the promotion threshold after arithmetic and analytic uncertainty are included.",
+    "statement": "The declared scalar upper bound remains strictly below the promotion threshold after source-bound arithmetic and analytic uncertainty are included.",
     "kind": "numeric-bound"
   },
   "semantics": {"mode": "payload_only"},
   "threat_model": {
-    "goal": "Force a strict numerical promotion without closing the outward arithmetic enclosure and analytic tail.",
+    "goal": "Force a strict numerical promotion without closing the source-bound outward arithmetic enclosure and analytic tail.",
     "break_conditions": ["false_acceptance", "invalid_promotion", "ledger_integrity_failure"]
   },
   "evidence": [
@@ -23,9 +23,10 @@
   ],
   "negative_controls": [
     {"id": "threshold-boundary", "status": "pass"},
-    {"id": "missing-radius", "status": "pass"}
+    {"id": "missing-radius", "status": "pass"},
+    {"id": "self-asserted-radius", "status": "pass"}
   ],
-  "formal_adapter": {"id": "validated-bound-v1", "status": "pass"},
+  "formal_adapter": {"id": "proof-carrying-bound-v1", "status": "pass"},
   "arithmetic_certificate": {
     "kind": "ball",
     "backend": "validated-demo-backend",
@@ -37,5 +38,19 @@
       {"id": "path-a", "lower": "0.92", "upper": "0.94"},
       {"id": "path-b", "center": "0.935", "radius": "0.01"}
     ]
+  },
+  "proof_carrying_numeric": {
+    "protocol": "proof-carrying-numeric-closure-v1",
+    "source_complete": true,
+    "root": "root",
+    "threshold": "1",
+    "nodes": [
+      {"id": "root", "kind": "exact_contract", "value": "0.93", "interval": ["0.92", "0.94"]}
+    ],
+    "tail": {
+      "rule": "geometric_tail",
+      "first_omitted_upper": "0.02",
+      "ratio_upper": "0.5"
+    }
   }
 }
