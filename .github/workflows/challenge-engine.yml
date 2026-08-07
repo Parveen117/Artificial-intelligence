@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - agent/source-bound-numerics-t47
     paths:
       - 'challenge_engine/**'
       - '.github/workflows/challenge-engine.yml'
@@ -44,6 +45,10 @@ jobs:
           assert data['arithmetic_protocol'] == 'exact-rational-directed-enclosure-v1'
           assert data['exact_connector_decimal_lexeme'] is True
           assert data['raw_float_without_radius'] == 'INCOMPLETE'
+          assert data['legacy_approximate_arithmetic_without_source_proof'] == 'INCOMPLETE'
+          assert data['source_bound_numerics_protocol'] == 'source-bound-proof-carrying-numerics-v1'
+          assert data['strict_exact_threshold_equality'] == 'FAILED'
+          assert len(data['implementation_manifest_sha256']) == 64
           assert data['seam_quotient_protocol'] == 'first-visible-jet-seam-quotient-v1'
           assert data['seam_quotient_proof_bearing_model'] == 'exact_polynomial_jet'
           assert 'INVALID' in data['raw_division_by_zero']
@@ -60,20 +65,33 @@ jobs:
           assert data['challenge_genesis']['accepted_claims'] == 0
           assert data['challenge_genesis']['rules_frozen'] is True
           assert len(data['challenge_genesis']['genesis_hash']) == 64
+          assert data['challenge_genesis']['contract']['implementation_manifest_sha256'] == data['implementation_manifest_sha256']
           PY
 
-      - name: Validated arithmetic example
+      - name: Legacy arithmetic trust boundary
         run: |
-          python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json --compact > /tmp/arithmetic.json
+          python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json --compact > /tmp/arithmetic.json || test $? -eq 2
           python - <<'PY'
           import json
           data = json.load(open('/tmp/arithmetic.json'))
-          assert data['result'] == 'CERTIFIED'
+          assert data['result'] == 'INCOMPLETE'
           assert data['arithmetic_protocol'] == 'exact-rational-directed-enclosure-v1'
-          assert data['arithmetic_summary']['outward_upper'] == '49/50'
-          assert data['arithmetic_summary']['threshold'] == '1'
+          assert data['arithmetic_summary']['proof_bearing'] is False
           overlap = next(x for x in data['checks'] if x['id'] == 'arithmetic_path_overlap')
           assert overlap['status'] == 'pass'
+          PY
+
+      - name: Source-bound proof-carrying numerical example
+        run: |
+          python challenge_engine/challenge.py challenge_engine/examples/source_bound_numerics_challenge.json --compact > /tmp/sourcebound.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/sourcebound.json'))
+          assert data['result'] == 'CERTIFIED'
+          assert data['source_bound_numerics_protocol'] == 'source-bound-proof-carrying-numerics-v1'
+          assert data['source_bound_numerics_summary']['proof_bearing'] is True
+          assert data['source_bound_numerics_summary']['analytic_tail'] == '1/50'
+          assert data['source_bound_numerics_summary']['final_upper'] == '18/25'
           PY
 
       - name: Exact seam quotient example
