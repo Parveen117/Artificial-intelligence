@@ -1,23 +1,26 @@
 cff-version: 1.2.0
-message: "If you use or reference this software, please cite it as below."
+message: "If you reference this public technical release, please cite it as below. Repository use remains governed by LICENSE and related rights notices."
 title: "Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates"
 type: software
-version: "1.0.2"
-date-released: "2026-07-12"
+version: "1.2.0"
+date-released: "2026-08-07"
 doi: "10.5281/zenodo.21300179"
 authors:
   - family-names: "Dabas"
     given-names: "Monty"
     orcid: "https://orcid.org/0009-0005-6948-209X"
     affiliation: "Independent Researcher"
-abstract: "A deployable AI trust-enablement repository for recognition-residue evaluation, hallucination-risk classification, confidence-collapse detection, release control, machine-readable certificates, finality records, temporal diagnostics, and future-state forecasting."
+abstract: "A public technical AI trust-enablement and challenge-testing repository for recognition-residue evaluation, hallucination-risk classification, release control, machine-readable certificates, persistent finality records, and fail-closed challenge evaluation. Version 1.2.0 adds a connector-ready Challenge Engine with exploratory, adversarial, and certified modes; explicit natural-language semantic scope; threat-model break classes; challenge-genesis hashing; observer-flow probes; burden/reserve checks; finite-to-limit completion gates; and a final hostile release audit."
 keywords:
   - artificial intelligence
   - AI safety
   - hallucination detection
   - recognition residue
-  - confidence collapse
-  - release control
+  - challenge engine
+  - adversarial testing
+  - red teaming
+  - formal verification
+  - fail-closed evaluation
   - machine-readable certificates
   - trustworthy AI
 repository-code: "https://github.com/Parveen117/Artificial-intelligence"

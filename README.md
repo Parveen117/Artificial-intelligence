@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21300179.svg)](https://doi.org/10.5281/zenodo.21300179)
 
-This repository contains a deployable AI trust-enablement service for hallucination-residue evaluation, confidence-collapse detection, release control, certificate generation, ECL-style finality, Lambda-Laplace analytic diagnostics, topological-memory / winding-sector diagnostics, and Future Arrow forecasting.
+This repository contains a deployable AI trust-enablement service for hallucination-residue evaluation, confidence-collapse detection, release control, certificate generation, ECL-style finality, Lambda-Laplace analytic diagnostics, topological-memory / winding-sector diagnostics, Future Arrow forecasting, and theorem-backed challenge testing.
 
 > **Patent status.** This repository is associated with inventor-controlled patent filings and related intellectual-property rights. Publication does not grant any patent license. See [`PATENT_NOTICE.md`](PATENT_NOTICE.md).
 >
@@ -24,13 +24,17 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 - Docker and docker-compose deployment files,
 - no-dependency regression tests.
 
-## Challenge Engine
+## Challenge Engine v1.2.0
 
-`challenge_engine/` is the testing front door for external challenges. It accepts a machine-readable Challenge Package and keeps three result levels separate:
+`challenge_engine/` is the external testing front door. It accepts a machine-readable Challenge Package and keeps three evidence levels separate:
 
 - `exploratory` for empirical or black-box evidence,
-- `adversarial` for declared targets plus negative controls,
-- `certified` for challenges that also close a formal adapter and formal support.
+- `adversarial` for a predeclared target, threat model, negative controls and break conditions,
+- `certified` for challenges that additionally close formal support and the selected formal adapter.
+
+The Challenge is **not** “make the English sentence confusing.” The object under attack is the declared claim-to-evidence closure contract. Natural-language text is payload by default; unrestricted English semantics are not claimed unless a semantic adapter is explicitly declared and closed.
+
+Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim.
 
 The default package is `math`; `logic`, `code`, and authorization-gated `security_audit` packages are included. A connector can discover the contract with:
 
@@ -44,7 +48,19 @@ or stream one JSON challenge through stdin:
 python challenge_engine/challenge.py - --compact
 ```
 
-See `challenge_engine/CONNECTOR_CONTRACT.md`.
+Meaningful break classes include false acceptance, blindness escape, scope escape, negative-control escape, invalid promotion, flow-consistency escape, and ledger-integrity failure. See [`challenge_engine/RED_TEAM_RULES.md`](challenge_engine/RED_TEAM_RULES.md) and [`challenge_engine/CONNECTOR_CONTRACT.md`](challenge_engine/CONNECTOR_CONTRACT.md).
+
+### Verification boundary
+
+The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The final Challenge Engine release workflow adds **57 unit/adversarial tests**, including 35 dedicated hostile pre-release attacks. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
+
+Final hostile release audit status:
+
+```text
+PASS_FINAL_CHALLENGE_RELEASE_AUDIT
+```
+
+The audit does not claim universal correctness, unrestricted semantic truth, or real-world authenticity of self-asserted evidence. It establishes fail-closed behavior against the documented attack classes and leaves external evidence authenticity to the relevant connector/package unless separately authenticated. See [`challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md).
 
 ## Quick start
 
@@ -120,8 +136,10 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
-- `challenge_engine/README.md` - challenge packages, modes, flow probes, burden and completion checks.
+- `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, burden and completion checks.
+- `challenge_engine/RED_TEAM_RULES.md` - red-team rules of engagement and meaningful break classes.
 - `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout contract.
+- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - final hostile pre-release audit.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
@@ -137,10 +155,10 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Citation
 
-Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates* (Version 1.0.1). Zenodo. https://doi.org/10.5281/zenodo.21300179
+Dabas, M. (2026). *Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates* (Version 1.2.0). Zenodo. DOI: 10.5281/zenodo.21300179.
 
 ## Status
 
-Deployable v1 for evaluation, gating, audit certificates, regression testing, ECL finality sealing, Lambda-Laplace analytic diagnostics, topological-memory diagnostics, Future Arrow forecasting, and integration into AI applications. It is not a standalone truth oracle and not a substitute for domain validation.
+Version 1.2.0 is the audited Challenge Engine release candidate plus the existing AI trust-enablement stack. It is intended for technical inspection, citation, reproducibility review, and challenge evaluation within the repository licence and any separately declared authorization/scope. It is not a standalone truth oracle and not a substitute for domain validation.
 
 This public release is a technical and citation layer associated with inventor-controlled intellectual-property materials.
