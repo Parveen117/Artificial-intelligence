@@ -7,6 +7,11 @@
     "statement": "The declared behavior survives the supplied black-box probes.",
     "kind": "behavioral"
   },
+  "semantics": {"mode": "payload_only"},
+  "threat_model": {
+    "goal": "Find a target-changing behavior that the declared black-box evidence and observer probes fail to distinguish.",
+    "break_conditions": ["blindness_escape", "negative_control_escape", "false_acceptance", "flow_consistency_escape"]
+  },
   "evidence": [
     {"id": "black-box-traces", "type": "trace", "status": "pass", "formal": false},
     {"id": "fuzz-summary", "type": "test-summary", "status": "pass", "formal": false}
