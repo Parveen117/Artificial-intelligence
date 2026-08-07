@@ -1,19 +1,17 @@
+import copy
+import json
 import unittest
+from pathlib import Path
 
 from challenge_engine.engine import evaluate_challenge, capabilities
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 def base_challenge():
-    return {
-        "schema_version": "1.0",
-        "challenge_id": "proof-carrying-numeric-demo",
-        "package": "math",
-        "mode": "certified",
-        "target": {"statement": "certify a strict numerical bound"},
-        "evidence": [{"id": "formal", "kind": "formal", "status": "pass"}],
-        "obligations": [{"id": "formal_support", "status": "pass"}],
-        "formal_adapter": {"id": "exact-trace-adapter", "status": "pass"},
-    }
+    c = json.loads((ROOT / "examples" / "math_challenge.json").read_text(encoding="utf-8"))
+    c["challenge_id"] = "proof-carrying-numeric-demo"
+    return c
 
 
 def exact_trace(upper="3/4", threshold="4/5"):
@@ -42,11 +40,10 @@ class ProofCarryingNumericHallucinationTests(unittest.TestCase):
 
     def test_forged_narrow_root_fails(self):
         c = base_challenge()
-        trace = exact_trace(upper="7/10")
+        trace = exact_trace()
         trace["nodes"][-1]["interval"] = ["7/10", "7/10"]
         c["proof_carrying_numeric"] = trace
-        r = evaluate_challenge(c)
-        self.assertEqual(r["result"], "FAILED")
+        self.assertEqual(evaluate_challenge(c)["result"], "FAILED")
 
     def test_zero_denominator_enclosure_fails(self):
         c = base_challenge()
@@ -78,13 +75,12 @@ class ProofCarryingNumericHallucinationTests(unittest.TestCase):
 
     def test_uncertain_boundary_touch_is_incomplete(self):
         c = base_challenge()
-        trace = exact_trace(upper="4/5", threshold="4/5")
-        c["proof_carrying_numeric"] = trace
+        c["proof_carrying_numeric"] = exact_trace(upper="4/5", threshold="4/5")
         self.assertEqual(evaluate_challenge(c)["result"], "INCOMPLETE")
 
     def test_geometric_tail_is_recomputed(self):
         c = base_challenge()
-        trace = exact_trace(upper="3/4", threshold="1")
+        trace = exact_trace(threshold="1")
         trace["tail"] = {"rule": "geometric_tail", "first_omitted_upper": "1/100", "ratio_upper": "1/2"}
         c["proof_carrying_numeric"] = trace
         r = evaluate_challenge(c)
@@ -113,6 +109,16 @@ class ProofCarryingNumericHallucinationTests(unittest.TestCase):
             "kind": "exact_rational", "numerator": "3", "denominator": "4", "analytic_tail": "0", "threshold": "4/5"
         }
         self.assertEqual(evaluate_challenge(c)["result"], "CERTIFIED")
+
+    def test_genesis_changes_when_numeric_trace_changes(self):
+        c1 = base_challenge()
+        c2 = base_challenge()
+        c1["proof_carrying_numeric"] = exact_trace()
+        c2["proof_carrying_numeric"] = copy.deepcopy(exact_trace())
+        c2["proof_carrying_numeric"]["nodes"][0]["value"] = "2/4"
+        r1 = evaluate_challenge(c1)
+        r2 = evaluate_challenge(c2)
+        self.assertNotEqual(r1["challenge_genesis"]["genesis_hash"], r2["challenge_genesis"]["genesis_hash"])
 
     def test_capabilities_publish_math_hallucination_role(self):
         caps = capabilities()
