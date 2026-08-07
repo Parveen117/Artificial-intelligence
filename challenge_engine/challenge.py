@@ -8,8 +8,10 @@ from pathlib import Path
 
 try:
     from .engine import ChallengeError, ENGINE_VERSION, capabilities, evaluate_challenge
+    from .strict_json import StrictJSONError, loads_strict
 except ImportError:
     from engine import ChallengeError, ENGINE_VERSION, capabilities, evaluate_challenge
+    from strict_json import StrictJSONError, loads_strict
 
 EXIT = {
     "OBSERVED": 0,
@@ -24,9 +26,8 @@ EXIT = {
 
 
 def read_input(path: str) -> dict:
-    if path == "-":
-        return json.load(sys.stdin)
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    text = sys.stdin.read() if path == "-" else Path(path).read_text(encoding="utf-8")
+    return loads_strict(text)
 
 
 def main() -> int:
@@ -42,9 +43,9 @@ def main() -> int:
         p.error("challenge path or '-' is required unless --capabilities is used")
     try:
         result = evaluate_challenge(read_input(args.challenge))
-    except (OSError, json.JSONDecodeError, ChallengeError, ValueError) as exc:
+    except (OSError, json.JSONDecodeError, StrictJSONError, ChallengeError, ValueError) as exc:
         result = {"engine_version": ENGINE_VERSION, "result": "INVALID", "error": str(exc)}
-    print(json.dumps(result, indent=None if args.compact else 2, sort_keys=True))
+    print(json.dumps(result, indent=None if args.compact else 2, sort_keys=True, allow_nan=False))
     return EXIT.get(result.get("result", "INVALID"), 4)
 
 
