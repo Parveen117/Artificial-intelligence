@@ -1,73 +1,105 @@
-# Challenge Engine v1.2.0
+# Challenge Engine v1.2.0 Release Candidate
 
-A fail-closed front door for theorem-backed testing.
+A fail-closed front door for theorem-backed challenge testing.
 
-## Read this first: what are you supposed to break?
-
-The Challenge is **not** “make the English sentence confusing.”
+## What the Challenge is
 
 The Challenge is:
 
 > **Break the declared claim-to-evidence closure contract.**
 
-A meaningful challenge fixes, before evaluation, the target of evaluation (TOE), claim, scope, threat model, evidence channels, obligations, negative controls, adapters and thresholds. A successful break demonstrates that an invalid/unsupported case can still escape those declared controls.
+A meaningful challenge fixes the target of evaluation, claim, scope, threat model, evidence channels, obligations, negative controls, adapters and thresholds before evaluation. The engine then decides whether those declared obligations close.
 
-The accepted break classes are machine-readable:
+It is not a universal natural-language truth oracle. `target.statement` is payload by default. Unrestricted semantic interpretation enters only through an explicitly declared semantic adapter.
 
-- `false_acceptance`
-- `blindness_escape`
-- `scope_escape`
-- `negative_control_escape`
-- `invalid_promotion`
-- `flow_consistency_escape`
-- `ledger_integrity_failure`
+Machine-readable break classes are:
 
-See [`RED_TEAM_RULES.md`](RED_TEAM_RULES.md) for the rules of engagement.
-
-## Natural-language boundary
-
-`target.statement` is **payload by default**, not an invitation to test unrestricted English semantics.
-
-Default:
-
-```json
-"semantics": {"mode": "payload_only"}
+```text
+false_acceptance
+blindness_escape
+scope_escape
+negative_control_escape
+invalid_promotion
+flow_consistency_escape
+ledger_integrity_failure
 ```
 
-In this mode the statement names/describes the target, while the package, adapters, evidence and obligations determine what is actually testable.
+See `RED_TEAM_RULES.md` and `PUBLIC_CHALLENGE_SCOPE.md`.
 
-If a package explicitly wants natural-language semantics to participate, it must provide a declared semantic adapter:
+## Quick start
 
-```json
-{
-  "semantics": {"mode": "adapter_declared"},
-  "semantic_adapter": {"id": "my-semantic-adapter", "status": "pass"}
-}
+```bash
+python challenge_engine/challenge.py challenge_engine/examples/math_challenge.json
+python challenge_engine/challenge.py challenge_engine/examples/source_bound_numerics_challenge.json
+python challenge_engine/challenge.py challenge_engine/examples/seam_quotient_challenge.json
+python challenge_engine/challenge.py --capabilities --compact
 ```
 
-Requesting semantic interpretation without a closed adapter returns `SEMANTICS_NOT_IN_SCOPE`.
+Connector/stdin mode:
 
-Non-formal testing is still allowed. Black-box traces, fuzz summaries, measurements, logs, model outputs and similar evidence may be used in exploratory/adversarial modes. They do not silently become formal proof.
+```bash
+cat challenge.json | python challenge_engine/challenge.py - --compact
+```
 
-## Strict connector JSON
+The engine requires no network access.
 
-Raw connector input uses strict interoperable JSON:
+## Result states
 
-- duplicate object keys are rejected at any nesting level;
-- `NaN`, `Infinity`, and `-Infinity` are rejected;
-- explicit malformed `package` or `mode` values do not silently fall back to defaults;
-- package names are restricted to installed package manifests;
-- ordinary finite decimal tokens retain their original JSON spelling for exact declared-value threshold and canonical-contract decisions.
+| Result | Meaning |
+| --- | --- |
+| `OBSERVED` | exploratory contract closed |
+| `ADVERSARIAL_PASS` | declared adversarial contract and negative controls closed |
+| `CERTIFIED` | formal promotion requirements closed |
+| `INCOMPLETE` | no contradiction, but a mandatory obligation remains open |
+| `FAILED` | a declared check or target relation failed |
+| `INVALID` | malformed contract |
+| `BLOCKED_SCOPE` | required authorization/scope not closed |
+| `SEMANTICS_NOT_IN_SCOPE` | semantic interpretation requested without a closed semantic adapter |
 
-This prevents parser-differential tricks such as supplying two `mode` keys and relying on one parser to keep the first while another keeps the last. For truly arbitrary-precision proof values, use quoted exact decimal/rational strings in `arithmetic_certificate`; do not rely on an ordinary platform float to preserve an unlimited numeric token.
+Exit code is `0` only for `OBSERVED`, `ADVERSARIAL_PASS`, and `CERTIFIED`.
 
-## Challenge Genesis: ledger initiation
+## Modes and packages
 
-Every evaluation emits a `CHALLENGE_GENESIS` object. Genesis means:
+Modes:
 
-> **Freeze the rules of engagement before evaluating the candidate.**
+```text
+exploratory
+adversarial
+certified
+```
 
-It does not mean “the claim is accepted.” At genesis:
+Included packages:
+
+```text
+math
+logic
+code
+security_audit
+```
+
+The `security_audit` package is authorization-gated and requires `target.toe == scope.target`.
+
+## Strict JSON and exact decimals
+
+Raw connector JSON rejects:
+
+- duplicate keys at any nesting level;
+- `NaN`, `Infinity`, and `-Infinity`;
+- malformed explicit package/mode values.
+
+Finite JSON decimals preserve their original numeric lexeme for exact declared-value decisions. Thus a mathematical boundary such as
+
+```text
+0.1 + 0.7 = 0.8
+```
+
+cannot become a false strict pass because of binary floating-point representation.
+
+For arbitrary-precision proof values, use quoted exact decimal/rational strings in the numerical certificates.
+
+## Challenge Genesis and Evaluation
+
+Every valid evaluation emits a `CHALLENGE_GENESIS` record with:
 
 ```text
 accepted_claims = 0
@@ -75,234 +107,35 @@ parent = null
 rules_frozen = true
 ```
 
-The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities, every enabled rule selector or threshold that can affect promotion, the installed package-manifest hash, parser/arithmetic contracts, exact connector numeric declarations, and any declared arithmetic or seam-quotient certificate.
+Genesis freezes the rules before evaluation. It does not accept the claim.
 
-A connector can pin the agreed rules:
-
-```json
-"genesis": {"expected_hash": "<sha256>"}
-```
-
-Changing a committed rule changes the genesis hash. Changing a later test outcome does not redefine the original rules. Numerically equivalent finite-decimal spellings such as `0.1` and `0.10` canonicalize to the same exact declared value rather than creating a fake rule change.
-
-## Challenge Evaluation: outcome commitment
-
-Genesis intentionally freezes rules rather than outcomes. Each run therefore also emits a separate `CHALLENGE_EVALUATION` record containing:
-
-- the Genesis hash;
-- a SHA-256 hash of the normalized evaluated input;
-- the result and computed checks;
-- its own `evaluation_hash`;
-- an optional `parent_evaluation_hash`.
-
-A subsequent request may declare:
-
-```json
-"evaluation": {"parent_hash": "<sha256>"}
-```
-
-This lets a persistent connector/ledger form an outcome chain without confusing changing evidence with changing rules.
-
-The engine itself is stateless. It can verify the shape and carry a parent hash, but it cannot know whether an old valid evaluation is being replayed as a new request. Cross-request replay rejection therefore belongs to the persistent connector or append-only ledger.
-
-## Quick start
-
-Default package is `math`.
-
-```bash
-python challenge_engine/challenge.py challenge_engine/examples/math_challenge.json
-```
-
-Validated arithmetic example:
-
-```bash
-python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json
-```
-
-Exact seam-quotient example:
-
-```bash
-python challenge_engine/challenge.py challenge_engine/examples/seam_quotient_challenge.json
-```
-
-Black-box / non-formal adversarial example:
-
-```bash
-python challenge_engine/challenge.py challenge_engine/examples/nonformal_behavioral_challenge.json
-```
-
-Authorized security-audit example:
-
-```bash
-python challenge_engine/challenge.py challenge_engine/examples/security_audit_challenge.json
-```
-
-Machine-readable capabilities:
-
-```bash
-python challenge_engine/challenge.py --capabilities
-```
-
-Connector / stdin mode:
-
-```bash
-cat challenge.json | python challenge_engine/challenge.py - --compact
-```
-
-The process writes one JSON result to stdout. It does not require network access.
-
-## Modes
-
-### `exploratory`
-
-Ordinary empirical or black-box evidence is allowed. A fully closed exploratory challenge returns `OBSERVED`. This is evidence, not a formal proof.
-
-### `adversarial`
-
-The threat-model goal, accepted break conditions, target, evidence and mandatory obligations are declared before evaluation. Negative controls are required. A fully closed challenge returns `ADVERSARIAL_PASS`. This means the declared adversarial contract passed. It is still not automatically a mathematical certificate.
-
-### `certified`
-
-All adversarial requirements apply, plus at least one formal support item, a passing `formal_adapter`, every package-required obligation closed, and any declared burden/completion/arithmetic/seam-quotient bound closed. A fully closed challenge returns `CERTIFIED`.
-
-Certification is always relative to the declared challenge contract. It is not a universal truth oracle.
-
-## Result states
-
-| Result | Meaning |
-| --- | --- |
-| `OBSERVED` | exploratory contract closed |
-| `ADVERSARIAL_PASS` | adversarial contract and negative controls closed |
-| `CERTIFIED` | formal promotion requirements closed |
-| `INCOMPLETE` | no contradiction, but one or more mandatory obligations are still open |
-| `FAILED` | a declared test, bound, negative control, genesis pin or obligation failed |
-| `INVALID` | malformed challenge contract |
-| `BLOCKED_SCOPE` | a package requiring declared authorization was invoked without it |
-| `SEMANTICS_NOT_IN_SCOPE` | semantic interpretation was requested without a closed semantic adapter |
-
-Exit code is `0` only for `OBSERVED`, `ADVERSARIAL_PASS`, and `CERTIFIED`.
-
-## Package model
-
-Package manifests live under `challenge_engine/packages/`.
-
-Included packages:
-
-- `math` — default package; certified by default.
-- `logic` — logical derivation testing.
-- `code` — program/specification and behavioral testing.
-- `security_audit` — authorized defensive testing; declared scope is mandatory.
-
-A package specifies allowed modes, its default mode, mandatory obligations per mode, whether authorization is required, and whether formal certification requires a formal adapter. The canonical package manifest is SHA-256 committed inside Challenge Genesis, so changing package rules without changing the Genesis commitment is detectable.
-
-Adding another domain does not require changing the mathematical core. Add a package manifest and, when needed, an adapter that produces the declared evidence/obligation fields.
-
-## Flow probes
-
-An adapter may expose a transformation/observer-flow sequence:
-
-```json
-"flow": {
-  "enabled": true,
-  "probes": [
-    {"order": 0, "target_visible": false},
-    {"order": 1, "target_visible": false},
-    {"order": 2, "target_visible": true}
-  ],
-  "first_recognition_order": 2,
-  "bilateral": {"defect": 0.002, "tolerance": 0.01},
-  "remainder_bound": 0.05
-}
-```
-
-The engine checks that declared target visibility does not revert at a deeper probe order and that the declared first-recognition order matches the supplied probe record. Connector decimal spellings used in numeric flow checks are retained for exact declared-value comparison.
-
-The probe objects are adapter outputs. The engine does not infer a generator or semantic model from arbitrary raw prose/data.
-
-## Burden / reserve
-
-A challenge may declare:
-
-```json
-"burden": {"beta": 0.72, "threshold": 1.0}
-```
-
-The engine reports the strict reserve `threshold - beta` and fails when the burden exceeds the threshold. Negative, Boolean, NaN, or malformed values are rejected rather than coerced.
-
-## Finite-to-limit promotion
-
-For a finite approximation to support a limiting claim:
-
-```json
-"completion": {
-  "enabled": true,
-  "finite_upper": 0.83,
-  "completion_error": 0.06,
-  "threshold": 1.0
-}
-```
-
-The promotion check is fail-closed:
+The final T47 release candidate also commits:
 
 ```text
-finite_upper + completion_error < threshold
+implementation_manifest_sha256
 ```
 
-Declared finite decimal tokens are compared through their exact decimal values. Thus a boundary such as `0.1 + 0.7 = 0.8` remains equality and cannot become a false strict pass merely because a binary float happens to lie just below `0.8`.
+into every Genesis. The manifest fingerprints the parser/current numerical engine layers, the primary Challenge schema, and installed package manifests. This means a changed interpreter no longer masquerades as the same frozen rules.
 
-A finite value without `completion_error` returns `INCOMPLETE`. Removing or disabling a previously committed completion gate changes the genesis hash.
+A connector can pin Genesis:
 
-## Proof-bearing arithmetic enclosures
+```json
+"genesis": {"expected_hash": "<64-hex-sha256>"}
+```
 
-The generic arithmetic protocol is:
+Each run also emits a hash-bound `CHALLENGE_EVALUATION` containing the Genesis hash, input hash, checks, result and optional parent Evaluation hash.
+
+The engine is stateless. Parent existence, event uniqueness and replay rejection require persistent connector/ledger memory.
+
+## Legacy arithmetic protocol
+
+The earlier arithmetic carrier remains:
 
 ```text
 exact-rational-directed-enclosure-v1
 ```
 
-It does **not** turn every number into a fraction. Exact integers, rationals and finite declared decimals have zero arithmetic radius. Irrational, transcendental, solver-produced or otherwise approximate values can be supplied as directed intervals or validated balls.
-
-Exact rational example:
-
-```json
-"arithmetic_certificate": {
-  "kind": "exact_rational",
-  "numerator": "7",
-  "denominator": "10",
-  "analytic_tail": "1/100",
-  "threshold": "4/5"
-}
-```
-
-Validated ball example:
-
-```json
-"arithmetic_certificate": {
-  "kind": "ball",
-  "backend": "validated-backend-v1",
-  "center": "0.93",
-  "radius": "0.01",
-  "analytic_tail": "0.04",
-  "threshold": "1"
-}
-```
-
-The certificate separates two different uncertainties:
-
-```text
-arithmetic radius   = uncertainty introduced by numerical representation/operations
-analytic tail       = uncertainty from finite analytic/refinement depth
-```
-
-The scalar promotion rule is strictly outward:
-
-```text
-enclosure_upper + analytic_tail < threshold
-```
-
-Equality is `INCOMPLETE`, not a strict pass. An outward upper above the threshold is `FAILED`.
-
-Supported certificate kinds are:
+It parses:
 
 ```text
 exact_rational
@@ -312,132 +145,248 @@ ball
 raw_float
 ```
 
-For arbitrary precision, use quoted exact decimal/rational strings in the certificate fields. A `raw_float` centre without a validated outward `radius` is calibration only and returns `INCOMPLETE`; with a separately validated radius it participates as an enclosure.
+T47 tightens what may formally promote.
 
-**Trust boundary:** the current arithmetic layer checks closure relative to the declared radius/tail but does not itself authenticate an external backend or independently prove a participant-supplied radius/tail. Such provenance remains an external adapter obligation. This is a known pre-release hardening target and must not be confused with Theorem 45 itself.
+Without source-bound proof, intrinsically proof-bearing legacy cases are now only:
 
-A challenge may also supply two or more `independent_enclosures`. Their common scalar intersection must be nonempty. Disjoint claimed certified paths fail closed because they cannot all contain the same exact target. Overlap is a necessary consistency check, not proof that the external backends are intrinsically correct.
+```text
+exact_rational + analytic_tail = 0
+exact_decimal  + analytic_tail = 0
+```
 
-See [`ARITHMETIC_ENCLOSURE_AUDIT.md`](ARITHMETIC_ENCLOSURE_AUDIT.md).
+The following are held at `INCOMPLETE` when they would otherwise promote from participant assertions alone:
+
+```text
+directed_interval
+ball
+raw_float with supplied radius
+exact value with nonzero supplied analytic_tail
+```
+
+Independent enclosure overlap remains a consistency check. Disjoint paths can fail; overlapping paths do not authenticate the external backends.
+
+The historical `arithmetic_ball_challenge.json` is now intentionally an `INCOMPLETE` trust-boundary example rather than a proof-bearing release example.
+
+## Theorem 47: source-bound proof-carrying numerics
+
+The proof-bearing numerical protocol is:
+
+```text
+source-bound-proof-carrying-numerics-v1
+```
+
+Recognition-Kernel source theorem:
+
+```text
+Theorem 47: Source-Bound Proof-Carrying Numerical Validation
+RKF main e0e0d051fecf9d7a87fe6386864c7153dd614324
+```
+
+The central law is:
+
+> **A bound does not validate itself.**
+
+### Current source model
+
+```text
+exact_expression_v1
+```
+
+The trace is a finite topologically ordered exact-rational interval DAG. Current protocol limit:
+
+```text
+256 nodes
+```
+
+Admitted operations:
+
+```text
+add
+sub
+mul
+neg
+div
+```
+
+Every exact source leaf carries a declared exact value and an interval containing that value. For every operation node, the engine recomputes the canonical interval from already-verified dependencies.
+
+A participant may widen an interval. A participant may **not** narrow the interval below the verifier-computed enclosure.
+
+Example:
+
+```json
+"source_bound_numerics": {
+  "protocol": "source-bound-proof-carrying-numerics-v1",
+  "source_model": "exact_expression_v1",
+  "nodes": [
+    {
+      "id": "a",
+      "kind": "exact_contract",
+      "value": "1/3",
+      "interval": {"lower": "1/3", "upper": "1/3"}
+    },
+    {
+      "id": "b",
+      "kind": "exact_contract",
+      "value": "1/6",
+      "interval": {"lower": "1/6", "upper": "1/6"}
+    },
+    {
+      "id": "root",
+      "kind": "op",
+      "op": "add",
+      "deps": ["a", "b"],
+      "interval": {"lower": "49/100", "upper": "51/100"}
+    }
+  ],
+  "root": "root",
+  "tail": {"rule": "zero"},
+  "threshold": "4/5"
+}
+```
+
+The exact canonical root is `1/2`; `[49/100,51/100]` is a lawful wider enclosure with derived radius `1/100`.
+
+### Division domain
+
+Interval division is admitted only when the denominator interval excludes zero:
+
+```text
+0 in denominator enclosure -> no certified division step
+```
+
+This is ordinary interval-domain safety. It does not redefine algebraic division by zero.
+
+### Tail rules
+
+Current proof-bearing tail rules:
+
+```text
+zero
+geometric_tail
+```
+
+For a geometric tail, both the first omitted magnitude and ratio upper bound must reference verified DAG nodes. If the verified ratio satisfies `0 <= q < 1`, the engine computes:
+
+```text
+tau = first_omitted_upper / (1 - ratio_upper)
+```
+
+The participant does not supply the final tail scalar.
+
+The RKF theorem packet separately proves a rational exponential upper rule and a Theorem-43 jet-tail formula. Those specialized tail rules are intentionally not exposed as proof-bearing engine rules until their norm/source hypotheses have an admitted package-specific validator.
+
+### Strict threshold logic
+
+After the root enclosure and absolute tail are combined into `[L,U]`:
+
+```text
+U < threshold                  PASS
+L >= threshold                 FAIL
+L = U = threshold              FAIL for a strict < claim
+L < threshold <= U             INCOMPLETE
+```
+
+Exact equality is false for a strict inequality. Uncertain boundary contact stays incomplete.
+
+### Source boundary
+
+The current T47 source model proves the **declared exact formal expression**. It does not authenticate an arbitrary measurement, external backend output, or physical norm. Mapping those into exact leaves requires a package/connector source validator.
+
+This is why the engine does not yet expose the T43 norm-tail rule or approximate T46 seam remainder as automatically proof-bearing.
+
+Dedicated schema:
+
+```text
+challenge_engine/schema/source_bound_numerics.schema.json
+```
+
+See `SOURCE_BOUND_NUMERICS_AUDIT.md` and `CONNECTOR_CONTRACT.md`.
 
 ## First-visible-jet seam quotient
 
-The seam-quotient protocol is:
+Protocol:
 
 ```text
 first-visible-jet-seam-quotient-v1
 ```
 
-It does **not** redefine field division by zero. Raw algebraic `1/0` and raw algebraic `0/0` remain invalid.
+This does **not** redefine field division by zero. Raw `1/0` and raw algebraic `0/0` remain invalid.
 
-The proof-bearing release model is currently only:
+Current proof-bearing model:
 
 ```text
 exact_polynomial_jet
 ```
 
-A declaration such as:
-
-```json
-"seam_quotient_certificate": {
-  "seam_id": "demo-regular-seam",
-  "model": "exact_polynomial_jet",
-  "relation": "finite_seam_quotient",
-  "numerator_coefficients": [0, 0, "2"],
-  "denominator_coefficients": [0, 0, "4"]
-}
-```
-
-represents two exact vanishing polynomials along one declared seam. The engine finds the first nonzero coefficient order in each series. If the orders agree at `r` and the denominator coefficient is nonzero, the finite seam quotient is the exact ratio `a_r / b_r`. In the example above it is `1/2`.
-
-The classifications are:
+For exact vanishing polynomial jets:
 
 ```text
 numerator order > denominator order    FINITE_QUOTIENT_ZERO
 orders equal                            FINITE_SEAM_QUOTIENT
 numerator order < denominator order    DIVERGENT_NO_FINITE_QUOTIENT
-all declared denominator jets zero     INCOMPLETE_FLAT_OR_UNRESOLVED
+all denominator jets zero              INCOMPLETE_FLAT_OR_UNRESOLVED
 ```
 
-The all-zero finite-jet case remains incomplete because flat functions can have all endpoint derivatives zero while their punctured ratio still has a finite limit. The engine refuses to invent that missing asymptotic information.
+The general `analytic_with_validated_remainder` model remains incomplete until a source-bound remainder adapter establishes the Theorem-46 hypotheses.
 
-The more general Theorem-46 model with validated analytic remainders is **not yet proof-bearing in the engine**. A certificate using `analytic_with_validated_remainder` returns `INCOMPLETE` until a trusted remainder/denominator-separation validator is wired in. Participant-supplied text such as `claimed_remainder` cannot promote the result by itself.
+See `SEAM_QUOTIENT_AUDIT.md`.
 
-See [`SEAM_QUOTIENT_AUDIT.md`](SEAM_QUOTIENT_AUDIT.md).
+## Burden and finite-to-limit gates
 
-## Security-audit scope
+The existing burden and completion gates remain part of the declared challenge contract. Exact connector decimal comparison prevents binary-rounding boundary promotion. A finite-to-limit gate still requires its declared completion error.
 
-The `security_audit` package requires a machine-bound TOE as well as declared authorization:
+These generic contract fields are not, by themselves, a universal external evidence-authentication system. When a domain requires provenance for such fields, the selected package/connector must supply the corresponding adapter.
 
-```json
-{
-  "scope": {
-    "authorization": "declared",
-    "target": "local-demo-service"
-  },
-  "target": {
-    "toe": "local-demo-service",
-    "statement": "The declared property to test"
-  }
-}
-```
+## External trust boundary
 
-For authorization-gated packages, `target.toe` must match `scope.target`. This prevents a contract from carrying authorization for one machine-readable target while evaluating another.
+The engine tests declared closure. It does not automatically authenticate real-world evidence, external numerical backends, measurements, signatures or arbitrary source claims merely because they arrive in valid JSON.
 
-This package is intended for authorized defensive testing. Scope is part of the machine-readable challenge contract, not a decorative disclaimer.
+T47 closes the **internal formal derivation** of an admitted numerical enclosure/tail. External-world source mapping remains a separate obligation.
 
-## External input trust boundary
+The implementation fingerprint is likewise an integrity commitment under an externally pinned expected release, not an authenticity oracle if the executable and its reported hash are both attacker-controlled.
 
-The engine evaluates closure over supplied package/connector/adapter outputs. It does not authenticate real-world evidence merely because a participant sends valid JSON. Evidence authenticity, provenance, signatures, sandboxing, remote attestation, or correctness of an external interval/ball backend must be supplied by the relevant connector/package when those properties matter.
+## Resource boundary
 
-This distinction is deliberate: **contract closure is tested here; external-world authenticity is a separate obligation unless explicitly wired in.**
+The T47 proof trace has a 256-node protocol limit. Global input-byte, nesting-depth, numeric digit/exponent, CPU/memory, and request-rate denial-of-service hardening remains a separate pre-public-endpoint engineering gate.
 
-## Licence / participation boundary
-
-The Challenge protocol does not create a new licence. Repository use is governed by the existing [`LICENSE`](../LICENSE), [`PATENT_NOTICE.md`](../PATENT_NOTICE.md), and any separate written challenge authorization supplied by the rights holder.
-
-If a public Challenge is activated, the public invitation should state the exact permission/scope participants are being given. The engine itself does not enlarge those rights.
+Resource-exhaustion testing should remain outside a public Challenge unless explicitly authorized.
 
 ## Release verification
 
-The foundational theorem/audit layer currently records:
+Foundational theorem/audit evidence:
 
 ```text
 236,456 exact/random/exhaustive adversarial cases
 ```
 
-The current Challenge Engine workflow records:
+Current T47 Challenge Engine development suite:
 
 ```text
-112 unit/adversarial tests
+131 unit/adversarial tests
 ```
 
-These counts are reported separately because mathematical adversarial cases and software unit tests are different forms of evidence.
+These counts are intentionally separate.
 
-Current audit statuses:
+Current audit sequence:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
 PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
 PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
+PASS_SOURCE_BOUND_NUMERICS_T47_AUDIT
 ```
 
-See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md), [`FINAL_SEAL_AUDIT.md`](FINAL_SEAL_AUDIT.md), [`ARITHMETIC_ENCLOSURE_AUDIT.md`](ARITHMETIC_ENCLOSURE_AUDIT.md), and [`SEAM_QUOTIENT_AUDIT.md`](SEAM_QUOTIENT_AUDIT.md).
+## Rights boundary
 
-## Tests
+The Challenge protocol creates no new licence. Repository use remains governed by `LICENSE`, `PATENT_NOTICE.md`, `COPYRIGHT_NOTICE.md`, and any separate written challenge authorization.
 
-```bash
-python -m unittest discover -s challenge_engine/tests -v
-```
+## Key files
 
-The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope, challenge-genesis integrity, duplicate-ID attacks, malformed numeric inputs, evidence-status spoofing, rule-removal mutations, strict JSON parser differentials, exact long-decimal threshold boundaries, scoped TOE binding, package-manifest commitment, evaluation-hash chaining, exact rational/decimal certificates, interval/ball outward promotion, raw-float fail-closed behavior, independent-enclosure consistency, exact first-visible-jet seam quotients, order-mismatch divergence, flat-denominator incompleteness, seam Genesis commitment, and approximate-seam fail-closed behavior.
-
-## Connector contract
-
-See [`CONNECTOR_CONTRACT.md`](CONNECTOR_CONTRACT.md) for stable stdin/stdout, genesis, evaluation-chain, arithmetic-certificate, seam-quotient and exit-code behavior.
-
-## Mathematical foundation
-
-The Challenge Engine is the user-facing contract layer. The theorem paper under `foundational_mathematics/invariant_gated_state_transitions/` supplies the public mathematical justification for target blindness, flow/observer refinement, finite-to-infinite completion, finite obstruction certificates, burden reserve, gate closure and persistent records. The generic arithmetic certificate is an outward-enclosure adapter over those declared completion obligations. The exact seam-quotient adapter consumes the separately verified first-visible-jet theorem from the Recognition-Kernel theorem chain while keeping raw division by zero invalid.
-
-The interface deliberately uses ordinary testing/red-team language. The theorem layer remains rigorous underneath it.
+- `CONNECTOR_CONTRACT.md`
+- `PUBLIC_CHALLENGE_SCOPE.md`
+- `SOURCE_BOUND_NUMERICS_AUDIT.md`
+- `schema/source_bound_numerics.schema.json`
+- `ARITHMETIC_ENCLOSURE_AUDIT.md`
+- `SEAM_QUOTIENT_AUDIT.md`
+- `FINAL_SEAL_AUDIT.md`
