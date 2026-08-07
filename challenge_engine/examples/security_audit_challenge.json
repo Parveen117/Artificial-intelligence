@@ -12,6 +12,11 @@
     "statement": "The declared session policy rejects an invalid test transition.",
     "kind": "defensive-control"
   },
+  "semantics": {"mode": "payload_only"},
+  "threat_model": {
+    "goal": "Within the declared authorized target, demonstrate a false acceptance, scope escape, undetected negative control, or other contract-level failure.",
+    "break_conditions": ["false_acceptance", "scope_escape", "negative_control_escape", "invalid_promotion", "ledger_integrity_failure"]
+  },
   "evidence": [
     {"id": "policy", "type": "specification", "status": "pass", "formal": false},
     {"id": "test-trace", "type": "trace", "status": "pass", "formal": false}
