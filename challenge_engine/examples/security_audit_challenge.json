@@ -9,6 +9,7 @@
     "allowed_actions": ["configuration_review", "test_fixture_execution", "protocol_validation"]
   },
   "target": {
+    "toe": "local-demo-service",
     "statement": "The declared session policy rejects an invalid test transition.",
     "kind": "defensive-control"
   },
