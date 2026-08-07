@@ -1,6 +1,6 @@
 # Zenodo release metadata: v1.2.0
 
-Use this as the copy/paste release record for the audited Challenge Engine snapshot.
+Use this as the copy/paste release record for the final audited Challenge Engine snapshot after Theorem-47 integration.
 
 ## Title
 
@@ -26,78 +26,79 @@ Software
 
 ## Release snapshot rule
 
-The separately verified theorem source is present on `Parveen117/Recognition-Kernel-Framework` at post-main theorem commit:
+The separately verified source-bound numerical theorem is on:
 
 ```text
-0502a28042aaa8607b62b71bc1e7df0148438366
+Parveen117/Recognition-Kernel-Framework
+main e0e0d051fecf9d7a87fe6386864c7153dd614324
 ```
 
-The post-integration AI implementation was verified on `Parveen117/Artificial-intelligence/main` at:
+Its proof packet passed the RKF proof-lab matrix on Python 3.11 and 3.12 and the independent Recognition Kernel Review workflow.
 
-```text
-b4444a9cc53e7e8c00c3d488f8466ab66532cb92
-```
+The AI release archive must be created from the **final Artificial-intelligence `main` commit after Theorem-47 integration and post-merge CI**. Do not archive the older pre-T47 snapshots `b4444a9...` or `dd1503d...` as the final v1.2.0 release.
 
-with Challenge Engine, `ai-trust-enable-ci`, and CI Proof Pack v5 all successful. The Challenge Engine suite reported 112 tests, all passing.
-
-When creating the GitHub release / Zenodo archive, tag the final `main` snapshot after this metadata synchronization. The archived source must therefore contain the Theorem 46 seam-quotient integration and must not point to an implementation commit older than `b4444a9cc53e7e8c00c3d488f8466ab66532cb92`.
+Record the exact final AI commit here only after the T47 PR/merge and all three post-main workflows have passed.
 
 ## Description
 
-Artificial Intelligence Trust Enablement v1.2.0 adds a connector-ready, fail-closed Challenge Engine to the existing AI trust-enablement repository. The engine evaluates declared claim-to-evidence closure contracts rather than unrestricted natural-language truth. It supports exploratory, adversarial and certified modes; mathematics, logic, code and authorization-gated security-audit packages; explicit formal/non-formal evidence boundaries; SHA-256 Challenge Genesis and Challenge Evaluation records; observer-flow probes; burden/reserve checks; finite-to-limit completion gates; strict JSON connector parsing; package-manifest commitment; and scoped target-of-evaluation binding.
+Artificial Intelligence Trust Enablement v1.2.0 provides a connector-ready, fail-closed Challenge Engine for declared claim-to-evidence closure contracts. The engine does not claim unrestricted natural-language truth. It supports exploratory, adversarial and certified modes; mathematics, logic, code and authorization-gated security-audit packages; formal/non-formal evidence boundaries; strict JSON parsing; exact decimal-lexeme preservation; machine-bound security scope; SHA-256 Challenge Genesis and Challenge Evaluation records; observer-flow, burden and finite-to-limit gates; theorem-backed numerical checks; and explicit rights/replay/external-source boundaries.
 
-The release includes the numerical protocol `exact-rational-directed-enclosure-v1`. Finite connector decimals retain their declared lexemes for exact threshold and canonical-contract decisions. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector; arbitrary-precision exact values may be supplied as quoted decimal or rational strings; approximate values may be represented as directed intervals or balls. Arithmetic uncertainty and analytic/truncation uncertainty remain separate. The declared scalar closure rule is `enclosure_upper + analytic_tail < threshold`; equality is not a strict promotion. External numerical-backend, radius and analytic-tail provenance are not authenticated merely because a participant supplies such fields, and remain source/adapter trust obligations pending the dedicated validator layer.
+The release includes the exact arithmetic protocol `exact-rational-directed-enclosure-v1` and the newer source-bound numerical protocol `source-bound-proof-carrying-numerics-v1`, derived from Recognition-Kernel Theorem 47. The T47 engine subset uses exact rational interval proof DAGs. Every operation enclosure is recomputed from previously verified dependencies, so a participant may widen an interval but cannot obtain certification by shrinking it below the verifier-computed enclosure. Interval division is rejected when the denominator enclosure contains zero.
 
-The release also adds `first-visible-jet-seam-quotient-v1`, consuming the separately verified Recognition-Kernel First-Visible-Jet Seam Quotient Closure Theorem. This protocol does not redefine ordinary division by zero. Raw algebraic `1/0` and `0/0` remain invalid. The proof-bearing implementation is intentionally limited to exact polynomial jets for two vanishing functions on one declared seam. Equal first-visible orders give the exact leading-coefficient ratio; a higher numerator order gives quotient zero; a higher denominator order gives no finite quotient; and all-zero declared denominator jets remain `INCOMPLETE_FLAT_OR_UNRESOLVED`. The more general analytic/remainder-bearing seam model remains incomplete until a trusted remainder and denominator-separation validator closes the theorem hypotheses.
+The initial proof-bearing source model is `exact_expression_v1`, with exact operations `add`, `sub`, `mul`, `neg`, and `div`. The current proof-bearing tail rules are `zero` and `geometric_tail`. For a geometric tail, the first omitted magnitude and ratio upper bound must reference verified DAG nodes, and the engine computes the final tail itself. Participant-supplied approximate radii or analytic tails therefore no longer become proof-bearing merely because they are syntactically valid.
 
-Multiple hostile release passes tested duplicate identifiers and keys, malformed/non-standard numbers, package/mode fallback, package path abuse, exact threshold boundaries, scoped TOE mismatch, package-manifest mutation, Genesis integrity, evaluation-result chaining, long exact decimal declarations, rational normalization, interval/ball boundaries, missing floating-point radii, disjoint enclosures, zero denominators, exact first-visible-jet quotient classification, order mismatch, flat-denominator incompleteness, seam Genesis mutation, and attempted promotion of unvalidated approximate seam remainders.
+Legacy arithmetic certificates remain readable for compatibility. Exact rational/decimal singleton values with zero analytic tail remain intrinsically exact. Directed intervals, balls, bounded raw floats, and exact values with a participant-supplied nonzero analytic tail are held at `INCOMPLETE` when they would otherwise promote without T47 source proof. Disjoint independent enclosures may still fail; overlap remains a consistency check rather than backend authentication.
 
-The current Challenge Engine workflow completes **112 unit/adversarial tests** successfully. Separately, the foundational mathematics/audit layer records **236,456 exact/random/exhaustive adversarial cases**. These counts are reported separately because they represent different forms of verification evidence.
+The T47 strict-boundary rule distinguishes mathematical falsity from numerical uncertainty: `U < threshold` passes; `L >= threshold` fails; an exact singleton equal to the threshold fails a strict `<` claim; and a non-singleton enclosure touching/crossing the threshold remains incomplete.
 
-Current release audit statuses:
+Every Challenge Genesis now commits an `implementation_manifest_sha256` covering the current parser/engine numerical layers, primary Challenge schema, and package manifests. This intentionally advances pre-T47 Genesis hashes before the final release. The fingerprint is an integrity commitment under an externally pinned expected release, not an external authenticity oracle if the executable itself is untrusted.
+
+The release also retains `first-visible-jet-seam-quotient-v1`. Raw algebraic `1/0` and `0/0` remain invalid. The proof-bearing seam implementation remains limited to exact polynomial jets; equal first-visible orders give the exact leading-coefficient quotient, higher numerator order gives zero, lower numerator order gives no finite quotient, and all-zero denominator jets remain `INCOMPLETE_FLAT_OR_UNRESOLVED`. Approximate seam remainders remain incomplete until their source bounds are connected to an admitted validator. Theorem 47 supplies that trust architecture but does not authenticate arbitrary remainder fields by itself.
+
+The current T47 development Challenge Engine suite reports **131 unit/adversarial tests** successfully. Separately, the foundational mathematics/audit layer records **236,456 exact/random/exhaustive adversarial cases**. These counts are intentionally separate because they represent different evidence classes.
+
+Current audit sequence:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
 PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
 PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
+PASS_SOURCE_BOUND_NUMERICS_T47_AUDIT
 ```
 
-The release does not claim unrestricted English-language understanding, universal semantic truth, universal correctness, universal numerical stability, correctness of arbitrary external numerical backends, automatic authentication of participant-supplied evidence/radii/tails/remainders, a universal algebraic value for `0/0`, uniqueness across genuinely different seams, or stateless replay detection. Challenge Evaluation hashes make individual outcomes reproducible, while replay rejection and external evidence/backend validation remain persistent connector/package responsibilities unless separately authenticated.
+The release does not claim unrestricted English-language understanding, universal semantic truth, universal correctness, correctness/authenticity of arbitrary external numerical backends, universal real-world source validation, universal source completeness, external executable authenticity from an internally reported hash, stateless replay rejection, or complete denial-of-service/resource-exhaustion hardening. Global input-byte, nesting-depth, numeric digit/exponent, CPU/memory and request-rate controls remain a separate pre-public-endpoint engineering gate.
 
-Repository use remains governed by the repository LICENSE, PATENT_NOTICE.md, COPYRIGHT_NOTICE.md, and any separately declared challenge authorization/scope. The Challenge protocol itself grants no additional copyright, patent, deployment, benchmarking, or derivative-work rights.
+Repository use remains governed by `LICENSE`, `PATENT_NOTICE.md`, `COPYRIGHT_NOTICE.md`, and any separately declared challenge authorization/scope. The Challenge protocol itself grants no additional copyright, patent, deployment, benchmarking, or derivative-work rights.
 
 ## Keywords
 
 - artificial intelligence
 - AI safety
-- hallucination detection
 - challenge engine
 - adversarial testing
-- red teaming
 - formal verification
 - fail-closed evaluation
+- proof-carrying numerics
 - validated numerics
 - interval arithmetic
-- ball arithmetic
 - exact rational arithmetic
+- source validation
+- theorem-backed verification
 - indeterminate limits
 - seam quotient
-- first-visible jet
-- machine-readable certificates
 - challenge genesis
 - challenge evaluation
-- persistent records
 - trustworthy AI
 
 ## Important release files
 
-- `challenge_engine/README.md`
-- `challenge_engine/RED_TEAM_RULES.md`
 - `challenge_engine/CONNECTOR_CONTRACT.md`
-- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`
-- `challenge_engine/FINAL_SEAL_AUDIT.md`
+- `challenge_engine/PUBLIC_CHALLENGE_SCOPE.md`
+- `challenge_engine/SOURCE_BOUND_NUMERICS_AUDIT.md`
+- `challenge_engine/schema/source_bound_numerics.schema.json`
 - `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`
 - `challenge_engine/SEAM_QUOTIENT_AUDIT.md`
+- `challenge_engine/examples/source_bound_numerics_challenge.json`
 - `challenge_engine/examples/arithmetic_ball_challenge.json`
 - `challenge_engine/examples/seam_quotient_challenge.json`
 - `RELEASE_NOTES_v1.2.0.md`
@@ -105,4 +106,4 @@ Repository use remains governed by the repository LICENSE, PATENT_NOTICE.md, COP
 
 ## DOI handling
 
-The repository currently carries `10.5281/zenodo.21300179` in `CITATION.cff` and the README badge. Before publishing the new Zenodo version, verify in the Zenodo UI whether this is the concept DOI or an older version DOI. After Zenodo mints the v1.2.0 version DOI, use the newly minted DOI for that immutable version while retaining the Zenodo concept DOI as the stable all-versions reference when appropriate.
+The repository currently carries `10.5281/zenodo.21300179` in `CITATION.cff` and the README badge. Before publishing the new Zenodo version, verify in the Zenodo UI whether this is the concept DOI or an older version DOI. After Zenodo mints the v1.2.0 version DOI, use the newly minted DOI for that immutable version while retaining the concept DOI as the stable all-versions reference when appropriate.
