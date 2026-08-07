@@ -19,6 +19,50 @@
       "additionalProperties": true
     },
     "scope": {"type": "object", "additionalProperties": true},
+    "threat_model": {
+      "type": "object",
+      "properties": {
+        "goal": {"type": "string", "minLength": 1},
+        "break_conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "false_acceptance",
+              "blindness_escape",
+              "scope_escape",
+              "negative_control_escape",
+              "invalid_promotion",
+              "flow_consistency_escape",
+              "ledger_integrity_failure"
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "semantics": {
+      "type": "object",
+      "properties": {
+        "mode": {"enum": ["payload_only", "adapter_declared"], "default": "payload_only"}
+      },
+      "additionalProperties": true
+    },
+    "semantic_adapter": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["pass", "fail", "open"]}
+      },
+      "additionalProperties": true
+    },
+    "genesis": {
+      "type": "object",
+      "properties": {
+        "expected_hash": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
     "evidence": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
     "obligations": {
       "type": "array",
