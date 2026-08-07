@@ -4,11 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any
+import hashlib
 import json
 import math
 
 
-ENGINE_VERSION = "1.0.0"
+ENGINE_VERSION = "1.1.0"
 SCHEMA_VERSION = "1.0"
 
 TERMINAL_RESULTS = {
@@ -19,7 +20,18 @@ TERMINAL_RESULTS = {
     "FAILED",
     "INVALID",
     "BLOCKED_SCOPE",
+    "SEMANTICS_NOT_IN_SCOPE",
 }
+
+BREAK_CONDITIONS = [
+    "false_acceptance",
+    "blindness_escape",
+    "scope_escape",
+    "negative_control_escape",
+    "invalid_promotion",
+    "flow_consistency_escape",
+    "ledger_integrity_failure",
+]
 
 
 @dataclass
@@ -69,8 +81,7 @@ def _obligation_map(challenge: dict[str, Any]) -> dict[str, str]:
 
 def _check_basic_structure(challenge: dict[str, Any], package: dict[str, Any]) -> list[Check]:
     checks: list[Check] = []
-    required = ["challenge_id", "target"]
-    for key in required:
+    for key in ("challenge_id", "target"):
         if key not in challenge:
             checks.append(Check(f"field:{key}", "fail", f"missing required field '{key}'"))
         else:
@@ -119,6 +130,64 @@ def _check_scope(challenge: dict[str, Any], package: dict[str, Any]) -> Check | 
     if not target:
         return Check("scope_authorization", "blocked", "scope.target must be declared")
     return Check("scope_authorization", "pass", f"declared for {target}")
+
+
+def _check_threat_model(challenge: dict[str, Any], mode: str) -> Check | None:
+    if mode == "exploratory":
+        return None
+    model = challenge.get("threat_model")
+    if not isinstance(model, dict):
+        return Check(
+            "threat_model",
+            "open",
+            "adversarial/certified mode requires a declared goal and break_conditions",
+        )
+    goal = str(model.get("goal", "")).strip()
+    conditions = model.get("break_conditions")
+    if not goal:
+        return Check("threat_model", "open", "threat_model.goal must be declared")
+    if not isinstance(conditions, list) or not conditions:
+        return Check("threat_model", "open", "threat_model.break_conditions must be a non-empty list")
+    bad = [c for c in conditions if c not in BREAK_CONDITIONS]
+    if bad:
+        return Check("threat_model", "fail", f"unknown break condition(s): {', '.join(map(str, bad))}")
+    return Check("threat_model", "pass", f"goal fixed; break_conditions={','.join(conditions)}")
+
+
+def _check_semantics(challenge: dict[str, Any]) -> Check:
+    semantics = challenge.get("semantics")
+    if semantics is None:
+        semantics = {"mode": "payload_only"}
+    if not isinstance(semantics, dict):
+        return Check("semantic_scope", "fail", "semantics must be an object")
+    mode = semantics.get("mode", "payload_only")
+    if mode == "payload_only":
+        return Check(
+            "semantic_scope",
+            "pass",
+            "target.statement is treated as declared payload/label; unrestricted natural-language semantics are not inferred",
+        )
+    if mode != "adapter_declared":
+        return Check("semantic_scope", "fail", "semantics.mode must be payload_only or adapter_declared")
+    adapter = challenge.get("semantic_adapter")
+    if not isinstance(adapter, dict):
+        return Check(
+            "semantic_scope",
+            "not_in_scope",
+            "semantic interpretation was requested but no semantic_adapter was declared",
+        )
+    if not str(adapter.get("id", "")).strip():
+        return Check("semantic_scope", "fail", "semantic_adapter.id is required")
+    status = adapter.get("status")
+    if status == "pass":
+        return Check("semantic_scope", "pass", f"semantic adapter closed: {adapter['id']}")
+    if status == "fail":
+        return Check("semantic_scope", "fail", f"semantic adapter failed: {adapter['id']}")
+    return Check(
+        "semantic_scope",
+        "not_in_scope",
+        f"semantic adapter has not closed: {adapter['id']}",
+    )
 
 
 def _required_obligations(challenge: dict[str, Any], package: dict[str, Any]) -> list[Check]:
@@ -170,8 +239,11 @@ def _check_formal_promotion(challenge: dict[str, Any], package: dict[str, Any], 
     if not isinstance(adapter, dict):
         return Check("formal_adapter", "open", "certified mode requires a declared formal_adapter")
     if adapter.get("status") != "pass":
-        return Check("formal_adapter", "open" if adapter.get("status") != "fail" else "fail",
-                     "formal adapter has not passed")
+        return Check(
+            "formal_adapter",
+            "open" if adapter.get("status") != "fail" else "fail",
+            "formal adapter has not passed",
+        )
     if not str(adapter.get("id", "")).strip():
         return Check("formal_adapter", "fail", "formal_adapter.id is required")
     return Check("formal_adapter", "pass", str(adapter.get("id")))
@@ -227,10 +299,15 @@ def _check_flow(challenge: dict[str, Any]) -> list[Check]:
         if seen_visible and not visible:
             monotone = False
         seen_visible = seen_visible or visible
-    if monotone:
-        checks.append(Check("flow:recognition_monotonicity", "pass", "visibility does not revert at higher probe order"))
-    else:
-        checks.append(Check("flow:recognition_monotonicity", "fail", "target visibility reverted at a higher probe order"))
+    checks.append(
+        Check(
+            "flow:recognition_monotonicity",
+            "pass" if monotone else "fail",
+            "visibility does not revert at higher probe order"
+            if monotone
+            else "target visibility reverted at a higher probe order",
+        )
+    )
 
     visible_orders = [order for order, visible in parsed if visible]
     declared_first = flow.get("first_recognition_order")
@@ -241,8 +318,13 @@ def _check_flow(challenge: dict[str, Any]) -> list[Check]:
         elif declared_first == actual_first:
             checks.append(Check("flow:first_recognition_order", "pass", str(actual_first)))
         else:
-            checks.append(Check("flow:first_recognition_order", "fail",
-                                f"declared {declared_first}, observed {actual_first}"))
+            checks.append(
+                Check(
+                    "flow:first_recognition_order",
+                    "fail",
+                    f"declared {declared_first}, observed {actual_first}",
+                )
+            )
     elif declared_first is not None:
         checks.append(Check("flow:first_recognition_order", "fail", "declared recognition without a visible probe"))
 
@@ -307,6 +389,85 @@ def _check_completion(challenge: dict[str, Any]) -> Check | None:
     return Check("completion", "fail", f"worst-case bound {worst} exceeds threshold {threshold}")
 
 
+def _strip_status(item: Any) -> Any:
+    if not isinstance(item, dict):
+        return item
+    keep = {}
+    for key in ("id", "type", "formal", "sha256", "hash", "ref", "source"):
+        if key in item:
+            keep[key] = item[key]
+    return keep
+
+
+def _genesis_payload(challenge: dict[str, Any], package: dict[str, Any]) -> dict[str, Any]:
+    mode = challenge.get("mode", package.get("default_mode", "exploratory"))
+    semantics = challenge.get("semantics") if isinstance(challenge.get("semantics"), dict) else {"mode": "payload_only"}
+    flow = challenge.get("flow") if isinstance(challenge.get("flow"), dict) else {}
+    burden = challenge.get("burden") if isinstance(challenge.get("burden"), dict) else {}
+    completion = challenge.get("completion") if isinstance(challenge.get("completion"), dict) else {}
+    bilateral = flow.get("bilateral") if isinstance(flow.get("bilateral"), dict) else {}
+    return {
+        "engine_version": ENGINE_VERSION,
+        "schema_version": SCHEMA_VERSION,
+        "challenge_id": challenge.get("challenge_id"),
+        "package": package.get("package"),
+        "package_version": package.get("version"),
+        "mode": mode,
+        "target": challenge.get("target"),
+        "scope": challenge.get("scope", {}),
+        "threat_model": challenge.get("threat_model", {}),
+        "semantics": {"mode": semantics.get("mode", "payload_only")},
+        "required_obligations": package.get("required_obligations", {}).get(mode, []),
+        "declared_obligation_ids": sorted(
+            str(x.get("id")) for x in challenge.get("obligations", []) if isinstance(x, dict) and x.get("id") is not None
+        ),
+        "negative_control_ids": sorted(
+            str(x.get("id")) for x in challenge.get("negative_controls", []) if isinstance(x, dict) and x.get("id") is not None
+        ),
+        "evidence_refs": [_strip_status(x) for x in challenge.get("evidence", []) if isinstance(x, dict)],
+        "formal_adapter_id": challenge.get("formal_adapter", {}).get("id")
+        if isinstance(challenge.get("formal_adapter"), dict)
+        else None,
+        "semantic_adapter_id": challenge.get("semantic_adapter", {}).get("id")
+        if isinstance(challenge.get("semantic_adapter"), dict)
+        else None,
+        "thresholds": {
+            "burden": burden.get("threshold"),
+            "completion": completion.get("threshold"),
+            "bilateral_tolerance": bilateral.get("tolerance"),
+        },
+    }
+
+
+def _challenge_genesis(challenge: dict[str, Any], package: dict[str, Any]) -> dict[str, Any]:
+    payload = _genesis_payload(challenge, package)
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return {
+        "kind": "CHALLENGE_GENESIS",
+        "hash_algorithm": "sha256",
+        "genesis_hash": digest,
+        "parent": None,
+        "accepted_claims": 0,
+        "rules_frozen": True,
+        "meaning": "immutable rules of engagement before candidate evaluation; no claim is accepted at genesis",
+        "contract": payload,
+    }
+
+
+def _check_genesis_pin(challenge: dict[str, Any], genesis: dict[str, Any]) -> Check | None:
+    pin = challenge.get("genesis")
+    if not isinstance(pin, dict) or "expected_hash" not in pin:
+        return None
+    expected = str(pin.get("expected_hash", "")).strip().lower()
+    if not expected:
+        return Check("genesis_integrity", "fail", "genesis.expected_hash must be non-empty")
+    actual = genesis["genesis_hash"]
+    if expected == actual:
+        return Check("genesis_integrity", "pass", actual)
+    return Check("genesis_integrity", "fail", f"expected {expected}, computed {actual}")
+
+
 def evaluate_challenge(challenge: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(challenge, dict):
         raise ChallengeError("challenge input must be a JSON object")
@@ -318,11 +479,19 @@ def evaluate_challenge(challenge: dict[str, Any]) -> dict[str, Any]:
     challenge["package"] = package_name
     challenge["mode"] = mode
     challenge.setdefault("schema_version", SCHEMA_VERSION)
+    if "semantics" not in challenge:
+        challenge["semantics"] = {"mode": "payload_only"}
+
+    genesis = _challenge_genesis(challenge, package)
 
     checks = _check_basic_structure(challenge, package)
     scope_check = _check_scope(challenge, package)
     if scope_check:
         checks.append(scope_check)
+    threat_check = _check_threat_model(challenge, mode)
+    if threat_check:
+        checks.append(threat_check)
+    checks.append(_check_semantics(challenge))
     checks.extend(_required_obligations(challenge, package))
     checks.extend(_check_negative_controls(challenge, mode))
     formal_check = _check_formal_promotion(challenge, package, mode)
@@ -336,15 +505,21 @@ def evaluate_challenge(challenge: dict[str, Any]) -> dict[str, Any]:
     completion_check = _check_completion(challenge)
     if completion_check:
         checks.append(completion_check)
+    genesis_check = _check_genesis_pin(challenge, genesis)
+    if genesis_check:
+        checks.append(genesis_check)
 
     statuses = [c.status for c in checks]
     if "blocked" in statuses:
         result = "BLOCKED_SCOPE"
     elif any(c.id.startswith("field:") and c.status == "fail" for c in checks) or any(
-        c.id in {"schema_version", "target", "mode", "evidence_shape", "obligations_shape"} and c.status == "fail"
+        c.id in {"schema_version", "target", "mode", "evidence_shape", "obligations_shape", "semantic_scope"}
+        and c.status == "fail"
         for c in checks
     ):
         result = "INVALID"
+    elif "not_in_scope" in statuses:
+        result = "SEMANTICS_NOT_IN_SCOPE"
     elif "fail" in statuses:
         result = "FAILED"
     elif "open" in statuses:
@@ -362,6 +537,7 @@ def evaluate_challenge(challenge: dict[str, Any]) -> dict[str, Any]:
     open_items = [c.id for c in checks if c.status == "open"]
     failed_items = [c.id for c in checks if c.status == "fail"]
     blocked_items = [c.id for c in checks if c.status == "blocked"]
+    not_in_scope_items = [c.id for c in checks if c.status == "not_in_scope"]
 
     return {
         "engine_version": ENGINE_VERSION,
@@ -371,14 +547,22 @@ def evaluate_challenge(challenge: dict[str, Any]) -> dict[str, Any]:
         "mode": mode,
         "result": result,
         "formal_promotion": formal_promotion,
+        "challenge_genesis": genesis,
         "checks": [asdict(c) for c in checks],
         "open_obligations": open_items,
         "failed_obligations": failed_items,
         "blocked_obligations": blocked_items,
+        "not_in_scope": not_in_scope_items,
+        "challenge_definition": "Break the declared claim-to-evidence closure contract, not the prose used to label the target.",
         "claim_boundary": (
-            "The result is relative to this declared challenge contract. "
-            "Non-formal evidence is permitted in exploratory/adversarial modes, "
-            "but it does not become a formal certificate without a passing formal adapter."
+            "The result is relative to this declared challenge contract. target.statement is payload by default; "
+            "unrestricted natural-language semantics are not evaluated unless a declared semantic adapter closes. "
+            "Non-formal evidence is permitted in exploratory/adversarial modes, but it does not become a formal "
+            "certificate without a passing formal adapter."
+        ),
+        "license_boundary": (
+            "The Challenge protocol grants no additional copyright, patent, deployment, benchmarking, or other use rights. "
+            "Repository use remains governed by LICENSE and any separate written challenge authorization."
         ),
     }
 
@@ -393,4 +577,16 @@ def capabilities() -> dict[str, Any]:
         "packages": manifests,
         "stdin_stdout_json": True,
         "network_required": False,
+        "semantic_default": "payload_only",
+        "challenge_definition": "Break the declared claim-to-evidence closure contract, not natural-language prose.",
+        "break_conditions": BREAK_CONDITIONS,
+        "challenge_genesis": {
+            "accepted_claims": 0,
+            "parent": None,
+            "rules_frozen": True,
+            "hash_algorithm": "sha256",
+        },
+        "license_boundary": (
+            "The protocol itself grants no use rights; repository use is governed by LICENSE and any separate written challenge authorization."
+        ),
     }
