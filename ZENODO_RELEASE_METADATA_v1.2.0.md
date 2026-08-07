@@ -26,33 +26,37 @@ Software
 
 ## Release snapshot rule
 
-The separately verified theorem source is present on `Parveen117/Recognition-Kernel-Framework` at post-main theorem commit:
+The latest separately verified source-bound numerical theorem is present on `Parveen117/Recognition-Kernel-Framework/main` at:
 
 ```text
-0502a28042aaa8607b62b71bc1e7df0148438366
+1e4b75eebe634e6de3472aa25d9a0b557da39715
 ```
 
-The post-integration AI implementation was verified on `Parveen117/Artificial-intelligence/main` at:
+Both RKF proof-lab CI and the independent Recognition Kernel Review passed on that exact commit.
 
-```text
-b4444a9cc53e7e8c00c3d488f8466ab66532cb92
-```
-
-with Challenge Engine, `ai-trust-enable-ci`, and CI Proof Pack v5 all successful. The Challenge Engine suite reported 112 tests, all passing.
-
-When creating the GitHub release / Zenodo archive, tag the final `main` snapshot after this metadata synchronization. The archived source must therefore contain the Theorem 46 seam-quotient integration and must not point to an implementation commit older than `b4444a9cc53e7e8c00c3d488f8466ab66532cb92`.
+The AI proof-carrying integration is being verified through PR #16. The eventual GitHub release / Zenodo archive must tag the final post-merge `main` snapshot containing the proof-carrying numerical provenance gate; do not archive an older pre-Theorem-47 implementation snapshot.
 
 ## Description
 
-Artificial Intelligence Trust Enablement v1.2.0 adds a connector-ready, fail-closed Challenge Engine to the existing AI trust-enablement repository. The engine evaluates declared claim-to-evidence closure contracts rather than unrestricted natural-language truth. It supports exploratory, adversarial and certified modes; mathematics, logic, code and authorization-gated security-audit packages; explicit formal/non-formal evidence boundaries; SHA-256 Challenge Genesis and Challenge Evaluation records; observer-flow probes; burden/reserve checks; finite-to-limit completion gates; strict JSON connector parsing; package-manifest commitment; and scoped target-of-evaluation binding.
+Artificial Intelligence Trust Enablement v1.2.0 provides a connector-ready, fail-closed Challenge Engine for declared claim-to-evidence closure contracts rather than unrestricted natural-language truth. It supports exploratory, adversarial and certified modes; mathematics, logic, code and authorization-gated security-audit packages; explicit formal/non-formal evidence boundaries; SHA-256 Challenge Genesis and Challenge Evaluation records; observer-flow probes; burden/reserve checks; finite-to-limit completion gates; strict JSON connector parsing; package-manifest commitment; and scoped target-of-evaluation binding.
 
-The release includes the numerical protocol `exact-rational-directed-enclosure-v1`. Finite connector decimals retain their declared lexemes for exact threshold and canonical-contract decisions. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector; arbitrary-precision exact values may be supplied as quoted decimal or rational strings; approximate values may be represented as directed intervals or balls. Arithmetic uncertainty and analytic/truncation uncertainty remain separate. The declared scalar closure rule is `enclosure_upper + analytic_tail < threshold`; equality is not a strict promotion. External numerical-backend, radius and analytic-tail provenance are not authenticated merely because a participant supplies such fields, and remain source/adapter trust obligations pending the dedicated validator layer.
+For mathematics, the release explicitly treats **formal numeric overclaim** as a special case of mathematical hallucination: a conclusion claims more numerical certainty than its admitted source trace, dependency closure, remainder proof, or strict-bound evidence establishes.
 
-The release also adds `first-visible-jet-seam-quotient-v1`, consuming the separately verified Recognition-Kernel First-Visible-Jet Seam Quotient Closure Theorem. This protocol does not redefine ordinary division by zero. Raw algebraic `1/0` and `0/0` remain invalid. The proof-bearing implementation is intentionally limited to exact polynomial jets for two vanishing functions on one declared seam. Equal first-visible orders give the exact leading-coefficient ratio; a higher numerator order gives quotient zero; a higher denominator order gives no finite quotient; and all-zero declared denominator jets remain `INCOMPLETE_FLAT_OR_UNRESOLVED`. The more general analytic/remainder-bearing seam model remains incomplete until a trusted remainder and denominator-separation validator closes the theorem hypotheses.
+The low-level numerical protocol remains `exact-rational-directed-enclosure-v1`. Finite connector decimals retain their declared lexemes for exact threshold and canonical-contract decisions. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector, while approximate values may be represented as intervals or balls.
 
-Multiple hostile release passes tested duplicate identifiers and keys, malformed/non-standard numbers, package/mode fallback, package path abuse, exact threshold boundaries, scoped TOE mismatch, package-manifest mutation, Genesis integrity, evaluation-result chaining, long exact decimal declarations, rational normalization, interval/ball boundaries, missing floating-point radii, disjoint enclosures, zero denominators, exact first-visible-jet quotient classification, order mismatch, flat-denominator incompleteness, seam Genesis mutation, and attempted promotion of unvalidated approximate seam remainders.
+The new proof-carrying promotion protocol is `proof-carrying-numeric-closure-v1`. Its current proof-bearing subset verifies exact-rational interval DAGs with `exact_contract` source leaves, `add/sub/mul/neg/div` operations, an explicit source-completeness/no-blindness gate, and `zero` or `geometric_tail` analytic-tail rules. A participant may widen a computed enclosure but cannot shrink it below the verifier-computed enclosure. Division fails if the denominator enclosure contains zero. Unsupported source/tail classes remain incomplete.
 
-The current Challenge Engine workflow completes **112 unit/adversarial tests** successfully. Separately, the foundational mathematics/audit layer records **236,456 exact/random/exhaustive adversarial cases**. These counts are reported separately because they represent different forms of verification evidence.
+A participant-supplied radius, analytic tail, backend label, or overlapping set of claimed enclosures no longer self-validates. Overlap remains consistency evidence only. Exact primitive rational/finite-decimal values with zero analytic tail retain the exact compatibility path.
+
+Strict numerical classification is certainty-aware. A verified upper strictly below threshold passes. A verified lower at or above threshold fails, including exact equality for a strict claim. A non-singleton verified interval that touches or crosses the threshold while still containing sub-threshold values remains incomplete.
+
+When proof-carrying numerics are declared, Challenge Genesis commits the proof trace, protocol identifier and a validator-manifest SHA-256. This provides implementation-integrity binding under the frozen challenge contract, but is not a self-authenticating external trust anchor.
+
+The release also includes `first-visible-jet-seam-quotient-v1`. This does not redefine ordinary division by zero. Raw algebraic `1/0` and `0/0` remain invalid. The proof-bearing implementation is limited to exact polynomial jets for two vanishing functions on one declared seam; unresolved flat or approximate remainder-bearing cases remain incomplete until their source-bound remainder hypotheses close.
+
+Multiple hostile passes test parser differentials, malformed/non-standard numbers, package/mode fallback, scoped TOE mismatch, Genesis/evaluation integrity, exact threshold boundaries, long decimal declarations, rational normalization, interval/ball boundaries, missing or forged numeric provenance, denominator-zero enclosures, narrowed proof-DAG intervals, source-completeness failures, exact strict-bound equality, uncertain boundary contact, seam quotient classification, flat-denominator incompleteness, and attempted self-promotion of unvalidated numerical radii/tails/remainders.
+
+The current hardened Challenge Engine PR-head workflow completes **124 unit/adversarial tests** successfully. Separately, the foundational mathematics/audit layer records **236,456 exact/random/exhaustive adversarial cases**. These counts are reported separately because they represent different forms of verification evidence.
 
 Current release audit statuses:
 
@@ -60,9 +64,10 @@ Current release audit statuses:
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
 PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
 PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
+PASS_PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT
 ```
 
-The release does not claim unrestricted English-language understanding, universal semantic truth, universal correctness, universal numerical stability, correctness of arbitrary external numerical backends, automatic authentication of participant-supplied evidence/radii/tails/remainders, a universal algebraic value for `0/0`, uniqueness across genuinely different seams, or stateless replay detection. Challenge Evaluation hashes make individual outcomes reproducible, while replay rejection and external evidence/backend validation remain persistent connector/package responsibilities unless separately authenticated.
+The release does not claim unrestricted English-language understanding, universal semantic or mathematical truth, universal proof checking, correctness/authenticity of arbitrary external numerical backends or measurements, universal source completeness, a universal algebraic value for `0/0`, uniqueness across genuinely different seams, stateless replay detection, or resource-exhaustion resistance. Resource budgets and external executable/source authenticity remain separate deployment hardening obligations.
 
 Repository use remains governed by the repository LICENSE, PATENT_NOTICE.md, COPYRIGHT_NOTICE.md, and any separately declared challenge authorization/scope. The Challenge protocol itself grants no additional copyright, patent, deployment, benchmarking, or derivative-work rights.
 
@@ -71,22 +76,22 @@ Repository use remains governed by the repository LICENSE, PATENT_NOTICE.md, COP
 - artificial intelligence
 - AI safety
 - hallucination detection
+- mathematical hallucination
+- formal numeric overclaim
 - challenge engine
 - adversarial testing
 - red teaming
 - formal verification
+- proof-carrying numerics
 - fail-closed evaluation
 - validated numerics
 - interval arithmetic
-- ball arithmetic
 - exact rational arithmetic
 - indeterminate limits
 - seam quotient
-- first-visible jet
 - machine-readable certificates
 - challenge genesis
 - challenge evaluation
-- persistent records
 - trustworthy AI
 
 ## Important release files
@@ -98,6 +103,7 @@ Repository use remains governed by the repository LICENSE, PATENT_NOTICE.md, COP
 - `challenge_engine/FINAL_SEAL_AUDIT.md`
 - `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`
 - `challenge_engine/SEAM_QUOTIENT_AUDIT.md`
+- `challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md`
 - `challenge_engine/examples/arithmetic_ball_challenge.json`
 - `challenge_engine/examples/seam_quotient_challenge.json`
 - `RELEASE_NOTES_v1.2.0.md`
