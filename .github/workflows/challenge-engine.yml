@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - agent/seam-quotient-after-theorem46
     paths:
       - 'challenge_engine/**'
       - '.github/workflows/challenge-engine.yml'
@@ -44,6 +45,9 @@ jobs:
           assert data['arithmetic_protocol'] == 'exact-rational-directed-enclosure-v1'
           assert data['exact_connector_decimal_lexeme'] is True
           assert data['raw_float_without_radius'] == 'INCOMPLETE'
+          assert data['seam_quotient_protocol'] == 'first-visible-jet-seam-quotient-v1'
+          assert data['seam_quotient_proof_bearing_model'] == 'exact_polynomial_jet'
+          assert 'INVALID' in data['raw_division_by_zero']
           PY
 
       - name: Certified math example
@@ -71,6 +75,20 @@ jobs:
           assert data['arithmetic_summary']['threshold'] == '1'
           overlap = next(x for x in data['checks'] if x['id'] == 'arithmetic_path_overlap')
           assert overlap['status'] == 'pass'
+          PY
+
+      - name: Exact seam quotient example
+        run: |
+          python challenge_engine/challenge.py challenge_engine/examples/seam_quotient_challenge.json --compact > /tmp/seam.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/seam.json'))
+          assert data['result'] == 'CERTIFIED'
+          assert data['seam_quotient_protocol'] == 'first-visible-jet-seam-quotient-v1'
+          assert data['seam_quotient_summary']['classification'] == 'FINITE_SEAM_QUOTIENT'
+          assert data['seam_quotient_summary']['quotient'] == '1/2'
+          check = next(x for x in data['checks'] if x['id'] == 'seam_quotient')
+          assert check['status'] == 'pass'
           PY
 
       - name: Non-formal adversarial example
