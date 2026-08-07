@@ -1,4 +1,4 @@
-# Challenge Engine
+# Challenge Engine v1.2.0
 
 A fail-closed front door for theorem-backed testing.
 
@@ -63,7 +63,7 @@ parent = null
 rules_frozen = true
 ```
 
-The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities and thresholds.
+The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities and every enabled rule selector or threshold that can affect promotion.
 
 A connector can pin the agreed rules:
 
@@ -183,7 +183,7 @@ A challenge may declare:
 "burden": {"beta": 0.72, "threshold": 1.0}
 ```
 
-The engine reports the strict reserve `threshold - beta` and fails when the burden exceeds the threshold.
+The engine reports the strict reserve `threshold - beta` and fails when the burden exceeds the threshold. Negative, Boolean, NaN, or malformed values are rejected rather than coerced.
 
 ## Finite-to-limit promotion
 
@@ -204,7 +204,7 @@ The promotion check is fail-closed:
 finite_upper + completion_error < threshold
 ```
 
-A finite value without `completion_error` returns `INCOMPLETE`.
+A finite value without `completion_error` returns `INCOMPLETE`. Removing or disabling a previously committed completion gate changes the genesis hash.
 
 ## Security-audit scope
 
@@ -219,11 +219,42 @@ The `security_audit` package will not evaluate without:
 
 This package is intended for authorized defensive testing. Scope is part of the machine-readable challenge contract, not a decorative disclaimer.
 
+## External input trust boundary
+
+The engine evaluates closure over supplied package/connector/adapter outputs. It does not authenticate real-world evidence merely because a participant sends valid JSON. Evidence authenticity, provenance, signatures, sandboxing, or remote attestation must be supplied by the relevant connector/package when those properties matter.
+
+This distinction is deliberate: **contract closure is tested here; external-world authenticity is a separate obligation unless explicitly wired in.**
+
 ## Licence / participation boundary
 
 The Challenge protocol does not create a new licence. Repository use is governed by the existing [`LICENSE`](../LICENSE), [`PATENT_NOTICE.md`](../PATENT_NOTICE.md), and any separate written challenge authorization supplied by the rights holder.
 
 If a public Challenge is activated, the public invitation should state the exact permission/scope participants are being given. The engine itself does not enlarge those rights.
+
+## Release verification
+
+The foundational theorem/audit layer currently records:
+
+```text
+236,456 exact/random/exhaustive adversarial cases
+```
+
+The final Challenge Engine release workflow records:
+
+```text
+57 unit/adversarial tests
+35 of them dedicated hostile pre-release attacks
+```
+
+These counts are reported separately because mathematical adversarial cases and software unit tests are different forms of evidence.
+
+Final release audit:
+
+```text
+PASS_FINAL_CHALLENGE_RELEASE_AUDIT
+```
+
+See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md).
 
 ## Tests
 
@@ -231,7 +262,7 @@ If a public Challenge is activated, the public invitation should state the exact
 python -m unittest discover -s challenge_engine/tests -v
 ```
 
-The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope and challenge-genesis integrity.
+The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope, challenge-genesis integrity, duplicate-ID attacks, malformed numeric inputs, evidence-status spoofing, rule-removal mutations and other final release controls.
 
 ## Connector contract
 
