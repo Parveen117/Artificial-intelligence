@@ -1,7 +1,7 @@
 # Challenge Engine Connector Contract
 
 Protocol version: `1.0`
-Engine version: `1.1.0`
+Engine version: `1.2.0`
 
 This document defines the stable local process interface intended for connectors, CI systems and other tools.
 
@@ -23,13 +23,23 @@ not:
 arbitrary English prompt -> universal truth verdict
 ```
 
+## Strict JSON boundary
+
+Connector input is strict interoperable JSON. Before challenge evaluation the process rejects:
+
+- duplicate object keys at any nesting level;
+- `NaN`, `Infinity`, and `-Infinity` tokens;
+- malformed explicit package/mode selections instead of silently replacing them with defaults.
+
+This is intentional. A payload containing two `mode` keys must not be allowed to mean `certified` to one parser and `exploratory` to another.
+
 ## Discover capabilities
 
 ```bash
 python challenge_engine/challenge.py --capabilities --compact
 ```
 
-Output is one JSON object containing `engine_version`, `schema_version`, default package (`math`), installed package manifests, terminal result names, accepted break conditions, semantic default, genesis contract, and stdin/stdout support. No network call is made by the engine.
+Output is one JSON object containing `engine_version`, `schema_version`, default package (`math`), installed package manifests and their SHA-256 commitments, terminal result names, accepted break conditions, semantic default, Genesis contract information, parser/evaluation capabilities, and stdin/stdout support. No network call is made by the engine.
 
 ## Evaluate by file
 
@@ -54,7 +64,7 @@ Send exactly one JSON object on stdin. Read exactly one JSON object on stdout.
 }
 ```
 
-If `package` is omitted, `math` is used. If `mode` is omitted, the selected package's default mode is used. If `semantics` is omitted, `payload_only` is used.
+If `package` is **omitted**, `math` is used. If `mode` is **omitted**, the selected package's default mode is used. If `semantics` is omitted, `payload_only` is used. Explicit blank, null, Boolean, unknown or otherwise malformed package/mode values are not omissions and fail closed as `INVALID`.
 
 For adversarial/certified operation, declare a threat model. Without one the result remains `INCOMPLETE`.
 
@@ -88,6 +98,23 @@ For adversarial/certified operation, declare a threat model. Without one the res
 ```
 
 Input schema: `schema/challenge.schema.json`.
+
+For authorization-gated packages such as `security_audit`, bind the target of evaluation explicitly:
+
+```json
+{
+  "scope": {
+    "authorization": "declared",
+    "target": "local-demo-service"
+  },
+  "target": {
+    "toe": "local-demo-service",
+    "statement": "The declared security property"
+  }
+}
+```
+
+`target.toe` must match `scope.target`.
 
 ## Natural-language semantics
 
@@ -144,21 +171,59 @@ Every result contains:
 
 Genesis means the **rules of engagement are committed before candidate evaluation**. It is not a positive verdict on the target.
 
-The canonical hash commits to the contract declaration, while later pass/fail/open statuses are not used to redefine the original rules.
+The canonical hash commits to the contract declaration, the SHA-256 of the selected package manifest, and the strict-parser contract. Later pass/fail/open outcome statuses are intentionally not used to redefine the original rules.
 
 A connector may pin a previously agreed contract:
 
 ```json
-"genesis": {"expected_hash": "<sha256>"}
+"genesis": {"expected_hash": "<64-hex-sha256>"}
 ```
 
-A mismatch fails `genesis_integrity`.
+A mismatch fails `genesis_integrity`. Malformed pins are `INVALID`.
+
+## Challenge Evaluation / outcome record
+
+Because Genesis freezes rules rather than outcomes, every result also contains a separate hash-bound evaluation object:
+
+```json
+"challenge_evaluation": {
+  "kind": "CHALLENGE_EVALUATION",
+  "hash_algorithm": "sha256",
+  "genesis_hash": "...",
+  "input_sha256": "...",
+  "parent_evaluation_hash": null,
+  "result": "ADVERSARIAL_PASS",
+  "formal_promotion": false,
+  "checks": [],
+  "evaluation_hash": "..."
+}
+```
+
+The same Genesis can therefore support different evidence outcomes while each evaluated input/result remains independently committed.
+
+A subsequent request may carry a parent:
+
+```json
+"evaluation": {"parent_hash": "<64-hex-sha256>"}
+```
+
+The engine validates the parent hash format and carries it into the new evaluation record. The engine is intentionally stateless and cannot itself prove that the declared parent exists or that an old valid evaluation has not been replayed. Existence, uniqueness, ordering and replay rejection are persistent connector/ledger obligations.
+
+## Exact threshold boundary
+
+Burden and finite-to-limit threshold decisions use decimal-intent arithmetic derived from the declared JSON numeric values. This prevents binary floating-point from turning a mathematical equality into a false strict pass. For example, the declared boundary
+
+```text
+0.1 + 0.7 = 0.8
+```
+
+must remain a boundary (`INCOMPLETE` for a strict `<` promotion), even though ordinary binary floating-point may represent the sum as `0.7999999999999999`.
 
 ## Output
 
 ```json
 {
-  "engine_version": "1.1.0",
+  "engine_version": "1.2.0",
   "schema_version": "1.0",
   "challenge_id": "external-001",
   "package": "code",
@@ -166,13 +231,18 @@ A mismatch fails `genesis_integrity`.
   "result": "ADVERSARIAL_PASS",
   "formal_promotion": false,
   "challenge_genesis": {},
+  "challenge_evaluation": {},
   "checks": [],
   "open_obligations": [],
   "failed_obligations": [],
   "blocked_obligations": [],
+  "invalid_contract_fields": [],
   "not_in_scope": [],
   "challenge_definition": "...",
   "claim_boundary": "...",
+  "input_trust_boundary": "...",
+  "parser_boundary": "...",
+  "replay_boundary": "...",
   "license_boundary": "..."
 }
 ```

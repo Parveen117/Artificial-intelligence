@@ -49,6 +49,17 @@ Requesting semantic interpretation without a closed adapter returns `SEMANTICS_N
 
 Non-formal testing is still allowed. Black-box traces, fuzz summaries, measurements, logs, model outputs and similar evidence may be used in exploratory/adversarial modes. They do not silently become formal proof.
 
+## Strict connector JSON
+
+Raw connector input uses strict interoperable JSON:
+
+- duplicate object keys are rejected at any nesting level;
+- `NaN`, `Infinity`, and `-Infinity` are rejected;
+- explicit malformed `package` or `mode` values do not silently fall back to defaults;
+- package names are restricted to installed package manifests.
+
+This prevents parser-differential tricks such as supplying two `mode` keys and relying on one parser to keep the first while another keeps the last.
+
 ## Challenge Genesis: ledger initiation
 
 Every evaluation emits a `CHALLENGE_GENESIS` object. Genesis means:
@@ -63,7 +74,7 @@ parent = null
 rules_frozen = true
 ```
 
-The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities and every enabled rule selector or threshold that can affect promotion.
+The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities, every enabled rule selector or threshold that can affect promotion, the installed package-manifest hash, and the strict-parser contract.
 
 A connector can pin the agreed rules:
 
@@ -72,6 +83,26 @@ A connector can pin the agreed rules:
 ```
 
 Changing a committed rule changes the genesis hash. Changing a later test outcome does not redefine the original rules.
+
+## Challenge Evaluation: outcome commitment
+
+Genesis intentionally freezes rules rather than outcomes. Each run therefore also emits a separate `CHALLENGE_EVALUATION` record containing:
+
+- the Genesis hash;
+- a SHA-256 hash of the normalized evaluated input;
+- the result and computed checks;
+- its own `evaluation_hash`;
+- an optional `parent_evaluation_hash`.
+
+A subsequent request may declare:
+
+```json
+"evaluation": {"parent_hash": "<sha256>"}
+```
+
+This lets a persistent connector/ledger form an outcome chain without confusing changing evidence with changing rules.
+
+The engine itself is stateless. It can verify the shape and carry a parent hash, but it cannot know whether an old valid evaluation is being replayed as a new request. Cross-request replay rejection therefore belongs to the persistent connector or append-only ledger.
 
 ## Quick start
 
@@ -149,7 +180,7 @@ Included packages:
 - `code` — program/specification and behavioral testing.
 - `security_audit` — authorized defensive testing; declared scope is mandatory.
 
-A package specifies allowed modes, its default mode, mandatory obligations per mode, whether authorization is required, and whether formal certification requires a formal adapter.
+A package specifies allowed modes, its default mode, mandatory obligations per mode, whether authorization is required, and whether formal certification requires a formal adapter. The canonical package manifest is SHA-256 committed inside Challenge Genesis, so changing package rules without changing the Genesis commitment is detectable.
 
 Adding another domain does not require changing the mathematical core. Add a package manifest and, when needed, an adapter that produces the declared evidence/obligation fields.
 
@@ -204,18 +235,28 @@ The promotion check is fail-closed:
 finite_upper + completion_error < threshold
 ```
 
+Threshold decisions use decimal-intent arithmetic for the declared numeric values. This matters at exact boundaries: binary floating-point represents `0.1 + 0.7` as `0.7999999999999999` in Python, which could otherwise incorrectly create a strict reserve below `0.8`. The audited engine treats the declared decimal boundary as equality and therefore does not promote it.
+
 A finite value without `completion_error` returns `INCOMPLETE`. Removing or disabling a previously committed completion gate changes the genesis hash.
 
 ## Security-audit scope
 
-The `security_audit` package will not evaluate without:
+The `security_audit` package requires a machine-bound TOE as well as declared authorization:
 
 ```json
-"scope": {
-  "authorization": "declared",
-  "target": "local-demo-service"
+{
+  "scope": {
+    "authorization": "declared",
+    "target": "local-demo-service"
+  },
+  "target": {
+    "toe": "local-demo-service",
+    "statement": "The declared property to test"
+  }
 }
 ```
+
+For authorization-gated packages, `target.toe` must match `scope.target`. This prevents a contract from carrying authorization for one machine-readable target while evaluating another.
 
 This package is intended for authorized defensive testing. Scope is part of the machine-readable challenge contract, not a decorative disclaimer.
 
@@ -239,22 +280,21 @@ The foundational theorem/audit layer currently records:
 236,456 exact/random/exhaustive adversarial cases
 ```
 
-The final Challenge Engine release workflow records:
+The final Challenge Engine workflow records:
 
 ```text
-57 unit/adversarial tests
-35 of them dedicated hostile pre-release attacks
+84 unit/adversarial tests
 ```
 
 These counts are reported separately because mathematical adversarial cases and software unit tests are different forms of evidence.
 
-Final release audit:
+Final seal:
 
 ```text
-PASS_FINAL_CHALLENGE_RELEASE_AUDIT
+PASS_FINAL_CHALLENGE_SEAL_AUDIT
 ```
 
-See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md).
+See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md) and [`FINAL_SEAL_AUDIT.md`](FINAL_SEAL_AUDIT.md).
 
 ## Tests
 
@@ -262,11 +302,11 @@ See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md).
 python -m unittest discover -s challenge_engine/tests -v
 ```
 
-The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope, challenge-genesis integrity, duplicate-ID attacks, malformed numeric inputs, evidence-status spoofing, rule-removal mutations and other final release controls.
+The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope, challenge-genesis integrity, duplicate-ID attacks, malformed numeric inputs, evidence-status spoofing, rule-removal mutations, strict JSON parser differentials, exact decimal threshold boundaries, scoped TOE binding, package-manifest commitment, and evaluation-hash chaining.
 
 ## Connector contract
 
-See [`CONNECTOR_CONTRACT.md`](CONNECTOR_CONTRACT.md) for stable stdin/stdout, genesis and exit-code behavior.
+See [`CONNECTOR_CONTRACT.md`](CONNECTOR_CONTRACT.md) for stable stdin/stdout, genesis, evaluation-chain and exit-code behavior.
 
 ## Mathematical foundation
 
