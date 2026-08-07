@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "challenge_id": "source-bound-numerics-demo-001",
+  "package": "math",
+  "mode": "certified",
+  "target": {
+    "statement": "Under the declared exact-expression and geometric-tail premises, the source-bound scalar remains strictly below four fifths.",
+    "kind": "proof-carrying-numeric-bound"
+  },
+  "semantics": {"mode": "payload_only"},
+  "threat_model": {
+    "goal": "Verify strict numerical promotion only after all declared numerical obligations close.",
+    "break_conditions": ["false_acceptance", "invalid_promotion", "ledger_integrity_failure"]
+  },
+  "evidence": [
+    {"id": "source-bound-trace", "type": "formal-numerical-trace", "status": "pass", "formal": true}
+  ],
+  "obligations": [
+    {"id": "structure", "status": "pass"},
+    {"id": "target", "status": "pass"},
+    {"id": "evidence", "status": "pass"},
+    {"id": "dependencies", "status": "pass"}
+  ],
+  "negative_controls": [
+    {"id": "interval-enclosure-control", "status": "pass"},
+    {"id": "denominator-domain-control", "status": "pass"}
+  ],
+  "formal_adapter": {"id": "source-bound-proof-carrying-numerics-v1", "status": "pass"},
+  "source_bound_numerics": {
+    "protocol": "source-bound-proof-carrying-numerics-v1",
+    "source_model": "exact_expression_v1",
+    "nodes": [
+      {
+        "id": "root",
+        "kind": "exact_contract",
+        "value": "7/10",
+        "interval": {"lower": "7/10", "upper": "7/10"}
+      },
+      {
+        "id": "first-omitted",
+        "kind": "exact_contract",
+        "value": "1/100",
+        "interval": {"lower": "1/100", "upper": "1/100"}
+      },
+      {
+        "id": "tail-ratio",
+        "kind": "exact_contract",
+        "value": "1/2",
+        "interval": {"lower": "1/2", "upper": "1/2"}
+      }
+    ],
+    "root": "root",
+    "tail": {
+      "rule": "geometric_tail",
+      "first_omitted_node": "first-omitted",
+      "ratio_upper_node": "tail-ratio"
+    },
+    "threshold": "4/5"
+  }
+}
