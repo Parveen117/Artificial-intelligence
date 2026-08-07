@@ -29,12 +29,15 @@ def exact_cert(num, den, seam_id="demo-seam") -> dict:
 
 
 class SeamQuotientTheorem46Tests(unittest.TestCase):
-    def test_legacy_challenge_keeps_old_genesis(self):
+    def test_legacy_result_is_preserved_but_t47_fingerprints_genesis(self):
         c = load_math()
         old = evaluate_v4(copy.deepcopy(c))
         new = evaluate_challenge(copy.deepcopy(c))
         self.assertEqual(new["result"], old["result"])
-        self.assertEqual(new["challenge_genesis"]["genesis_hash"], old["challenge_genesis"]["genesis_hash"])
+        self.assertNotEqual(new["challenge_genesis"]["genesis_hash"], old["challenge_genesis"]["genesis_hash"])
+        fingerprint = new["challenge_genesis"]["contract"]["implementation_manifest_sha256"]
+        self.assertEqual(len(fingerprint), 64)
+        int(fingerprint, 16)
 
     def test_equal_order_exact_seam_quotient_certifies(self):
         c = load_math()
