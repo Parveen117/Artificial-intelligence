@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/challenge-engine/source_bound_numerics.schema.json",
+  "title": "Source-Bound Proof-Carrying Numerics Certificate",
+  "type": "object",
+  "required": ["protocol", "source_model", "nodes", "root", "tail", "threshold"],
+  "properties": {
+    "protocol": {"const": "source-bound-proof-carrying-numerics-v1"},
+    "source_model": {"const": "exact_expression_v1"},
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "interval"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["exact_contract", "op"]},
+          "value": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "integer"}, {"type": "number"}]},
+          "op": {"enum": ["add", "sub", "mul", "neg", "div"]},
+          "deps": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          },
+          "interval": {
+            "type": "object",
+            "required": ["lower", "upper"],
+            "properties": {
+              "lower": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "integer"}, {"type": "number"}]},
+              "upper": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "integer"}, {"type": "number"}]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "root": {"type": "string", "minLength": 1},
+    "tail": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["rule"],
+          "properties": {"rule": {"const": "zero"}},
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["rule", "first_omitted_node", "ratio_upper_node"],
+          "properties": {
+            "rule": {"const": "geometric_tail"},
+            "first_omitted_node": {"type": "string", "minLength": 1},
+            "ratio_upper_node": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "threshold": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "integer"}, {"type": "number"}]}
+  },
+  "additionalProperties": false
+}
