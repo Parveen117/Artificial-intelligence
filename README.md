@@ -34,11 +34,19 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 The Challenge is **not** “make the English sentence confusing.” The object under attack is the declared claim-to-evidence closure contract. Natural-language text is payload by default; unrestricted English semantics are not claimed unless a semantic adapter is explicitly declared and closed.
 
-Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim. The Genesis contract now also commits the installed package manifest hash and the strict-parser contract.
+Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim. The Genesis contract commits the installed package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic certificate.
 
 Each evaluated input/result also emits a SHA-256 `CHALLENGE_EVALUATION` record binding the Genesis hash, normalized input hash, result, and computed checks. An optional parent evaluation hash allows an external connector or persistent ledger to chain outcomes. The engine is stateless, so cross-request replay detection remains the responsibility of that persistent connector/ledger.
 
-Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Explicit malformed package or mode values do not silently fall back to defaults. Authorization-gated security challenges bind `target.toe` to the authorized `scope.target` identifier.
+Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Ordinary finite decimal tokens preserve their declared lexeme for exact threshold and canonical-contract decisions. Explicit malformed package or mode values do not silently fall back to defaults. Authorization-gated security challenges bind `target.toe` to the authorized `scope.target` identifier.
+
+The numerical interface is also fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be submitted as directed intervals or validated balls. Arithmetic uncertainty and analytic/truncation uncertainty remain separate, and scalar promotion requires:
+
+```text
+enclosure_upper + analytic_tail < threshold
+```
+
+A raw floating-point centre without a separately validated outward radius remains `INCOMPLETE`. Optional independently computed scalar enclosures must have a common intersection. See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md).
 
 The default package is `math`; `logic`, `code`, and authorization-gated `security_audit` packages are included. A connector can discover the contract with:
 
@@ -56,17 +64,18 @@ Meaningful break classes include false acceptance, blindness escape, scope escap
 
 ### Verification boundary
 
-The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The final Challenge Engine workflow now carries **84 unit/adversarial tests** after the parser/ledger seal pass. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
+The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The current Challenge Engine workflow carries **98 unit/adversarial tests** after the parser/ledger and arithmetic-enclosure hardening passes. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
 
-Final seal status:
+Current audit statuses:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
+PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
 ```
 
-The final seal found and repaired additional real issues beyond the earlier hostile pass, including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, and a binary floating-point boundary case where `0.1 + 0.7` could be represented as `0.7999999999999999` and incorrectly create a strict reserve below `0.8`. Threshold promotion now uses decimal-intent arithmetic for the declared numeric values.
+The audit series found and repaired additional real issues beyond the initial hostile pass, including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, a binary floating-point boundary case where `0.1 + 0.7` could appear slightly below `0.8`, long-decimal loss before exact comparison, raw-float missing-radius promotion risk, and mutually disjoint claimed numeric enclosures.
 
-The audits do not claim universal correctness, unrestricted semantic truth, real-world authenticity of self-asserted evidence, or stateless replay detection. They establish fail-closed behavior against the documented attack classes and leave external evidence authenticity and replay memory to the relevant connector/package or persistent ledger unless separately authenticated. See [`challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md) and [`challenge_engine/FINAL_SEAL_AUDIT.md`](challenge_engine/FINAL_SEAL_AUDIT.md).
+The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, correctness of arbitrary external interval/ball backends, real-world authenticity of self-asserted evidence, or stateless replay detection. They establish fail-closed behavior against the documented attack classes and leave external evidence/backend authenticity and replay memory to the relevant connector/package or persistent ledger unless separately authenticated. See [`challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md), [`challenge_engine/FINAL_SEAL_AUDIT.md`](challenge_engine/FINAL_SEAL_AUDIT.md), and [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md).
 
 ## Quick start
 
@@ -142,11 +151,12 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
-- `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, burden and completion checks.
+- `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, burden, completion, and proof-bearing arithmetic checks.
 - `challenge_engine/RED_TEAM_RULES.md` - red-team rules of engagement and meaningful break classes.
-- `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout contract.
+- `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout and arithmetic-certificate contract.
 - `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - first hostile pre-release audit.
-- `challenge_engine/FINAL_SEAL_AUDIT.md` - final parser, threshold, scoped-TOE, Genesis and evaluation-ledger seal audit.
+- `challenge_engine/FINAL_SEAL_AUDIT.md` - parser, threshold, scoped-TOE, Genesis and evaluation-ledger seal audit.
+- `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md` - exact-rational, long-decimal, interval/ball and outward-promotion audit.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.

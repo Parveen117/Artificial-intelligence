@@ -37,15 +37,18 @@ A participant should attempt to demonstrate a meaningful break of the declared c
 
 Natural-language ambiguity, rhetorical tricks, or semantic disagreement are not a break unless the selected package explicitly declares a semantic adapter and the challenge concerns that adapter.
 
+For numerical challenges, a meaningful break includes demonstrating that the engine grants a strict promotion even though the declared outward arithmetic enclosure plus analytic tail reaches or crosses the threshold, or that mutually disjoint claimed certified paths are nevertheless accepted as compatible.
+
 ## Allowed technical interaction
 
 For a publicly activated endpoint, the invitation should state exactly which of the following are permitted:
 
 - submit Challenge Package JSON to the designated endpoint;
 - inspect returned machine-readable results, Challenge Genesis records and Challenge Evaluation records;
-- vary targets, evidence, obligations, negative controls, flow probes, burden values, completion values, and threat-model fields within the published protocol;
+- vary targets, evidence, obligations, negative controls, flow probes, burden values, completion values, arithmetic certificates and threat-model fields within the published protocol;
 - attempt malformed, adversarial, boundary, mutation, parser-differential and fail-closed test cases against the designated Challenge interface;
-- attempt duplicate-key and numeric-boundary inputs against the documented connector interface without resource-exhaustion behavior;
+- attempt duplicate-key, exact-decimal, rational, interval/ball and numeric-boundary inputs against the documented connector interface without resource-exhaustion behavior;
+- attempt to create an invalid numerical promotion using missing radii, exact equality, negative radii, malformed rational denominators, disjoint certified enclosures or under-declared analytic tails;
 - report reproducible findings with the relevant release/version, Genesis hash and Evaluation hash.
 
 Do not infer authorization for any activity not explicitly listed in the public invitation.
@@ -60,6 +63,7 @@ Do not infer authorization for any activity not explicitly listed in the public 
 - attacks on unrelated services, accounts, networks, or data;
 - claims that unrestricted English semantics are part of the engine when `semantics.mode = payload_only`;
 - treating a participant-supplied evidence status as independently authenticated when the selected connector/package provides no provenance or attestation mechanism;
+- treating a participant-supplied interval or ball as independently validated merely because it has a radius field. Backend validation/provenance is a separate package/connector obligation;
 - treating the stateless engine as a replay database. Replay rejection requires the persistent connector/ledger to remember prior Evaluation hashes.
 
 ## Evidence standard for a reported break
@@ -74,7 +78,8 @@ A report should include:
 6. expected outcome under the declared contract;
 7. observed outcome;
 8. the break class being claimed;
-9. enough information to reproduce the result without expanding scope.
+9. for a numerical break, the exact rational/decimal/enclosure values and arithmetic/analytic uncertainty channels involved;
+10. enough information to reproduce the result without expanding scope.
 
 A parser error or crash is a software defect if it violates the documented connector contract, but it is not automatically a theorem-level false acceptance.
 
@@ -88,9 +93,9 @@ parent = null
 rules_frozen = true
 ```
 
-The final sealed Genesis also commits the SHA-256 of the selected package manifest and the strict-parser contract.
+The sealed Genesis commits the SHA-256 of the selected package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic certificate.
 
-If a participant changes a committed target, scope, threat model, adapter identity, enabled gate, threshold, package rules, or scoped TOE identifier, the Genesis commitment should change. Changing an outcome/status under the same rules should not redefine Genesis.
+If a participant changes a committed target, scope, threat model, adapter identity, enabled gate, threshold, arithmetic enclosure, analytic tail, package rules, or scoped TOE identifier, the Genesis commitment should change. Changing an outcome/status under the same rules should not redefine Genesis.
 
 ## Evaluation record and replay boundary
 
@@ -98,15 +103,25 @@ Each run emits a hash-bound `CHALLENGE_EVALUATION` record. This binds the frozen
 
 The engine is stateless. It validates and carries a parent hash but cannot independently prove that the parent exists, that the submitted event is new, or that a historical valid Evaluation is not being replayed. A public deployment that promises replay rejection must implement persistent Evaluation-hash storage or equivalent ledger state outside the pure evaluation engine.
 
-## Numeric boundary expectation
+## Numerical boundary expectation
 
-Strict promotion requires a genuinely positive reserve. Exact decimal boundaries such as
+Exact finite decimals are interpreted by declared value for strict threshold decisions. Thus
 
 ```text
 0.1 + 0.7 = 0.8
 ```
 
-are boundaries, not passes. A claimed break based only on ordinary binary floating-point rendering should be evaluated against the engine's declared decimal-intent threshold rule.
+is a boundary, not a pass.
+
+For an approximate proof-bearing numerical result, the public arithmetic rule is:
+
+```text
+enclosure_upper + analytic_tail < threshold
+```
+
+A raw floating-point centre without a separately validated outward radius remains incomplete. Independent claimed certified scalar enclosures must have a nonempty common intersection.
+
+A participant may attack these rules. They should not claim a break merely because their local language/runtime prints a different binary floating-point rendering of the same declared decimal.
 
 ## Participation and rights boundary
 

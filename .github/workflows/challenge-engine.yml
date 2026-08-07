@@ -41,6 +41,9 @@ jobs:
           assert 'ledger_integrity_failure' in data['break_conditions']
           names = {p['package'] for p in data['packages']}
           assert {'math','logic','code','security_audit'} <= names
+          assert data['arithmetic_protocol'] == 'exact-rational-directed-enclosure-v1'
+          assert data['exact_connector_decimal_lexeme'] is True
+          assert data['raw_float_without_radius'] == 'INCOMPLETE'
           PY
 
       - name: Certified math example
@@ -54,6 +57,20 @@ jobs:
           assert data['challenge_genesis']['accepted_claims'] == 0
           assert data['challenge_genesis']['rules_frozen'] is True
           assert len(data['challenge_genesis']['genesis_hash']) == 64
+          PY
+
+      - name: Validated arithmetic example
+        run: |
+          python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json --compact > /tmp/arithmetic.json
+          python - <<'PY'
+          import json
+          data = json.load(open('/tmp/arithmetic.json'))
+          assert data['result'] == 'CERTIFIED'
+          assert data['arithmetic_protocol'] == 'exact-rational-directed-enclosure-v1'
+          assert data['arithmetic_summary']['outward_upper'] == '49/50'
+          assert data['arithmetic_summary']['threshold'] == '1'
+          overlap = next(x for x in data['checks'] if x['id'] == 'arithmetic_path_overlap')
+          assert overlap['status'] == 'pass'
           PY
 
       - name: Non-formal adversarial example

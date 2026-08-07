@@ -56,9 +56,10 @@ Raw connector input uses strict interoperable JSON:
 - duplicate object keys are rejected at any nesting level;
 - `NaN`, `Infinity`, and `-Infinity` are rejected;
 - explicit malformed `package` or `mode` values do not silently fall back to defaults;
-- package names are restricted to installed package manifests.
+- package names are restricted to installed package manifests;
+- ordinary finite decimal tokens retain their original JSON spelling for exact declared-value threshold and canonical-contract decisions.
 
-This prevents parser-differential tricks such as supplying two `mode` keys and relying on one parser to keep the first while another keeps the last.
+This prevents parser-differential tricks such as supplying two `mode` keys and relying on one parser to keep the first while another keeps the last. For truly arbitrary-precision proof values, use quoted exact decimal/rational strings in `arithmetic_certificate`; do not rely on an ordinary platform float to preserve an unlimited numeric token.
 
 ## Challenge Genesis: ledger initiation
 
@@ -74,7 +75,7 @@ parent = null
 rules_frozen = true
 ```
 
-The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities, every enabled rule selector or threshold that can affect promotion, the installed package-manifest hash, and the strict-parser contract.
+The engine hashes the canonical contract with SHA-256. The committed contract includes target, package/mode, scope, threat model, semantic mode, declared obligation/control identifiers, evidence references, adapter identities, every enabled rule selector or threshold that can affect promotion, the installed package-manifest hash, parser/arithmetic contracts, exact connector numeric declarations, and any declared arithmetic certificate.
 
 A connector can pin the agreed rules:
 
@@ -82,7 +83,7 @@ A connector can pin the agreed rules:
 "genesis": {"expected_hash": "<sha256>"}
 ```
 
-Changing a committed rule changes the genesis hash. Changing a later test outcome does not redefine the original rules.
+Changing a committed rule changes the genesis hash. Changing a later test outcome does not redefine the original rules. Numerically equivalent finite-decimal spellings such as `0.1` and `0.10` canonicalize to the same exact declared value rather than creating a fake rule change.
 
 ## Challenge Evaluation: outcome commitment
 
@@ -110,6 +111,12 @@ Default package is `math`.
 
 ```bash
 python challenge_engine/challenge.py challenge_engine/examples/math_challenge.json
+```
+
+Validated arithmetic example:
+
+```bash
+python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json
 ```
 
 Black-box / non-formal adversarial example:
@@ -150,7 +157,7 @@ The threat-model goal, accepted break conditions, target, evidence and mandatory
 
 ### `certified`
 
-All adversarial requirements apply, plus at least one formal support item, a passing `formal_adapter`, every package-required obligation closed, and any declared burden/completion bound closed. A fully closed challenge returns `CERTIFIED`.
+All adversarial requirements apply, plus at least one formal support item, a passing `formal_adapter`, every package-required obligation closed, and any declared burden/completion/arithmetic bound closed. A fully closed challenge returns `CERTIFIED`.
 
 Certification is always relative to the declared challenge contract. It is not a universal truth oracle.
 
@@ -202,7 +209,7 @@ An adapter may expose a transformation/observer-flow sequence:
 }
 ```
 
-The engine checks that declared target visibility does not revert at a deeper probe order and that the declared first-recognition order matches the supplied probe record.
+The engine checks that declared target visibility does not revert at a deeper probe order and that the declared first-recognition order matches the supplied probe record. Connector decimal spellings used in numeric flow checks are retained for exact declared-value comparison.
 
 The probe objects are adapter outputs. The engine does not infer a generator or semantic model from arbitrary raw prose/data.
 
@@ -235,9 +242,75 @@ The promotion check is fail-closed:
 finite_upper + completion_error < threshold
 ```
 
-Threshold decisions use decimal-intent arithmetic for the declared numeric values. This matters at exact boundaries: binary floating-point represents `0.1 + 0.7` as `0.7999999999999999` in Python, which could otherwise incorrectly create a strict reserve below `0.8`. The audited engine treats the declared decimal boundary as equality and therefore does not promote it.
+Declared finite decimal tokens are compared through their exact decimal values. Thus a boundary such as `0.1 + 0.7 = 0.8` remains equality and cannot become a false strict pass merely because a binary float happens to lie just below `0.8`.
 
 A finite value without `completion_error` returns `INCOMPLETE`. Removing or disabling a previously committed completion gate changes the genesis hash.
+
+## Proof-bearing arithmetic enclosures
+
+The generic arithmetic protocol is:
+
+```text
+exact-rational-directed-enclosure-v1
+```
+
+It does **not** turn every number into a fraction. Exact integers, rationals and finite declared decimals have zero arithmetic radius. Irrational, transcendental, solver-produced or otherwise approximate values can be supplied as directed intervals or validated balls.
+
+Exact rational example:
+
+```json
+"arithmetic_certificate": {
+  "kind": "exact_rational",
+  "numerator": "7",
+  "denominator": "10",
+  "analytic_tail": "1/100",
+  "threshold": "4/5"
+}
+```
+
+Validated ball example:
+
+```json
+"arithmetic_certificate": {
+  "kind": "ball",
+  "backend": "validated-backend-v1",
+  "center": "0.93",
+  "radius": "0.01",
+  "analytic_tail": "0.04",
+  "threshold": "1"
+}
+```
+
+The certificate separates two different uncertainties:
+
+```text
+arithmetic radius   = uncertainty introduced by numerical representation/operations
+analytic tail       = uncertainty from finite analytic/refinement depth
+```
+
+The scalar promotion rule is strictly outward:
+
+```text
+enclosure_upper + analytic_tail < threshold
+```
+
+Equality is `INCOMPLETE`, not a strict pass. An outward upper above the threshold is `FAILED`.
+
+Supported certificate kinds are:
+
+```text
+exact_rational
+exact_decimal
+directed_interval
+ball
+raw_float
+```
+
+For arbitrary precision, use quoted exact decimal/rational strings in the certificate fields. A `raw_float` centre without a validated outward `radius` is calibration only and returns `INCOMPLETE`; with a separately validated radius it participates as an enclosure.
+
+A challenge may also supply two or more `independent_enclosures`. Their common scalar intersection must be nonempty. Disjoint claimed certified paths fail closed because they cannot all contain the same exact target. Overlap is a necessary consistency check, not proof that the external backends are intrinsically correct.
+
+See [`ARITHMETIC_ENCLOSURE_AUDIT.md`](ARITHMETIC_ENCLOSURE_AUDIT.md).
 
 ## Security-audit scope
 
@@ -262,7 +335,7 @@ This package is intended for authorized defensive testing. Scope is part of the 
 
 ## External input trust boundary
 
-The engine evaluates closure over supplied package/connector/adapter outputs. It does not authenticate real-world evidence merely because a participant sends valid JSON. Evidence authenticity, provenance, signatures, sandboxing, or remote attestation must be supplied by the relevant connector/package when those properties matter.
+The engine evaluates closure over supplied package/connector/adapter outputs. It does not authenticate real-world evidence merely because a participant sends valid JSON. Evidence authenticity, provenance, signatures, sandboxing, remote attestation, or correctness of an external interval/ball backend must be supplied by the relevant connector/package when those properties matter.
 
 This distinction is deliberate: **contract closure is tested here; external-world authenticity is a separate obligation unless explicitly wired in.**
 
@@ -280,21 +353,22 @@ The foundational theorem/audit layer currently records:
 236,456 exact/random/exhaustive adversarial cases
 ```
 
-The final Challenge Engine workflow records:
+The current Challenge Engine workflow records:
 
 ```text
-84 unit/adversarial tests
+98 unit/adversarial tests
 ```
 
 These counts are reported separately because mathematical adversarial cases and software unit tests are different forms of evidence.
 
-Final seal:
+Current audit statuses:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
+PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
 ```
 
-See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md) and [`FINAL_SEAL_AUDIT.md`](FINAL_SEAL_AUDIT.md).
+See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md), [`FINAL_SEAL_AUDIT.md`](FINAL_SEAL_AUDIT.md), and [`ARITHMETIC_ENCLOSURE_AUDIT.md`](ARITHMETIC_ENCLOSURE_AUDIT.md).
 
 ## Tests
 
@@ -302,14 +376,14 @@ See [`FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](FINAL_ADVERSARIAL_RELEASE_AUDIT.md) a
 python -m unittest discover -s challenge_engine/tests -v
 ```
 
-The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope, challenge-genesis integrity, duplicate-ID attacks, malformed numeric inputs, evidence-status spoofing, rule-removal mutations, strict JSON parser differentials, exact decimal threshold boundaries, scoped TOE binding, package-manifest commitment, and evaluation-hash chaining.
+The tests cover the default `math` package, certified math promotion, non-formal adversarial evidence, authorization blocking, formal/non-formal evidence boundary, completion-error gating, burden failure, flow recognition monotonicity, negative controls, semantic scope, challenge-genesis integrity, duplicate-ID attacks, malformed numeric inputs, evidence-status spoofing, rule-removal mutations, strict JSON parser differentials, exact long-decimal threshold boundaries, scoped TOE binding, package-manifest commitment, evaluation-hash chaining, exact rational/decimal certificates, interval/ball outward promotion, raw-float fail-closed behavior, and independent-enclosure consistency.
 
 ## Connector contract
 
-See [`CONNECTOR_CONTRACT.md`](CONNECTOR_CONTRACT.md) for stable stdin/stdout, genesis, evaluation-chain and exit-code behavior.
+See [`CONNECTOR_CONTRACT.md`](CONNECTOR_CONTRACT.md) for stable stdin/stdout, genesis, evaluation-chain, arithmetic-certificate and exit-code behavior.
 
 ## Mathematical foundation
 
-The Challenge Engine is the user-facing contract layer. The theorem paper under `foundational_mathematics/invariant_gated_state_transitions/` supplies the mathematical justification for target blindness, flow/observer refinement, finite-to-infinite completion, finite obstruction certificates, burden reserve, gate closure and persistent records.
+The Challenge Engine is the user-facing contract layer. The theorem paper under `foundational_mathematics/invariant_gated_state_transitions/` supplies the public mathematical justification for target blindness, flow/observer refinement, finite-to-infinite completion, finite obstruction certificates, burden reserve, gate closure and persistent records. The arithmetic certificate is a generic outward-enclosure adapter over those declared completion obligations.
 
 The interface deliberately uses ordinary testing/red-team language. The theorem layer remains rigorous underneath it.

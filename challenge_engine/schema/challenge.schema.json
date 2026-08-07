@@ -4,6 +4,21 @@
   "title": "Challenge Engine Input",
   "type": "object",
   "required": ["challenge_id", "target"],
+  "$defs": {
+    "exactScalar": {
+      "oneOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "integer"},
+        {"type": "number"}
+      ]
+    },
+    "integerLike": {
+      "oneOf": [
+        {"type": "integer"},
+        {"type": "string", "pattern": "^[+-]?[0-9]+$"}
+      ]
+    }
+  },
   "properties": {
     "schema_version": {"type": "string", "const": "1.0"},
     "challenge_id": {"type": "string", "minLength": 1},
@@ -147,6 +162,44 @@
         "finite_upper": {"type": "number", "minimum": 0},
         "completion_error": {"type": "number", "minimum": 0},
         "threshold": {"type": "number", "exclusiveMinimum": 0, "default": 1.0}
+      },
+      "additionalProperties": true
+    },
+    "arithmetic_certificate": {
+      "type": "object",
+      "required": ["kind", "analytic_tail", "threshold"],
+      "properties": {
+        "kind": {"enum": ["exact_rational", "exact_decimal", "directed_interval", "ball", "raw_float"]},
+        "relation": {"const": "upper_below_threshold", "default": "upper_below_threshold"},
+        "backend": {"type": "string"},
+        "numerator": {"$ref": "#/$defs/integerLike"},
+        "denominator": {"$ref": "#/$defs/integerLike"},
+        "value": {"$ref": "#/$defs/exactScalar"},
+        "lower": {"$ref": "#/$defs/exactScalar"},
+        "upper": {"$ref": "#/$defs/exactScalar"},
+        "center": {"$ref": "#/$defs/exactScalar"},
+        "radius": {"$ref": "#/$defs/exactScalar"},
+        "analytic_tail": {"$ref": "#/$defs/exactScalar"},
+        "threshold": {"$ref": "#/$defs/exactScalar"},
+        "independent_enclosures": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "numerator": {"$ref": "#/$defs/integerLike"},
+              "denominator": {"$ref": "#/$defs/integerLike"},
+              "value": {"$ref": "#/$defs/exactScalar"},
+              "lower": {"$ref": "#/$defs/exactScalar"},
+              "upper": {"$ref": "#/$defs/exactScalar"},
+              "center": {"$ref": "#/$defs/exactScalar"},
+              "radius": {"$ref": "#/$defs/exactScalar"}
+            },
+            "additionalProperties": true
+          }
+        }
       },
       "additionalProperties": true
     }
