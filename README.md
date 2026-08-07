@@ -34,19 +34,34 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 The Challenge is **not** “make the English sentence confusing.” The object under attack is the declared claim-to-evidence closure contract. Natural-language text is payload by default; unrestricted English semantics are not claimed unless a semantic adapter is explicitly declared and closed.
 
-Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim. The Genesis contract commits the installed package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic certificate.
+Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim. The Genesis contract commits the installed package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic or seam-quotient certificate.
 
 Each evaluated input/result also emits a SHA-256 `CHALLENGE_EVALUATION` record binding the Genesis hash, normalized input hash, result, and computed checks. An optional parent evaluation hash allows an external connector or persistent ledger to chain outcomes. The engine is stateless, so cross-request replay detection remains the responsibility of that persistent connector/ledger.
 
 Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Ordinary finite decimal tokens preserve their declared lexeme for exact threshold and canonical-contract decisions. Explicit malformed package or mode values do not silently fall back to defaults. Authorization-gated security challenges bind `target.toe` to the authorized `scope.target` identifier.
 
-The numerical interface is also fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be submitted as directed intervals or validated balls. Arithmetic uncertainty and analytic/truncation uncertainty remain separate, and scalar promotion requires:
+The numerical interface is fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be represented as directed intervals or balls, with arithmetic uncertainty kept separate from analytic/truncation uncertainty. The current arithmetic contract checks the declared outward relation, but external backend/radius/tail authenticity remains a connector or validator obligation rather than something inferred from a JSON label. See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md).
+
+### First-visible-jet seam quotient
+
+The Challenge Engine also exposes the exact finite-jet subset of the Recognition-Kernel first-visible-jet seam quotient theorem through:
 
 ```text
-enclosure_upper + analytic_tail < threshold
+first-visible-jet-seam-quotient-v1
 ```
 
-A raw floating-point centre without a separately validated outward radius remains `INCOMPLETE`. Optional independently computed scalar enclosures must have a common intersection. See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md).
+This does **not** redefine ordinary division by zero. Raw `1/0` and raw algebraic `0/0` remain invalid. For two exact vanishing polynomial jets on one named seam, the engine compares their first nonzero orders:
+
+```text
+numerator order > denominator order    quotient -> 0
+orders equal                            quotient -> leading numerator / leading denominator
+numerator order < denominator order    no finite quotient
+all denominator jets zero              INCOMPLETE_FLAT_OR_UNRESOLVED
+```
+
+The general analytic/remainder-bearing seam model remains `INCOMPLETE` until a trusted remainder/denominator-separation validator closes the hypotheses. A participant cannot promote a quotient merely by submitting a field called `claimed_remainder`.
+
+See [`challenge_engine/SEAM_QUOTIENT_AUDIT.md`](challenge_engine/SEAM_QUOTIENT_AUDIT.md).
 
 The default package is `math`; `logic`, `code`, and authorization-gated `security_audit` packages are included. A connector can discover the contract with:
 
@@ -64,18 +79,19 @@ Meaningful break classes include false acceptance, blindness escape, scope escap
 
 ### Verification boundary
 
-The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The current Challenge Engine workflow carries **98 unit/adversarial tests** after the parser/ledger and arithmetic-enclosure hardening passes. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
+The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The current Challenge Engine workflow carries **112 unit/adversarial tests** after parser/ledger, arithmetic-enclosure and exact seam-quotient hardening. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
 
 Current audit statuses:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
 PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
+PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
 ```
 
-The audit series found and repaired additional real issues beyond the initial hostile pass, including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, a binary floating-point boundary case where `0.1 + 0.7` could appear slightly below `0.8`, long-decimal loss before exact comparison, raw-float missing-radius promotion risk, and mutually disjoint claimed numeric enclosures.
+The audit series found and repaired concrete issues including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, binary floating-point boundary errors, long-decimal loss before exact comparison, missing-radius behavior, incompatible numeric enclosures, and unsafe finite-jet interpretations of apparent `0/0` forms.
 
-The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, correctness of arbitrary external interval/ball backends, real-world authenticity of self-asserted evidence, or stateless replay detection. They establish fail-closed behavior against the documented attack classes and leave external evidence/backend authenticity and replay memory to the relevant connector/package or persistent ledger unless separately authenticated. See [`challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`](challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md), [`challenge_engine/FINAL_SEAL_AUDIT.md`](challenge_engine/FINAL_SEAL_AUDIT.md), and [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md).
+The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, correctness of arbitrary external interval/ball backends, correctness of participant-asserted radii/tails/remainders, real-world authenticity of self-asserted evidence, or stateless replay detection. They establish fail-closed behavior against the documented attack classes and leave external evidence/backend authenticity and replay memory to the relevant connector/package or persistent ledger unless separately authenticated.
 
 ## Quick start
 
@@ -151,12 +167,13 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
-- `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, burden, completion, and proof-bearing arithmetic checks.
+- `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, arithmetic and seam-quotient checks.
 - `challenge_engine/RED_TEAM_RULES.md` - red-team rules of engagement and meaningful break classes.
-- `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout and arithmetic-certificate contract.
+- `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout, arithmetic and seam-quotient contract.
 - `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - first hostile pre-release audit.
 - `challenge_engine/FINAL_SEAL_AUDIT.md` - parser, threshold, scoped-TOE, Genesis and evaluation-ledger seal audit.
 - `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md` - exact-rational, long-decimal, interval/ball and outward-promotion audit.
+- `challenge_engine/SEAM_QUOTIENT_AUDIT.md` - exact finite-jet apparent-`0/0` classification and integration audit.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.

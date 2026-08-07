@@ -202,6 +202,26 @@
         }
       },
       "additionalProperties": true
+    },
+    "seam_quotient_certificate": {
+      "type": "object",
+      "required": ["seam_id", "model", "numerator_coefficients", "denominator_coefficients"],
+      "properties": {
+        "seam_id": {"type": "string", "minLength": 1},
+        "model": {"enum": ["exact_polynomial_jet", "analytic_with_validated_remainder"]},
+        "relation": {"const": "finite_seam_quotient", "default": "finite_seam_quotient"},
+        "numerator_coefficients": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/exactScalar"}
+        },
+        "denominator_coefficients": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/exactScalar"}
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true

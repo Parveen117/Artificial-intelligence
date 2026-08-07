@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Compatibility import for the final-seal Challenge Engine implementation."""
+"""Compatibility import for the current hardened Challenge Engine implementation."""
 try:
-    from .engine_v4 import *  # noqa: F401,F403
+    from .engine_v5 import *  # noqa: F401,F403
 except ImportError:
-    from engine_v4 import *  # noqa: F401,F403
+    from engine_v5 import *  # noqa: F401,F403

@@ -20,52 +20,55 @@ The release provides:
 - strict connector JSON with duplicate-key and NaN/Infinity rejection;
 - exact connector decimal-lexeme preservation for declared-value decisions;
 - SHA-256 `CHALLENGE_GENESIS` records with zero accepted claims and frozen rules of engagement;
-- package-manifest hashing inside Genesis so package-rule mutation changes the commitment;
+- package-manifest hashing inside Genesis;
 - genesis pinning to detect later rule mutation;
 - SHA-256 `CHALLENGE_EVALUATION` records binding each input/result under its Genesis;
-- optional evaluation-parent hashes for connector/ledger chaining;
-- observer-flow probes and first-recognition-order checks;
-- bilateral-defect and remainder controls;
-- burden/reserve gates;
-- finite-to-limit promotion requiring strict outward reserve;
-- `exact_rational`, `exact_decimal`, `directed_interval`, `ball`, and bounded `raw_float` arithmetic certificates;
+- observer-flow probes, burden/reserve gates and finite-to-limit checks;
+- exact-rational / interval-ball arithmetic certificate support;
 - separate arithmetic-radius and analytic-tail channels;
-- optional independent-enclosure common-intersection checks;
-- raw floating-point centres without a validated outward radius held at `INCOMPLETE`;
+- first-visible-jet seam-quotient protocol for an exact finite-jet class of apparent `0/0` limits;
+- explicit rejection of raw algebraic `1/0` and raw algebraic `0/0` as finite values;
+- fail-closed handling of unresolved flat denominator jets and unvalidated approximate seam remainders;
 - machine binding of `target.toe` to authorized `scope.target` for scoped packages;
 - stable JSON stdin/stdout connector behavior;
-- explicit external evidence-authenticity and replay boundaries;
-- fail-closed authorization for the security-audit package.
+- explicit external evidence-authenticity and replay boundaries.
 
-Meaningful break classes are:
+Meaningful break classes remain `false_acceptance`, `blindness_escape`, `scope_escape`, `negative_control_escape`, `invalid_promotion`, `flow_consistency_escape`, and `ledger_integrity_failure`.
 
-- `false_acceptance`;
-- `blindness_escape`;
-- `scope_escape`;
-- `negative_control_escape`;
-- `invalid_promotion`;
-- `flow_consistency_escape`;
-- `ledger_integrity_failure`.
+## Hostile audit sequence
 
-## Final hostile audits
+The first hostile release pass repaired duplicate identifiers, implicit/empty evidence, failed-evidence masking, malformed numeric inputs, flow-probe ambiguity, Python truthiness, and incomplete Genesis commitment of enabled gates.
 
-The first hostile release pass found and repaired concrete weaknesses involving duplicate identifiers, implicit/empty evidence, failed-evidence masking, malformed numeric inputs, flow-probe ambiguity, Python truthiness, and incomplete Genesis commitment of enabled gates.
+The parser/ledger seal then repaired duplicate JSON-key differentials, non-standard JSON numbers, malformed package/mode fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, and a binary floating-point threshold false-pass route.
 
-The final seal then targeted a different class of attacks and found further real issues: duplicate JSON-key parser differentials, non-standard JSON numbers, silent fallback from malformed package/mode values, package path/name abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, and a binary floating-point threshold error that could turn the exact boundary `0.1 + 0.7 = 0.8` into a false strict pass.
+The arithmetic-enclosure pass added the typed exact-rational / directed-enclosure contract, long-decimal preservation, interval/ball checks, explicit arithmetic/tail separation, missing-radius controls, and independent-enclosure consistency.
 
-The arithmetic-enclosure pass then generalized that patch into a typed numerical contract. Exact integers/rationals/finite decimals occupy the zero-radius sector; approximate numerical results require directed intervals or validated balls; analytic truncation/completion tails remain separate; and strict promotion is granted only when the outward arithmetic upper bound plus analytic tail remains below the threshold. Long decimal lexemes, arbitrary-precision exact strings, raw-float missing-radius cases, interval/ball boundaries, independent enclosure disagreement, and rational-denominator failures are included in the hostile suite.
+The seam-quotient pass then consumed the separately verified Recognition-Kernel first-visible-jet theorem. The release now distinguishes:
 
-Final audit statuses:
+```text
+raw 1/0                              invalid
+raw 0/0                              invalid
+exact vanishing jets, equal order    finite leading-coefficient quotient
+numerator higher order               finite quotient zero
+numerator lower order                divergent / no finite quotient
+all denominator jets zero            incomplete / unresolved
+approximate remainder-bearing seam   incomplete until validator closure
+```
+
+The seam adapter is deliberately narrower than the general theorem. It certifies only `exact_polynomial_jet`. Participant-supplied remainder/radius/tail claims do not become theorem hypotheses by declaration.
+
+Current audit statuses:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
 PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
+PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
 ```
 
-Challenge Engine workflow:
+Current Challenge Engine workflow:
 
 ```text
-Ran 98 tests
+Ran 112 tests
 OK
 ```
 
@@ -79,25 +82,33 @@ The two counts are intentionally not collapsed into one homogeneous number becau
 
 ## Numerical claim boundary
 
-The public arithmetic protocol is:
+The arithmetic protocol is:
 
 ```text
 exact-rational-directed-enclosure-v1
 ```
 
-For a scalar upper-threshold certificate, the rule is:
+For the scalar upper-threshold relation, the declared closure rule is:
 
 ```text
 enclosure_upper + analytic_tail < threshold
 ```
 
-Exact values have zero arithmetic radius. Arbitrary-precision exact values should be carried as quoted decimal/rational strings. A raw floating-point centre is not proof-bearing without a separately validated outward radius. An external interval/ball backend is not authenticated merely because it supplies a radius; backend validity and provenance remain connector/package obligations.
+Exact values have zero arithmetic radius. A raw floating-point centre without an outward radius remains incomplete. The engine does not independently authenticate arbitrary external interval/ball backends or prove every participant-supplied radius/tail; those remain source/adapter trust obligations pending the dedicated validator layer.
+
+## Seam-quotient claim boundary
+
+The seam protocol is:
+
+```text
+first-visible-jet-seam-quotient-v1
+```
+
+It is a theorem-backed limit classification for declared vanishing functions on a named seam, not a redefinition of field arithmetic. The exact finite-jet adapter cannot resolve flat-function cases and does not claim uniqueness across genuinely different seams. The general quantitative quotient enclosure remains gated until its remainder and denominator-separation hypotheses are source-validated.
 
 ## General claim boundary
 
-This release does not claim unrestricted English-language understanding, universal semantic truth, universal correctness, automatic authentication of participant-supplied evidence, universal numerical stability, or stateless replay detection. The Challenge Engine evaluates closure relative to the declared package, adapters, evidence, scope, obligations, arithmetic enclosures, thresholds, and threat model.
-
-Non-formal evidence is admissible in exploratory and adversarial modes, but it does not become a formal certificate without the formal-promotion requirements of the selected package.
+This release does not claim unrestricted English-language understanding, universal semantic truth, universal correctness, automatic authentication of participant-supplied evidence, universal numerical stability, correctness of arbitrary external numerical backends, or stateless replay detection.
 
 `CHALLENGE_EVALUATION` gives each evaluated input/result a reproducible hash and optional parent link. Detecting reuse of an old valid evaluation as a new request requires persistent connector/ledger memory.
 
@@ -112,6 +123,7 @@ python challenge_engine/challenge.py --capabilities --compact
 python -m unittest discover -s challenge_engine/tests -v
 python challenge_engine/challenge.py challenge_engine/examples/math_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json --compact
+python challenge_engine/challenge.py challenge_engine/examples/seam_quotient_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/nonformal_behavioral_challenge.json --compact
 python challenge_engine/challenge.py challenge_engine/examples/security_audit_challenge.json --compact
 ```
@@ -124,4 +136,5 @@ See:
 - `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md`
 - `challenge_engine/FINAL_SEAL_AUDIT.md`
 - `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`
+- `challenge_engine/SEAM_QUOTIENT_AUDIT.md`
 - `foundational_mathematics/invariant_gated_state_transitions/`

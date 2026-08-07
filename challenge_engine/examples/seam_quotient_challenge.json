@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "challenge_id": "seam-quotient-demo-001",
+  "package": "math",
+  "mode": "certified",
+  "target": {
+    "statement": "The declared vanishing-function ratio has a finite seam quotient determined by its first visible jet.",
+    "kind": "seam-quotient"
+  },
+  "semantics": {"mode": "payload_only"},
+  "threat_model": {
+    "goal": "Force the engine to assign a finite value to an unresolved or divergent apparent 0/0 form.",
+    "break_conditions": ["false_acceptance", "invalid_promotion", "ledger_integrity_failure"]
+  },
+  "evidence": [
+    {"id": "exact-jet-packet", "type": "exact-polynomial-jet", "status": "pass", "formal": true}
+  ],
+  "obligations": [
+    {"id": "structure", "status": "pass"},
+    {"id": "target", "status": "pass"},
+    {"id": "evidence", "status": "pass"},
+    {"id": "dependencies", "status": "pass"}
+  ],
+  "negative_controls": [
+    {"id": "raw-division-by-zero", "status": "pass"},
+    {"id": "flat-denominator", "status": "pass"},
+    {"id": "order-mismatch", "status": "pass"}
+  ],
+  "formal_adapter": {"id": "first-visible-jet-v1", "status": "pass"},
+  "seam_quotient_certificate": {
+    "seam_id": "demo-regular-seam",
+    "model": "exact_polynomial_jet",
+    "relation": "finite_seam_quotient",
+    "numerator_coefficients": [0, 0, "2"],
+    "denominator_coefficients": [0, 0, "4"]
+  }
+}
