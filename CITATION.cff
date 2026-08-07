@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you reference this public technical release, please cite it as below. Repository use remains governed by LICENSE and related rights notices."
-title: "Artificial Intelligence Trust Enablement: Recognition-Residue Evaluation, Release Control, and Finality Certificates"
+title: "Recognition Null Kernel Engine (RNKE): Challenge Engine and Foundational Verification"
 type: software
 version: "1.2.0"
 date-released: "2026-08-07"
@@ -10,16 +10,20 @@ authors:
     given-names: "Monty"
     orcid: "https://orcid.org/0009-0005-6948-209X"
     affiliation: "Independent Researcher"
-abstract: "A public technical AI trust-enablement and challenge-testing repository for recognition-residue evaluation, hallucination-risk classification, release control, machine-readable certificates, persistent finality records, and fail-closed challenge evaluation. Version 1.2.0 adds a connector-ready Challenge Engine with exploratory, adversarial, and certified modes; explicit natural-language semantic scope; threat-model break classes; challenge-genesis hashing; observer-flow probes; burden/reserve checks; finite-to-limit completion gates; and a final hostile release audit."
+abstract: "A public technical release of the Recognition Null Kernel Engine (RNKE), a general verification architecture for formalizable claim-evidence-dependency systems. The release includes AI trust-enablement components and a connector-ready, fail-closed Challenge Engine with exploratory, adversarial, and certified modes; mathematical hallucination and formal numeric-overclaim testing; challenge-genesis and evaluation hashing; exact and proof-carrying numerical gates; seam-quotient negative controls; observer-flow probes; burden/reserve checks; and finite-to-limit completion gates. The current public Challenge is a benchmark of RNKE rather than the full scope of the architecture."
 keywords:
+  - Recognition Null Kernel Engine
+  - RNKE
   - artificial intelligence
   - AI safety
   - hallucination detection
-  - recognition residue
+  - mathematical hallucination
+  - formal numeric overclaim
   - challenge engine
   - adversarial testing
   - red teaming
   - formal verification
+  - proof-carrying numerics
   - fail-closed evaluation
   - machine-readable certificates
   - trustworthy AI
