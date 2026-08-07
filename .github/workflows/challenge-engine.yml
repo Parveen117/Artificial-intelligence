@@ -47,6 +47,10 @@ jobs:
           assert data['seam_quotient_protocol'] == 'first-visible-jet-seam-quotient-v1'
           assert data['seam_quotient_proof_bearing_model'] == 'exact_polynomial_jet'
           assert 'INVALID' in data['raw_division_by_zero']
+          assert data['proof_carrying_numeric_protocol'] == 'proof-carrying-numeric-closure-v1'
+          assert data['math_hallucination_numeric_class'] == 'formal_numeric_overclaim'
+          assert data['participant_asserted_radius_or_tail'].startswith('INCOMPLETE')
+          assert len(data['numeric_validator_manifest_sha256']) == 64
           PY
 
       - name: Certified math example
@@ -62,7 +66,7 @@ jobs:
           assert len(data['challenge_genesis']['genesis_hash']) == 64
           PY
 
-      - name: Validated arithmetic example
+      - name: Proof-carrying arithmetic example
         run: |
           python challenge_engine/challenge.py challenge_engine/examples/arithmetic_ball_challenge.json --compact > /tmp/arithmetic.json
           python - <<'PY'
@@ -72,8 +76,13 @@ jobs:
           assert data['arithmetic_protocol'] == 'exact-rational-directed-enclosure-v1'
           assert data['arithmetic_summary']['outward_upper'] == '49/50'
           assert data['arithmetic_summary']['threshold'] == '1'
+          assert data['proof_carrying_numeric_protocol'] == 'proof-carrying-numeric-closure-v1'
+          assert data['proof_carrying_numeric_summary']['classification'] == 'CERTIFIED_NUMERIC_CLOSURE'
+          assert data['proof_carrying_numeric_summary']['final_interval'][1] == '49/50'
           overlap = next(x for x in data['checks'] if x['id'] == 'arithmetic_path_overlap')
           assert overlap['status'] == 'pass'
+          provenance = next(x for x in data['checks'] if x['id'] == 'proof_carrying_numeric')
+          assert provenance['status'] == 'pass'
           PY
 
       - name: Exact seam quotient example

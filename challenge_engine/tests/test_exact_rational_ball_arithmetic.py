@@ -52,7 +52,7 @@ class ExactRationalBallArithmeticTests(unittest.TestCase):
         self.assertEqual(exact["$.completion.finite_upper"], {"numerator": "1", "denominator": "10"})
         self.assertEqual(exact["$.completion.threshold"], {"numerator": "4", "denominator": "5"})
 
-    def test_exact_rational_certificate_passes(self):
+    def test_exact_rational_with_unproved_tail_is_incomplete(self):
         c = load_math()
         c["arithmetic_certificate"] = {
             "kind": "exact_rational",
@@ -62,8 +62,9 @@ class ExactRationalBallArithmeticTests(unittest.TestCase):
             "threshold": "4/5",
         }
         r = evaluate_challenge(c)
-        self.assertEqual(r["result"], "CERTIFIED")
+        self.assertEqual(r["result"], "INCOMPLETE")
         self.assertEqual(r["arithmetic_summary"]["arithmetic_radius"], "0")
+        self.assertIn("proof_carrying_numeric", r["open_obligations"])
 
     def test_exact_decimal_arbitrary_precision_passes(self):
         c = load_math()
@@ -114,7 +115,7 @@ class ExactRationalBallArithmeticTests(unittest.TestCase):
         self.assertEqual(r["result"], "INCOMPLETE")
         self.assertFalse(r["arithmetic_summary"]["proof_bearing"])
 
-    def test_raw_float_with_validated_radius_can_close(self):
+    def test_raw_float_with_asserted_radius_stays_incomplete(self):
         c = load_math()
         c["arithmetic_certificate"] = {
             "kind": "raw_float",
@@ -123,7 +124,9 @@ class ExactRationalBallArithmeticTests(unittest.TestCase):
             "analytic_tail": "0.01",
             "threshold": "0.80",
         }
-        self.assertEqual(evaluate_challenge(c)["result"], "CERTIFIED")
+        r = evaluate_challenge(c)
+        self.assertEqual(r["result"], "INCOMPLETE")
+        self.assertIn("proof_carrying_numeric", r["open_obligations"])
 
     def test_disjoint_independent_enclosures_fail(self):
         c = load_math()
@@ -140,7 +143,7 @@ class ExactRationalBallArithmeticTests(unittest.TestCase):
         }
         self.assertEqual(evaluate_challenge(c)["result"], "FAILED")
 
-    def test_overlapping_independent_enclosures_pass(self):
+    def test_overlapping_independent_enclosures_are_consistent_but_not_self_proving(self):
         c = load_math()
         c["arithmetic_certificate"] = {
             "kind": "ball",
@@ -154,9 +157,10 @@ class ExactRationalBallArithmeticTests(unittest.TestCase):
             ]
         }
         r = evaluate_challenge(c)
-        self.assertEqual(r["result"], "CERTIFIED")
+        self.assertEqual(r["result"], "INCOMPLETE")
         check = next(x for x in r["checks"] if x["id"] == "arithmetic_path_overlap")
         self.assertEqual(check["status"], "pass")
+        self.assertIn("proof_carrying_numeric", r["open_obligations"])
 
     def test_zero_denominator_is_invalid(self):
         c = load_math()
