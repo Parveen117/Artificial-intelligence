@@ -2,6 +2,22 @@
 
 Release date: 2026-08-07
 
+## Verified source state
+
+The theorem and engine integration used for this release were independently verified at these post-integration snapshots:
+
+```text
+Recognition-Kernel-Framework/main
+0502a28042aaa8607b62b71bc1e7df0148438366
+
+Artificial-intelligence/main post-integration/post-cleanup reference
+b4444a9cc53e7e8c00c3d488f8466ab66532cb92
+```
+
+The Recognition-Kernel theorem packet passed the proof-lab matrix on Python 3.11 and 3.12 plus the repository review workflow. The AI repository snapshot passed Challenge Engine, `ai-trust-enable-ci`, and CI Proof Pack v5. The Challenge Engine suite reported 112 tests, all passing.
+
+The eventual GitHub release tag / Zenodo archive should be created from the final `main` snapshot after any documentation-only synchronization that follows this note. It must not point to an implementation commit older than `b4444a9cc53e7e8c00c3d488f8466ab66532cb92`.
+
 ## Release focus
 
 Version 1.2.0 promotes the repository from a primarily AI trust-enablement implementation to a connector-ready, fail-closed Challenge Engine backed by foundational theorem and adversarial-audit layers.
