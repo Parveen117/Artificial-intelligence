@@ -10,13 +10,41 @@
     "challenge_id": {"type": ["string", "null"]},
     "package": {"type": "string"},
     "mode": {"type": "string"},
-    "result": {"enum": ["OBSERVED", "ADVERSARIAL_PASS", "CERTIFIED", "INCOMPLETE", "FAILED", "INVALID", "BLOCKED_SCOPE"]},
+    "result": {
+      "enum": [
+        "OBSERVED",
+        "ADVERSARIAL_PASS",
+        "CERTIFIED",
+        "INCOMPLETE",
+        "FAILED",
+        "INVALID",
+        "BLOCKED_SCOPE",
+        "SEMANTICS_NOT_IN_SCOPE"
+      ]
+    },
     "formal_promotion": {"type": "boolean"},
+    "challenge_genesis": {
+      "type": "object",
+      "properties": {
+        "kind": {"const": "CHALLENGE_GENESIS"},
+        "hash_algorithm": {"const": "sha256"},
+        "genesis_hash": {"type": "string"},
+        "parent": {"type": "null"},
+        "accepted_claims": {"const": 0},
+        "rules_frozen": {"const": true},
+        "meaning": {"type": "string"},
+        "contract": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
     "checks": {"type": "array"},
     "open_obligations": {"type": "array"},
     "failed_obligations": {"type": "array"},
     "blocked_obligations": {"type": "array"},
-    "claim_boundary": {"type": "string"}
+    "not_in_scope": {"type": "array"},
+    "challenge_definition": {"type": "string"},
+    "claim_boundary": {"type": "string"},
+    "license_boundary": {"type": "string"}
   },
   "additionalProperties": true
 }
