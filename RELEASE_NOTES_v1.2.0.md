@@ -1,10 +1,10 @@
-# Artificial Intelligence Trust Enablement v1.2.0
+# Recognition Null Kernel Engine (RNKE) v1.2.0
 
 Release date: 2026-08-07
 
 ## Verified source state
 
-The post-Theorem-47 source-bound numerical theorem is verified on `Recognition-Kernel-Framework/main` at:
+The separately verified source-bound numerical theorem is present on `Recognition-Kernel-Framework/main` at:
 
 ```text
 1e4b75eebe634e6de3472aa25d9a0b557da39715
@@ -12,15 +12,37 @@ The post-Theorem-47 source-bound numerical theorem is verified on `Recognition-K
 
 The RKF proof-lab CI and independent Recognition Kernel Review both passed on that exact commit.
 
-The AI Challenge Engine integration is being verified through PR #16. The hardened PR head carries the proof-carrying numerical provenance gate and reports 124 Challenge Engine tests passing before final documentation synchronization. The eventual GitHub release / Zenodo archive must be cut from the final post-merge `main`, not from an older pre-proof-carrying snapshot.
+The proof-carrying numerical Challenge integration was merged to `Artificial-intelligence/main` at `56011af8e01e98325e8ee86c532ded93c918c488`. The publication-safe RNKE framing was then merged through PR #17 at:
+
+```text
+b41c96415bc7556992065c1e90cb4ca31fa0de71
+```
+
+The final GitHub release / Zenodo archive must be cut from this publication-framed lineage or a later verified `main` commit that contains it. An older pre-RNKE-framing snapshot should not be used for the final v1.2.0 archive.
+
+## RNKE framing
+
+Version 1.2.0 presents the public implementation as the **Recognition Null Kernel Engine (RNKE)**: a general verification architecture for formalizable systems whose claims, evidence, dependencies, governing rules, admissible transitions, and committed state can be represented explicitly.
+
+RNKE is organized around three public principles:
+
+1. **Null-as-Cut:** verification begins from a structured genesis state with no admitted claims and a frozen rule structure;
+2. **Recognition Before Commitment:** a claim is promoted only after its required evidence, dependencies, invariants, and proof obligations close;
+3. **Persistent Verification History:** accepted, rejected, refuted, and unresolved events can remain bound to a tamper-evident lineage when the required persistent connector/ledger is present.
+
+The present Challenge Engine is a benchmark of RNKE rather than the full scope of RNKE. The mathematical package is deliberately used as a severe special case of **mathematical hallucination detection**, where a break occurs if a formal conclusion is promoted beyond the closure actually established by its proof flow, dependency structure, numerical enclosure, or remainder obligations. A formal numeric overclaim is one subclass of this broader failure.
+
+The architecture may support additional domain adapters when their semantics and source-authentication obligations are explicitly supplied. Candidate directions include AI safety, software/specification verification, finance/compliance, scientific provenance, biotechnology workflows, law/governance records, and supply-chain provenance. These are application directions, not claims that every listed adapter is already completed or validated.
+
+Private hardware/device-enabling material is outside this public release.
 
 ## Release focus
 
-Version 1.2.0 promotes the repository from a primarily AI trust-enablement implementation to a connector-ready, fail-closed Challenge Engine backed by foundational theorem and adversarial-audit layers.
+Version 1.2.0 provides a connector-ready, fail-closed Challenge Engine backed by foundational theorem and adversarial-audit layers.
 
 The Challenge is defined narrowly: **break the declared claim-to-evidence closure contract, not the prose used to label the target.** Natural-language semantics are payload-only by default and enter the evaluation only through an explicitly declared semantic adapter.
 
-For mathematics, a new adversarial subclass is now explicit: **formal numeric overclaim**. This is a special case of mathematical hallucination in which a conclusion claims more numerical certainty than its admitted source trace, remainder proof, or dependency closure establishes.
+For mathematics, an adversarial subclass is explicit: **formal numeric overclaim**. This is a special case of mathematical hallucination in which a conclusion claims more numerical certainty than its admitted source trace, remainder proof, or dependency closure establishes.
 
 ## Challenge Engine
 
@@ -61,7 +83,7 @@ The arithmetic-enclosure pass added the typed exact-rational / directed-enclosur
 
 The seam-quotient pass consumed the separately verified first-visible-jet theorem and kept raw field division by zero invalid.
 
-The source-bound numerical pass then closed the most important remaining numerical trust membrane. A participant-supplied radius, analytic tail, backend label, or overlapping set of claimed enclosures is no longer sufficient for certification. Approximate numerical promotion requires the generic protocol:
+The source-bound numerical pass closed the most important numerical trust membrane. A participant-supplied radius, analytic tail, backend label, or overlapping set of claimed enclosures is not sufficient for certification. Approximate numerical promotion requires the generic protocol:
 
 ```text
 proof-carrying-numeric-closure-v1
@@ -72,9 +94,9 @@ The currently admitted proof-bearing subset uses exact rational interval DAGs, o
 Strict boundary handling is certainty-aware:
 
 ```text
-verified upper < threshold                pass
-verified lower >= threshold               fail
-verified interval straddles/touches bound incomplete
+verified upper < threshold                 pass
+verified lower >= threshold                fail
+verified interval straddles/touches bound  incomplete
 ```
 
 Thus exact equality fails a strict inequality, while uncertain boundary contact remains incomplete.
@@ -88,7 +110,7 @@ PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
 PASS_PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT
 ```
 
-Current Challenge Engine hardened PR-head workflow:
+Current Challenge Engine workflow:
 
 ```text
 Ran 124 tests
@@ -157,6 +179,7 @@ python challenge_engine/challenge.py challenge_engine/examples/security_audit_ch
 
 See:
 
+- `RNKE_PUBLIC_INTRODUCTION.md`
 - `challenge_engine/README.md`
 - `challenge_engine/RED_TEAM_RULES.md`
 - `challenge_engine/CONNECTOR_CONTRACT.md`
