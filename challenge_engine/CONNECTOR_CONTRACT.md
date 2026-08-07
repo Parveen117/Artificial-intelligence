@@ -1,17 +1,16 @@
 # Challenge Engine Connector Contract
 
-Protocol version: `1.0`
-Engine version: `1.2.0`
-Arithmetic protocol: `exact-rational-directed-enclosure-v1`
-Seam quotient protocol: `first-visible-jet-seam-quotient-v1`
+Protocol version: `1.0`  
+Engine version: `1.2.0` release candidate  
+Arithmetic protocol: `exact-rational-directed-enclosure-v1`  
+Seam protocol: `first-visible-jet-seam-quotient-v1`  
+Source-bound numerical protocol: `source-bound-proof-carrying-numerics-v1`
 
-This document defines the stable local process interface intended for connectors, CI systems and other tools.
+This document defines the stable local process interface intended for connectors, CI systems, and other tools.
 
 ## What the connector is connecting to
 
-The engine evaluates a **declared claim-to-evidence closure contract**.
-
-It does not treat `target.statement` as unrestricted natural-language semantics. By default the statement is a payload/label identifying the target. A connector that wants language semantics evaluated must declare a semantic adapter.
+The engine evaluates a **declared claim-to-evidence closure contract**. It does not treat `target.statement` as unrestricted natural-language semantics. By default the statement is payload identifying the target. A connector that wants language semantics evaluated must declare a semantic adapter.
 
 A red-team connector should therefore think in these terms:
 
@@ -27,15 +26,9 @@ arbitrary English prompt -> universal truth verdict
 
 ## Strict JSON and numeric boundary
 
-Connector input is strict interoperable JSON. Before challenge evaluation the process rejects:
+Connector input is strict interoperable JSON. Before evaluation the process rejects duplicate object keys and non-standard `NaN`, `Infinity`, and `-Infinity` tokens. Explicit malformed package/mode selections do not silently become defaults.
 
-- duplicate object keys at any nesting level;
-- `NaN`, `Infinity`, and `-Infinity` tokens;
-- malformed explicit package/mode selections instead of silently replacing them with defaults.
-
-Ordinary finite decimal JSON tokens retain their original numeric lexeme so exact declared-value threshold and canonical-contract decisions do not depend on a later binary floating representation. Numerically equivalent finite-decimal spellings canonicalize to the same exact rational value for Genesis.
-
-For genuinely arbitrary-precision proof values, use quoted exact decimal/rational strings inside the relevant certificate. A connector should not expect an ordinary platform float to preserve an unlimited decimal token merely because JSON looked very serious about it.
+Ordinary finite decimal JSON tokens retain their original numeric lexeme so exact declared-value comparisons do not depend on a later binary floating representation. For genuinely arbitrary-precision proof values, use quoted exact decimal/rational strings in the numerical certificate fields.
 
 ## Discover capabilities
 
@@ -43,21 +36,16 @@ For genuinely arbitrary-precision proof values, use quoted exact decimal/rationa
 python challenge_engine/challenge.py --capabilities --compact
 ```
 
-Output is one JSON object containing engine/schema versions, default package, installed package manifests and SHA-256 commitments, terminal results, accepted break conditions, semantic default, Genesis/evaluation capabilities, arithmetic protocol, seam-quotient protocol, and stdin/stdout support. No network call is made by the engine.
+The result publishes package manifests, terminal states, parser/numerical protocols, seam-quotient boundary, source-bound operations/tail rules, the current implementation-manifest SHA-256, and stdin/stdout behavior.
 
-## Evaluate by file
-
-```bash
-python challenge_engine/challenge.py /path/to/challenge.json --compact
-```
-
-## Evaluate by stdin
+## Evaluate by file or stdin
 
 ```bash
-python challenge_engine/challenge.py - --compact
+python challenge_engine/challenge.py challenge.json --compact
+cat challenge.json | python challenge_engine/challenge.py - --compact
 ```
 
-Send exactly one JSON object on stdin. Read exactly one JSON object on stdout.
+The process writes one JSON object to stdout.
 
 ## Minimum input
 
@@ -68,28 +56,7 @@ Send exactly one JSON object on stdin. Read exactly one JSON object on stdout.
 }
 ```
 
-If `package` is **omitted**, `math` is used. If `mode` is **omitted**, the selected package's default mode is used. If `semantics` is omitted, `payload_only` is used. Explicit blank, null, Boolean, unknown or otherwise malformed package/mode values are not omissions and fail closed as `INVALID`.
-
-For adversarial/certified operation, declare a threat model. Without one the result remains `INCOMPLETE`.
-
-Input schema: `schema/challenge.schema.json`.
-
-For authorization-gated packages such as `security_audit`, bind the target of evaluation explicitly:
-
-```json
-{
-  "scope": {
-    "authorization": "declared",
-    "target": "local-demo-service"
-  },
-  "target": {
-    "toe": "local-demo-service",
-    "statement": "The declared security property"
-  }
-}
-```
-
-`target.toe` must match `scope.target`.
+If `package` is omitted, `math` is used. If `mode` is omitted, the selected package default is used. Explicit blank/null/Boolean/unknown package or mode values are invalid rather than omissions.
 
 ## Natural-language semantics
 
@@ -98,8 +65,6 @@ Default:
 ```json
 "semantics": {"mode": "payload_only"}
 ```
-
-In this mode an ambiguous, adversarial or witty English sentence does not redefine the theorem-backed challenge. The engine evaluates only the declared adapters/evidence/obligations.
 
 To request semantic interpretation:
 
@@ -110,11 +75,11 @@ To request semantic interpretation:
 }
 ```
 
-If semantic interpretation is requested without a closed adapter, the terminal result is `SEMANTICS_NOT_IN_SCOPE`.
+Requesting semantic interpretation without a closed adapter returns `SEMANTICS_NOT_IN_SCOPE`.
 
 ## Break conditions
 
-The protocol recognizes:
+Machine-readable break classes are:
 
 ```text
 false_acceptance
@@ -126,11 +91,9 @@ flow_consistency_escape
 ledger_integrity_failure
 ```
 
-A package-specific challenge may choose the subset relevant to its target. These values define what success for the challenger means before evaluation begins.
+## Challenge Genesis
 
-## Challenge Genesis / ledger initiation
-
-Every result contains a `CHALLENGE_GENESIS` record with:
+Every valid evaluation emits `CHALLENGE_GENESIS` with:
 
 ```text
 accepted_claims = 0
@@ -138,43 +101,58 @@ parent = null
 rules_frozen = true
 ```
 
-Genesis means the **rules of engagement are committed before candidate evaluation**. It is not a positive verdict on the target.
+Genesis freezes rules, not outcomes. The contract commits target/scope/threat model, package/mode, adapter and obligation declarations, package-manifest SHA-256, parser/arithmetic declarations, numerical/seam certificates when present, and the current `implementation_manifest_sha256`.
 
-The canonical hash commits to the contract declaration, selected package-manifest hash, parser/arithmetic contracts, exact connector numeric declarations, and declared arithmetic/seam-quotient certificates. Outcome statuses do not redefine the original rules.
+The implementation fingerprint is a deliberate T47 hardening. It commits the parser/validator implementation used to interpret the rules, so a changed interpreter does not masquerade as the same frozen Genesis.
 
-A connector may pin a previously agreed contract:
+A connector may pin an agreed Genesis:
 
 ```json
 "genesis": {"expected_hash": "<64-hex-sha256>"}
 ```
 
-A mismatch fails `genesis_integrity`. Malformed pins are `INVALID`.
+Because the T47 implementation fingerprint was introduced before the final v1.2.0 tag/archive, pre-T47 Genesis hashes are not release-stable pins. Pin the final release implementation.
 
-Legacy requests with no seam-quotient certificate retain the pre-seam Genesis contract. A request that declares a seam certificate commits its protocol, seam identity, model and coefficient arrays into Genesis.
+## Challenge Evaluation
 
-## Challenge Evaluation / outcome record
+Every valid result also emits `CHALLENGE_EVALUATION`, binding:
 
-Every result also contains a hash-bound `CHALLENGE_EVALUATION` record. It binds the Genesis hash, normalized input, result and computed checks. A subsequent request may carry:
+- Genesis hash;
+- normalized input hash;
+- result and computed checks;
+- optional parent Evaluation hash;
+- its own SHA-256 evaluation hash.
+
+The pure engine remains stateless. Parent existence, event uniqueness, ordering, and cross-request replay rejection require a persistent connector/ledger.
+
+## Security target binding
+
+Authorization-gated packages require:
 
 ```json
-"evaluation": {"parent_hash": "<64-hex-sha256>"}
+{
+  "scope": {
+    "authorization": "declared",
+    "target": "local-demo-service"
+  },
+  "target": {
+    "toe": "local-demo-service",
+    "statement": "The declared property"
+  }
+}
 ```
 
-The engine validates and carries the parent hash. The engine is intentionally stateless and cannot itself prove parent existence, event uniqueness or cross-request replay rejection. Those are persistent connector/ledger obligations.
+`target.toe` must equal `scope.target`.
 
-## Exact threshold boundary
+## Legacy arithmetic certificate
 
-Burden, flow numeric checks and finite-to-limit threshold decisions use the exact declared decimal lexeme when the request came through the strict connector parser. Thus the mathematical equality
+The legacy numerical carrier remains:
 
 ```text
-0.1 + 0.7 = 0.8
+exact-rational-directed-enclosure-v1
 ```
 
-cannot become a false strict pass because of binary rendering.
-
-## Proof-bearing arithmetic certificate
-
-The optional arithmetic certificate supports:
+Supported kinds remain:
 
 ```text
 exact_rational
@@ -184,48 +162,176 @@ ball
 raw_float
 ```
 
-The current scalar relation is `upper_below_threshold`, with the declared closure rule:
+The old arithmetic layer still parses these objects and performs outward consistency calculations. T47 changes their **formal trust status**.
+
+Without a T47 source proof, the only intrinsically proof-bearing legacy numerical cases are:
 
 ```text
-enclosure_upper + analytic_tail < threshold
+exact_rational with analytic_tail = 0
+exact_decimal  with analytic_tail = 0
 ```
 
-Exact rational/decimal values occupy the zero-arithmetic-radius sector. Directed intervals and balls carry an outward arithmetic enclosure. A raw float without a radius remains `INCOMPLETE`.
-
-**Important trust boundary:** the engine currently checks closure relative to submitted interval/radius/tail values. It does not, by itself, authenticate an external numerical backend or independently derive every submitted radius/tail. A deployment that represents such values as externally validated must provide the validating adapter/provenance layer. This boundary is being kept explicit rather than promoted by naming ceremony.
-
-Independent scalar enclosures may be supplied. Their common intersection must be nonempty; disjoint claimed certified paths fail closed. Overlap is necessary consistency, not external-backend authentication.
-
-## First-visible-jet seam quotient certificate
-
-The optional seam quotient certificate represents a ratio of two vanishing functions along a declared seam. It does **not** redefine ordinary algebraic division by zero.
-
-Raw scalar:
+The following do not formally promote merely because the participant supplied a radius or tail:
 
 ```text
-1/0   invalid
-0/0   invalid
+directed_interval
+ball
+raw_float with radius
+exact value with nonzero analytic_tail
 ```
 
-Current proof-bearing model:
+If those objects are otherwise consistent, the formal result is held at `INCOMPLETE`. Disjoint independent enclosures can still fail. Overlap remains only a necessary consistency check, not backend authentication.
 
-```text
-exact_polynomial_jet
-```
-
-Example:
+Thus this legacy example:
 
 ```json
-"seam_quotient_certificate": {
-  "seam_id": "demo-regular-seam",
-  "model": "exact_polynomial_jet",
-  "relation": "finite_seam_quotient",
-  "numerator_coefficients": [0, 0, "2"],
-  "denominator_coefficients": [0, 0, "4"]
+"arithmetic_certificate": {
+  "kind": "ball",
+  "center": "0.93",
+  "radius": "0.01",
+  "analytic_tail": "0.04",
+  "threshold": "1"
 }
 ```
 
-Both constant coefficients must be zero. The coefficient arrays describe exact polynomial jets on the named seam. Let `r_A` and `r_B` denote first nonzero coefficient indices. The engine classifies:
+is no longer self-certifying. A field called `radius` is not evidence of how that radius was obtained.
+
+## T47 source-bound proof-carrying numerics
+
+The proof-bearing numerical path is:
+
+```text
+source-bound-proof-carrying-numerics-v1
+```
+
+Current source model:
+
+```text
+exact_expression_v1
+```
+
+Current admitted operations:
+
+```text
+add
+sub
+mul
+neg
+div
+```
+
+A certificate is shaped as:
+
+```json
+"source_bound_numerics": {
+  "protocol": "source-bound-proof-carrying-numerics-v1",
+  "source_model": "exact_expression_v1",
+  "nodes": [
+    {
+      "id": "a",
+      "kind": "exact_contract",
+      "value": "1/3",
+      "interval": {"lower": "1/3", "upper": "1/3"}
+    },
+    {
+      "id": "b",
+      "kind": "exact_contract",
+      "value": "1/6",
+      "interval": {"lower": "1/6", "upper": "1/6"}
+    },
+    {
+      "id": "root",
+      "kind": "op",
+      "op": "add",
+      "deps": ["a", "b"],
+      "interval": {"lower": "49/100", "upper": "51/100"}
+    }
+  ],
+  "root": "root",
+  "tail": {"rule": "zero"},
+  "threshold": "4/5"
+}
+```
+
+For each operation node the engine recomputes the canonical exact rational interval from already-verified dependency intervals. The declared node interval may be wider but cannot be narrower than the verifier-computed enclosure.
+
+The current trace limit is 256 nodes.
+
+### Division rule
+
+Division is admitted only when the denominator interval excludes zero:
+
+```text
+0 in denominator enclosure -> no certified division step
+```
+
+This does not alter ordinary algebraic division by zero and does not replace the separate Theorem-46 seam quotient.
+
+### Tail rules
+
+Current proof-bearing tail rules are:
+
+```text
+zero
+geometric_tail
+```
+
+For `geometric_tail`, both the first omitted magnitude and ratio upper bound must reference verified DAG nodes:
+
+```json
+"tail": {
+  "rule": "geometric_tail",
+  "first_omitted_node": "first",
+  "ratio_upper_node": "ratio"
+}
+```
+
+If the verified ratio enclosure satisfies `0 <= q < 1`, the engine derives:
+
+```text
+tau = first_omitted_upper / (1 - ratio_upper)
+```
+
+The participant does not supply the final tail value.
+
+The separately verified RKF Theorem 47 also proves a rational exponential upper rule and a Theorem-43 jet-tail construction. Those specialized rules remain out of the proof-bearing connector protocol until their norm/source hypotheses are bound by an admitted package-specific validator.
+
+### Strict threshold semantics
+
+After arithmetic and tail uncertainty are carried outward into `[L,U]`:
+
+```text
+U < threshold                  PASS
+L >= threshold                 FAIL
+L = U = threshold              FAIL for a strict < claim
+L < threshold <= U             INCOMPLETE
+```
+
+Exact equality is mathematical falsity of a strict inequality, not uncertainty. A non-singleton enclosure touching the boundary remains incomplete because refinement may still decide it.
+
+### Source boundary
+
+`exact_expression_v1` proves the declared formal numeric expression. It does not prove that an arbitrary measurement, external backend result, or physical norm is correctly mapped into an exact leaf. External-world mapping requires the relevant package/connector source validator.
+
+Legacy `arithmetic_certificate` and `source_bound_numerics` are mutually exclusive in one request.
+
+Dedicated schema:
+
+```text
+challenge_engine/schema/source_bound_numerics.schema.json
+```
+
+## First-visible-jet seam quotient
+
+The seam protocol is:
+
+```text
+first-visible-jet-seam-quotient-v1
+```
+
+Raw `1/0` and raw algebraic `0/0` remain invalid. The proof-bearing release model is `exact_polynomial_jet`.
+
+For exact vanishing polynomial jets, if `r_A` and `r_B` are first nonzero coefficient orders:
 
 ```text
 r_A > r_B                         FINITE_QUOTIENT_ZERO
@@ -234,29 +340,30 @@ r_A < r_B                         DIVERGENT_NO_FINITE_QUOTIENT
 all declared denominator jets 0   INCOMPLETE_FLAT_OR_UNRESOLVED
 ```
 
-A zero rational denominator anywhere in the exact coefficient packet is `INVALID`.
+The approximate `analytic_with_validated_remainder` model remains `INCOMPLETE_REMAINDER_VALIDATION` until its reduced-function remainder sources are actually bound through an admitted source validator. T47 supplies the trust architecture but does not make arbitrary remainder claims true.
 
-The more general model name
+## Implementation fingerprint boundary
 
-```text
-analytic_with_validated_remainder
-```
+The engine publishes `implementation_manifest_sha256` in capabilities and commits it into every Genesis. The manifest covers the current strict parser, engine compatibility/current numerical layers, primary Challenge schema, and installed package manifests.
 
-is reserved in the schema but is **not proof-bearing yet**. It returns `INCOMPLETE_REMAINDER_VALIDATION`. Participant-supplied fields called `claimed_remainder`, `validated_radius`, or similar do not close the theorem hypothesis merely because a JSON key sounds authoritative.
+This is an integrity commitment. It is **not** an external authenticity oracle. If an attacker controls both executable and reported hash, the hash alone is not a trust anchor. The public Git commit, immutable archive, signature, attestation, or equivalent external pin must anchor the expected fingerprint when executable authenticity matters.
 
-The reason is mathematical: the general Theorem-46 quotient enclosure requires proved reduced-function remainder bounds and denominator separation. Until a source-bound validator establishes those hypotheses, the engine deliberately refuses numerical promotion for this model.
+## Output additions
 
-When seam evidence is present, output additionally contains:
+T47-capable results may include:
 
 ```json
 {
-  "seam_quotient_protocol": "first-visible-jet-seam-quotient-v1",
-  "seam_quotient_summary": {
-    "classification": "FINITE_SEAM_QUOTIENT",
-    "numerator_order": 2,
-    "denominator_order": 2,
-    "quotient": "1/2",
-    "proof_bearing": true
+  "implementation_manifest_sha256": "...",
+  "source_bound_numerics_protocol": "source-bound-proof-carrying-numerics-v1",
+  "source_bound_numerics_summary": {
+    "proof_bearing": true,
+    "root_lower": "7/10",
+    "root_upper": "7/10",
+    "analytic_tail": "1/50",
+    "final_upper": "18/25",
+    "threshold": "4/5",
+    "classification": "STRICT_PASS"
   }
 }
 ```
@@ -274,8 +381,19 @@ BLOCKED_SCOPE           5
 SEMANTICS_NOT_IN_SCOPE  6
 ```
 
+## External trust and replay boundaries
+
+The engine evaluates declared closure. Real-world evidence authenticity, signatures, sandboxing, remote attestation, external numerical-backend correctness, or arbitrary source truth remain connector/package obligations unless explicitly wired into an admitted validator.
+
+The engine is stateless. Cross-request replay rejection remains a persistent ledger responsibility.
+
 ## Permission boundary
 
-The connector protocol grants no additional permission to use, deploy, benchmark, modify, copy, commercialize or otherwise exploit repository materials. The repository `LICENSE`, `PATENT_NOTICE.md`, and any separate written challenge authorization govern permitted use.
+The connector protocol grants no additional permission to use, deploy, benchmark, modify, copy, commercialize, or otherwise exploit repository materials. Repository `LICENSE`, `PATENT_NOTICE.md`, and any separate written challenge authorization govern permitted use.
 
-A public Challenge invitation should state the exact authorization/scope offered to participants. Machine-readable `security_audit` scope does not itself create legal authorization.
+See also:
+
+- `SOURCE_BOUND_NUMERICS_AUDIT.md`
+- `ARITHMETIC_ENCLOSURE_AUDIT.md`
+- `SEAM_QUOTIENT_AUDIT.md`
+- `PUBLIC_CHALLENGE_SCOPE.md`
