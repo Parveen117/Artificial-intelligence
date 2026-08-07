@@ -1,3 +1,20 @@
+\section{Recognition Null Kernel Engine interpretation}
+
+The theorem chain developed in this paper supplies the mathematical core of the \emph{Recognition Null Kernel Engine} (RNKE), a general verification architecture for formalizable trust systems. The intended abstraction is not restricted to mathematical proof checking. A domain adapter supplies a typed claim $C$, evidence $E$, dependency data $D$, governing validation rules $R$, and an already committed state $S$. The verification layer then implements a classification of the form
+\begin{equation}
+\mathcal V(C,E,D,R,S)
+\longrightarrow
+\{\mathrm{ADMIT},\mathrm{REJECT},\mathrm{INCOMPLETE}\}.
+\label{eq:rnke-abstract-contract}
+\end{equation}
+The architecture is domain-independent only in this formal sense: the relevant claims, evidence, dependencies, admissible transitions, and verification obligations must be represented explicitly enough for the selected adapter to check them. RNKE does not by itself authenticate an external measurement, legal fact, sensor reading, database entry, or numerical backend merely because that object is supplied to the interface.
+
+Three principles organize the interpretation. First, \emph{null-as-cut}: verification begins from a structured genesis datum containing no admitted claims but a fixed rule and type structure. Here the null state is operational and does not redefine arithmetic zero. Second, \emph{recognition before commitment}: a candidate cannot promote itself; its evidence, dependencies, invariants, and required proof obligations must close under independently declared validators. Third, \emph{persistent verification history}: accepted, held, and rejected events remain attached to a reconstructible lineage so that later rule substitution, inconsistent replay, or historical mutation can be detected when the required persistent record is present.
+
+The current public Challenge Engine should therefore be read as a benchmark for this architecture, not as its definition. Its mathematical package deliberately tests a severe special case: whether a conclusion can be promoted when its formal proof flow, numerical enclosure, dependency structure, or remainder obligations do not actually justify it. In that setting, a mathematical hallucination is a formal overclaim in which the strength of the asserted conclusion exceeds the strength of the verified closure. A formal numeric overclaim is one subclass of the same failure.
+
+Candidate application domains include software/specification verification, provenance and reproducibility systems, evidence-gated AI, finance/compliance workflows, scientific records, biotechnology workflows, law/governance records, and supply-chain provenance, provided each domain supplies the required semantics and source-authentication layer. These are application directions of the architecture, not claims that every such adapter has already been completed or validated.
+
 \section{Purpose and theorem order}
 
 The aim is to isolate a minimal mathematical architecture for guarded state change. The development order is
