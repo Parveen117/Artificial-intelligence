@@ -7,6 +7,11 @@
     "statement": "The submitted derivation reaches the declared target using licensed dependencies.",
     "kind": "proof"
   },
+  "semantics": {"mode": "payload_only"},
+  "threat_model": {
+    "goal": "Produce a false certification by escaping the declared derivation, dependency, evidence, burden, or completion checks.",
+    "break_conditions": ["false_acceptance", "negative_control_escape", "invalid_promotion", "ledger_integrity_failure"]
+  },
   "evidence": [
     {"id": "proof-object", "type": "derivation", "status": "pass", "formal": true}
   ],
