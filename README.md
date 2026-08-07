@@ -1,14 +1,60 @@
-# Artificial Intelligence Trust Enablement
+# Recognition Null Kernel Engine (RNKE)
+
+## Artificial Intelligence Trust Enablement and Challenge Engine
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21300179.svg)](https://doi.org/10.5281/zenodo.21300179)
 
-This repository contains a deployable AI trust-enablement service for hallucination-residue evaluation, confidence-collapse detection, release control, certificate generation, ECL-style finality, Lambda-Laplace analytic diagnostics, topological-memory / winding-sector diagnostics, Future Arrow forecasting, and theorem-backed challenge testing.
+This repository contains a deployable AI trust-enablement service and the public Challenge Engine for the **Recognition Null Kernel Engine (RNKE)** verification architecture. The implemented stack includes hallucination-residue evaluation, confidence-collapse detection, release control, certificate generation, ECL-style finality, Lambda-Laplace analytic diagnostics, topological-memory / winding-sector diagnostics, Future Arrow forecasting, and theorem-backed challenge testing.
 
 > **Patent status.** This repository is associated with inventor-controlled patent filings and related intellectual-property rights. Publication does not grant any patent license. See [`PATENT_NOTICE.md`](PATENT_NOTICE.md).
 >
 > **Copyright and license boundary.** This is a public technical inspection and citation release, not an unrestricted open-source grant. All rights are reserved unless a separate written license states otherwise. See [`LICENSE`](LICENSE) and [`COPYRIGHT_NOTICE.md`](COPYRIGHT_NOTICE.md).
 >
 > **Public release boundary.** This repository is a selected public technical release and does not reproduce the complete private filing, research, hardware, or internal development record. See [`docs/PUBLIC_RELEASE_BOUNDARY.md`](docs/PUBLIC_RELEASE_BOUNDARY.md).
+
+## RNKE: a general verification machine
+
+RNKE is a foundational verification architecture for **formalizable trust systems**. A domain adapter presents explicit claims, evidence, dependencies, governing rules, admissible transitions, and committed state. The verification kernel then decides whether the proposed transition is admitted, rejected, or remains incomplete.
+
+The architecture is organized around three principles:
+
+1. **Null-as-Cut.** Verification begins from a structured genesis condition containing no admitted claims but a fixed rule structure. The null state is operational; this does not redefine arithmetic zero.
+2. **Recognition Before Commitment.** A claim is promoted only when its required evidence, dependencies, invariants, and proof obligations close. Assertion alone has no authority.
+3. **Persistent Verification History.** Accepted, rejected, refuted, and unresolved events can remain bound to a tamper-evident lineage so that rule mutation, inconsistent replay, or historical alteration can be detected when the required persistent connector/ledger is present.
+
+Abstractly, the interface is
+
+```text
+V(claim, evidence, dependencies, rules, committed_state)
+    -> ADMIT | REJECT | INCOMPLETE
+```
+
+RNKE is therefore more general than a mathematical proof checker and more structured than a hash chain. A proof checker, numerical verifier, code/specification checker, compliance engine, provenance system, or evidence-gated AI can each be expressed as a domain adapter of the same claim-to-evidence closure architecture.
+
+This is a statement about the architecture, **not** a claim that every possible real-world domain has already been modeled or validated. External evidence, measurements, sensors, legal facts, or numerical backends still require the source/authentication obligations declared by their adapters.
+
+The full publication-safe framing is in [`RNKE_PUBLIC_INTRODUCTION.md`](RNKE_PUBLIC_INTRODUCTION.md).
+
+### The public Challenge is a special case
+
+The present Challenge Engine deliberately starts with mathematics and other formal systems because they provide unusually sharp adversarial ground truth. In the mathematical package, the challenge is a form of **mathematical hallucination detection**: can an attacker make the engine promote a conclusion whose proof flow, dependency chain, numerical enclosure, or remainder obligations do not actually close?
+
+A formal numeric overclaim is one subclass of this larger failure. Missing lemmas, hidden dependencies, fabricated precision, unjustified convergence, discarded remainders, illegal division-by-zero steps, and unsupported proof transitions are other examples of the same structural problem: the claimed conclusion outruns the verified evidence.
+
+The scope relation is therefore:
+
+```text
+RNKE
+  -> formal-system verification
+      -> mathematical hallucination detection
+          -> current public Challenge
+```
+
+**The Challenge demonstrates RNKE. It does not define RNKE.**
+
+Candidate application domains include AI safety, software/cybersecurity, finance/compliance, scientific provenance, biotechnology workflows, law/governance records, and supply-chain provenance where the required semantics and source-authentication layers are explicitly supplied. These are application directions, not claims that every listed adapter is already completed.
+
+> **Design principle:** Do not trust the claim. Verify the transition.
 
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
@@ -40,7 +86,7 @@ Each evaluated input/result also emits a SHA-256 `CHALLENGE_EVALUATION` record b
 
 Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Ordinary finite decimal tokens preserve their declared lexeme for exact threshold and canonical-contract decisions. Explicit malformed package or mode values do not silently fall back to defaults. Authorization-gated security challenges bind `target.toe` to the authorized `scope.target` identifier.
 
-The numerical interface is fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be represented as directed intervals or balls, with arithmetic uncertainty kept separate from analytic/truncation uncertainty. The current arithmetic contract checks the declared outward relation, but external backend/radius/tail authenticity remains a connector or validator obligation rather than something inferred from a JSON label. See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md).
+The numerical interface is fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be represented as directed intervals or balls, with arithmetic uncertainty kept separate from analytic/truncation uncertainty. The proof-carrying layer `proof-carrying-numeric-closure-v1` requires an admitted source-bound validation trace before approximate numerical evidence may promote a formal claim. A participant-supplied radius, analytic tail, backend label, or overlapping set of claimed enclosures does not self-validate. Arbitrary external backend/source authenticity remains a separate trust obligation unless its adapter closes that obligation. See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md) and [`challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md`](challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md).
 
 ### First-visible-jet seam quotient
 
@@ -79,7 +125,7 @@ Meaningful break classes include false acceptance, blindness escape, scope escap
 
 ### Verification boundary
 
-The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The current Challenge Engine workflow carries **112 unit/adversarial tests** after parser/ledger, arithmetic-enclosure and exact seam-quotient hardening. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
+The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The current Challenge Engine workflow carries **124 unit/adversarial tests** after parser/ledger, arithmetic-enclosure, exact seam-quotient, and proof-carrying numerical-provenance hardening. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
 
 Current audit statuses:
 
@@ -87,11 +133,12 @@ Current audit statuses:
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
 PASS_EXACT_RATIONAL_ENCLOSURE_AUDIT
 PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
+PASS_PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT
 ```
 
-The audit series found and repaired concrete issues including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, binary floating-point boundary errors, long-decimal loss before exact comparison, missing-radius behavior, incompatible numeric enclosures, and unsafe finite-jet interpretations of apparent `0/0` forms.
+The audit series found and repaired concrete issues including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, binary floating-point boundary errors, long-decimal loss before exact comparison, missing-radius behavior, incompatible numeric enclosures, unsafe finite-jet interpretations of apparent `0/0` forms, self-validating numerical-radius/tail assumptions, and incorrect strict-bound treatment under uncertainty.
 
-The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, correctness of arbitrary external interval/ball backends, correctness of participant-asserted radii/tails/remainders, real-world authenticity of self-asserted evidence, or stateless replay detection. They establish fail-closed behavior against the documented attack classes and leave external evidence/backend authenticity and replay memory to the relevant connector/package or persistent ledger unless separately authenticated.
+The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, correctness of arbitrary external interval/ball backends, real-world authenticity of self-asserted evidence, universal source completeness, stateless replay detection, or resistance to all resource-exhaustion attacks. They establish fail-closed behavior against the documented attack classes and leave external evidence/backend authenticity, deployment resource budgets, and replay memory to the relevant connector/package or persistent ledger unless separately authenticated.
 
 ## Quick start
 
@@ -167,6 +214,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 
 ## Documentation
 
+- `RNKE_PUBLIC_INTRODUCTION.md` - publication-safe RNKE definition, Challenge special-case relation, candidate applications, and claim boundary.
 - `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, arithmetic and seam-quotient checks.
 - `challenge_engine/RED_TEAM_RULES.md` - red-team rules of engagement and meaningful break classes.
 - `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout, arithmetic and seam-quotient contract.
@@ -174,6 +222,7 @@ Future Arrow estimates where the recognition trajectory may go next. ECL can sea
 - `challenge_engine/FINAL_SEAL_AUDIT.md` - parser, threshold, scoped-TOE, Genesis and evaluation-ledger seal audit.
 - `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md` - exact-rational, long-decimal, interval/ball and outward-promotion audit.
 - `challenge_engine/SEAM_QUOTIENT_AUDIT.md` - exact finite-jet apparent-`0/0` classification and integration audit.
+- `challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md` - source-bound numerical provenance and formal-overclaim audit.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
