@@ -185,13 +185,16 @@ class DynamicRNKEAtomicCommitTests(unittest.TestCase):
         result = evaluate_challenge(baseline_challenge())
         return result["dynamic_transition"]
 
+    def _commit(self, store, certificate):
+        return commit_prepared_transition(store, certificate, certificate["certificate_sha256"])
+
     def test_duplicate_prepared_transition_commits_at_most_once(self):
         challenge = baseline_challenge()
         initial = challenge["action_authorization"]["committed_state"]
         store = InMemoryAtomicStateStore(initial)
         certificate = self._certificate()
-        first = commit_prepared_transition(store, certificate)
-        second = commit_prepared_transition(store, certificate)
+        first = self._commit(store, certificate)
+        second = self._commit(store, certificate)
         self.assertTrue(first["committed"], first)
         self.assertEqual(first["status"], "COMMITTED")
         self.assertFalse(second["committed"], second)
@@ -202,11 +205,12 @@ class DynamicRNKEAtomicCommitTests(unittest.TestCase):
         initial = challenge["action_authorization"]["committed_state"]
         store = InMemoryAtomicStateStore(initial)
         certificate = self._certificate()
+        expected = certificate["certificate_sha256"]
         receipts = []
         lock = threading.Lock()
 
         def worker():
-            receipt = commit_prepared_transition(store, certificate)
+            receipt = commit_prepared_transition(store, certificate, expected)
             with lock:
                 receipts.append(receipt)
 
@@ -217,6 +221,24 @@ class DynamicRNKEAtomicCommitTests(unittest.TestCase):
             thread.join()
         self.assertEqual(sum(1 for r in receipts if r["committed"]), 1, receipts)
         self.assertEqual(sum(1 for r in receipts if r["status"] == "STALE_STATE"), 63, receipts)
+
+    def test_forged_replacement_state_cannot_use_original_evaluated_digest(self):
+        challenge = baseline_challenge()
+        initial = challenge["action_authorization"]["committed_state"]
+        store = InMemoryAtomicStateStore(initial)
+        original = self._certificate()
+        expected = original["certificate_sha256"]
+
+        forged = copy.deepcopy(original)
+        forged["state_after"]["epoch"] = 999999
+        forged["state_after_sha256"] = sha256_json(forged["state_after"])
+        body = {key: value for key, value in forged.items() if key != "certificate_sha256"}
+        forged["certificate_sha256"] = sha256_json(body)
+
+        receipt = commit_prepared_transition(store, forged, expected)
+        self.assertFalse(receipt["committed"], receipt)
+        self.assertEqual(receipt["status"], "INVALID")
+        self.assertEqual(store.snapshot(), initial)
 
     def test_failed_recognition_cannot_commit(self):
         state = {"counter": 0}
@@ -229,7 +251,7 @@ class DynamicRNKEAtomicCommitTests(unittest.TestCase):
             recognition_result="FAILED",
         )
         store = InMemoryAtomicStateStore(state)
-        receipt = commit_prepared_transition(store, cert)
+        receipt = commit_prepared_transition(store, cert, cert.get("certificate_sha256", "0" * 64))
         self.assertEqual(cert["decision"], "REJECT")
         self.assertFalse(receipt["committed"])
         self.assertEqual(receipt["status"], "NOT_COMMITTABLE")
@@ -250,7 +272,7 @@ class DynamicRNKEAtomicCommitTests(unittest.TestCase):
         self.assertEqual(cert["state_before_sha256"], sha256_json(before))
         self.assertEqual(cert["state_after_sha256"], sha256_json(after))
         store = InMemoryAtomicStateStore(before)
-        receipt = commit_prepared_transition(store, cert)
+        receipt = commit_prepared_transition(store, cert, cert["certificate_sha256"])
         self.assertTrue(receipt["committed"])
         self.assertEqual(store.snapshot(), after)
 
