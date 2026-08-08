@@ -273,6 +273,34 @@ class ProofBeforeActionIntegrationTests(unittest.TestCase):
         self.assertEqual(result["action_decision"], "REJECT")
         self.assertFalse(result["action_executable"])
 
+    def test_genesis_pin_allows_candidate_action_mutation_but_gate_rejects_it(self):
+        challenge = challenge_contract()
+        baseline = evaluate_challenge(challenge)
+        expected = baseline["challenge_genesis"]["genesis_hash"]
+        attack = copy.deepcopy(challenge)
+        attack["genesis"] = {"expected_hash": expected}
+        attack["action_authorization"]["action"]["parameters"]["to"] = "attacker@example.com"
+        result = evaluate_challenge(attack)
+        self.assertEqual(result["result"], "FAILED", result)
+        self.assertEqual(result["action_decision"], "REJECT")
+        genesis_check = next(x for x in result["checks"] if x["id"] == "genesis_integrity")
+        self.assertEqual(genesis_check["status"], "pass")
+        self.assertEqual(result["challenge_genesis"]["genesis_hash"], expected)
+
+    def test_genesis_pin_allows_prompt_payload_mutation(self):
+        challenge = challenge_contract()
+        baseline = evaluate_challenge(challenge)
+        expected = baseline["challenge_genesis"]["genesis_hash"]
+        attack = copy.deepcopy(challenge)
+        attack["genesis"] = {"expected_hash": expected}
+        attack["action_authorization"]["proposal_context"]["payload"] = "A completely different hostile prompt injection"
+        result = evaluate_challenge(attack)
+        self.assertEqual(result["result"], "ADVERSARIAL_PASS", result)
+        self.assertEqual(result["action_decision"], "ADMIT")
+        genesis_check = next(x for x in result["checks"] if x["id"] == "genesis_integrity")
+        self.assertEqual(genesis_check["status"], "pass")
+        self.assertEqual(result["challenge_genesis"]["genesis_hash"], expected)
+
     def test_genesis_pin_detects_authority_rule_mutation(self):
         challenge = challenge_contract()
         baseline = evaluate_challenge(challenge)
