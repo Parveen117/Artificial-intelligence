@@ -4,7 +4,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21300179.svg)](https://doi.org/10.5281/zenodo.21300179)
 
-This repository contains a deployable AI trust-enablement service and the public Challenge Engine for the **Recognition Null Kernel Engine (RNKE)** verification architecture. The implemented stack includes hallucination-residue evaluation, confidence-collapse detection, release control, certificate generation, ECL-style finality, Lambda-Laplace analytic diagnostics, topological-memory / winding-sector diagnostics, Future Arrow forecasting, and theorem-backed challenge testing.
+This repository contains a deployable AI trust-enablement service and the public Challenge Engine for the **Recognition Null Kernel Engine (RNKE)** verification architecture. The implemented stack includes Proof-Before-Action agent gating, mathematical hallucination/formal-overclaim testing, release control, certificate generation, ECL-style finality, Lambda-Laplace diagnostics, topological-memory diagnostics, Future Arrow forecasting, and theorem-backed challenge testing.
 
 > **Patent status.** This repository is associated with inventor-controlled patent filings and related intellectual-property rights. Publication does not grant any patent license. See [`PATENT_NOTICE.md`](PATENT_NOTICE.md).
 >
@@ -14,47 +14,137 @@ This repository contains a deployable AI trust-enablement service and the public
 
 ## RNKE: a general verification machine
 
-RNKE is a foundational verification architecture for **formalizable trust systems**. A domain adapter presents explicit claims, evidence, dependencies, governing rules, admissible transitions, and committed state. The verification kernel then decides whether the proposed transition is admitted, rejected, or remains incomplete.
+RNKE is a foundational verification architecture for **formalizable trust systems**. A domain adapter presents explicit claims or proposed transitions, evidence, dependencies, governing rules, and committed state. The verification kernel then decides whether the proposed transition is admitted, rejected, or remains incomplete.
 
 The architecture is organized around three principles:
 
 1. **Null-as-Cut.** Verification begins from a structured genesis condition containing no admitted claims but a fixed rule structure. The null state is operational; this does not redefine arithmetic zero.
-2. **Recognition Before Commitment.** A claim is promoted only when its required evidence, dependencies, invariants, and proof obligations close. Assertion alone has no authority.
+2. **Recognition Before Commitment.** A claim or action is promoted only when its required evidence, authority, dependencies, invariants, and proof obligations close. Assertion or model confidence alone has no authority.
 3. **Persistent Verification History.** Accepted, rejected, refuted, and unresolved events can remain bound to a tamper-evident lineage so that rule mutation, inconsistent replay, or historical alteration can be detected when the required persistent connector/ledger is present.
 
-Abstractly, the interface is
+Abstractly, the interface is:
 
 ```text
-V(claim, evidence, dependencies, rules, committed_state)
+V(claim_or_transition, evidence, dependencies, rules, committed_state)
     -> ADMIT | REJECT | INCOMPLETE
 ```
 
-RNKE is therefore more general than a mathematical proof checker and more structured than a hash chain. A proof checker, numerical verifier, code/specification checker, compliance engine, provenance system, or evidence-gated AI can each be expressed as a domain adapter of the same claim-to-evidence closure architecture.
+RNKE is therefore more general than a mathematical proof checker and more structured than a hash chain. A proof checker, numerical verifier, agent-action gate, code/specification checker, compliance engine, provenance system, or evidence-gated AI can each be expressed as a domain adapter of the same recognition-before-commitment architecture.
 
-This is a statement about the architecture, **not** a claim that every possible real-world domain has already been modeled or validated. External evidence, measurements, sensors, legal facts, or numerical backends still require the source/authentication obligations declared by their adapters.
+This is a statement about the architecture, **not** a claim that every possible real-world domain has already been modeled or validated. External evidence, identities, measurements, sensors, legal facts, numerical backends, and physical actuators still require the source/authentication obligations declared by their adapters.
 
 The full publication-safe framing is in [`RNKE_PUBLIC_INTRODUCTION.md`](RNKE_PUBLIC_INTRODUCTION.md).
 
-### The public Challenge is a special case
+## 🔥 Main Challenge: Proof Before Action
 
-The present Challenge Engine deliberately starts with mathematics and other formal systems because they provide unusually sharp adversarial ground truth. In the mathematical package, the challenge is a form of **mathematical hallucination detection**: can an attacker make the engine promote a conclusion whose proof flow, dependency chain, numerical enclosure, or remainder obligations do not actually close?
+> **Make an AI agent execute an action whose frozen authority/evidence chain does not close.**
 
-A formal numeric overclaim is one subclass of this larger failure. Missing lemmas, hidden dependencies, fabricated precision, unjustified convergence, discarded remainders, illegal division-by-zero steps, and unsupported proof transitions are other examples of the same structural problem: the claimed conclusion outruns the verified evidence.
+This is the flagship executable RNKE challenge.
 
-The scope relation is therefore:
+An upstream model is allowed to hallucinate, misunderstand a request, follow hostile retrieved text, or propose the wrong tool call. Those failures are not automatically a break. The proposal itself has no authority.
+
+The first executable protocol is:
+
+```text
+proof-before-action-v1
+```
+
+The current exact-action gate checks the declared principal and agent, exact tool/operation/resource, SHA-256 binding of the complete executable parameters, delegation continuity, committed validity epoch, revocation state, request-nonce freshness, and exact-action human confirmation when required.
+
+Only:
+
+```text
+ADMIT
+```
+
+is executable. `REJECT`, `INCOMPLETE`, and `INVALID` do not cross the RNKE execution boundary.
+
+The deliberately provocative part is also the useful part:
+
+> **Natural-language/model output may propose an action but cannot enlarge authority.**
+
+So a prompt injection does not have to be perfectly understood or labeled malicious. If it changes the proposed action, that candidate still has to close independently against the frozen authority rules.
+
+Run the baseline:
+
+```bash
+python challenge_engine/challenge.py challenge_engine/examples/agent_action_challenge.json --compact
+```
+
+The baseline deliberately contains hostile retrieved text but an exactly authorized executable action. Then mutate the candidate action, request nonce, approval, or prompt payload under the same frozen authority contract and try to obtain an unauthorized `ADMIT`.
+
+The complete rules and initial audit are in:
+
+- [`challenge_engine/MAIN_CHALLENGE.md`](challenge_engine/MAIN_CHALLENGE.md)
+- [`challenge_engine/PROOF_BEFORE_ACTION_AUDIT.md`](challenge_engine/PROOF_BEFORE_ACTION_AUDIT.md)
+- [`challenge_engine/RED_TEAM_RULES.md`](challenge_engine/RED_TEAM_RULES.md)
+
+### Initial self-red-team result
+
+Before promoting this challenge, the exact gate was attacked with directed cases plus a deterministic mutation campaign:
+
+```text
+15 directed core adversarial cases: PASS
+20,000 deterministic hostile mutations
+20 mutation classes
+unauthorized ADMIT: 0
+```
+
+The campaign includes tool/operation/resource escape, parameter tampering, wrong principal/agent, forged action binding, revoked/expired grants, nonce replay, missing authority, stale confirmation, delegation escalation, broken delegation lineage, cyclic delegation, and malformed committed replay state.
+
+The repository CI reruns the mutation campaign together with the existing Challenge Engine tests.
+
+### Genesis freezes authority, not the attack
+
+A self-audit exposed an important distinction: freezing the complete candidate into Genesis would make the red-team exercise artificial. The corrected model freezes the **authority/rule view** while leaving the attack candidate variable.
+
+For Proof Before Action:
+
+```text
+candidate mutation      -> same Genesis, new evaluation
+authority/rule mutation -> different Genesis
+```
+
+`action`, `request_nonce`, `approval`, and `proposal_context` are evaluation inputs bound by `CHALLENGE_EVALUATION`. Principal/agent declarations, committed authority state, delegation grants, terminal grant, confirmation policy, protocol, and validator identity belong to the frozen authority view.
+
+That means an attacker can genuinely mutate the proposed action under a pinned Genesis and test the gate itself rather than merely triggering a different contract hash.
+
+## RNKE special cases
+
+The flagship challenge demonstrates RNKE; it does not define RNKE.
+
+### Special case I: mathematical verification
+
+Mathematics remains an implemented sharp-ground-truth specialization:
+
+```text
+proof/evidence closure -> theorem commitment
+```
+
+The mathematical challenge asks whether an invalid or unsupported conclusion can escape proof-flow, dependency, numerical-enclosure, convergence, remainder, or seam obligations. Missing lemmas, fabricated precision, unjustified convergence, discarded remainders, illegal algebraic division-by-zero, and unsupported proof transitions are examples of the same structural failure: the claimed conclusion outruns verified evidence.
+
+### Special case II: Proof of Work
+
+Proof of Work is the next intended specialization:
+
+```text
+work/evidence closure -> state commitment
+```
+
+The target is not to invent another hash function or casually declare victory over blockchain consensus. A PoW adapter would ask whether a candidate state can be committed when work, ancestry, frozen rule, and state-transition obligations do not close. It remains a development direction until separately implemented and audited.
+
+The intended hierarchy is therefore:
 
 ```text
 RNKE
-  -> formal-system verification
-      -> mathematical hallucination detection
-          -> current public Challenge
+  -> Proof Before Action        [flagship executable challenge]
+  -> mathematical verification [implemented special case]
+  -> Proof of Work              [next special-case adapter]
 ```
 
-**The Challenge demonstrates RNKE. It does not define RNKE.**
-
-Candidate application domains include AI safety, software/cybersecurity, finance/compliance, scientific provenance, biotechnology workflows, law/governance records, and supply-chain provenance where the required semantics and source-authentication layers are explicitly supplied. These are application directions, not claims that every listed adapter is already completed.
-
 > **Design principle:** Do not trust the claim. Verify the transition.
+
+## AI trust-enablement stack
 
 The production-oriented package is in `ai_trust_enablement/`. It provides:
 
@@ -76,27 +166,63 @@ The production-oriented package is in `ai_trust_enablement/`. It provides:
 
 - `exploratory` for empirical or black-box evidence,
 - `adversarial` for a predeclared target, threat model, negative controls and break conditions,
-- `certified` for challenges that additionally close formal support and the selected formal adapter.
+- `certified` for challenges that additionally close formal support and the selected package's promotion requirements.
 
-The Challenge is **not** “make the English sentence confusing.” The object under attack is the declared claim-to-evidence closure contract. Natural-language text is payload by default; unrestricted English semantics are not claimed unless a semantic adapter is explicitly declared and closed.
+Included packages are `agent_action`, `math`, `logic`, `code`, and authorization-gated `security_audit`. The default package remains `math` for backward compatibility; the flagship public challenge is `agent_action` / Proof Before Action.
 
-Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with `accepted_claims = 0`, `parent = null`, and `rules_frozen = true`. Genesis freezes the rules of engagement before outcomes are evaluated; it does not accept the claim. The Genesis contract commits the installed package manifest, parser/arithmetic contract, exact connector numeric declarations, and any declared arithmetic or seam-quotient certificate.
+The Challenge is **not** “make the English sentence confusing.” Natural-language text is payload by default; unrestricted English semantics are not claimed unless a semantic adapter is explicitly declared and closed.
+
+Every evaluation emits a SHA-256 `CHALLENGE_GENESIS` record with:
+
+```text
+accepted_claims = 0
+parent = null
+rules_frozen = true
+```
 
 Each evaluated input/result also emits a SHA-256 `CHALLENGE_EVALUATION` record binding the Genesis hash, normalized input hash, result, and computed checks. An optional parent evaluation hash allows an external connector or persistent ledger to chain outcomes. The engine is stateless, so cross-request replay detection remains the responsibility of that persistent connector/ledger.
 
-Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Ordinary finite decimal tokens preserve their declared lexeme for exact threshold and canonical-contract decisions. Explicit malformed package or mode values do not silently fall back to defaults. Authorization-gated security challenges bind `target.toe` to the authorized `scope.target` identifier.
+Connector JSON is strict: duplicate object keys and non-standard `NaN`/`Infinity` tokens are rejected. Ordinary finite decimal tokens preserve their declared lexeme for exact threshold and canonical-contract decisions. Explicit malformed package or mode values do not silently fall back to defaults.
 
-The numerical interface is fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be represented as directed intervals or balls, with arithmetic uncertainty kept separate from analytic/truncation uncertainty. The proof-carrying layer `proof-carrying-numeric-closure-v1` requires an admitted source-bound validation trace before approximate numerical evidence may promote a formal claim. A participant-supplied radius, analytic tail, backend label, or overlapping set of claimed enclosures does not self-validate. Arbitrary external backend/source authenticity remains a separate trust obligation unless its adapter closes that obligation. See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md) and [`challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md`](challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md).
+Meaningful break classes include false acceptance, blindness escape, scope escape, negative-control escape, invalid promotion, flow-consistency escape, and ledger-integrity failure.
+
+Discover the machine-readable contract with:
+
+```bash
+python challenge_engine/challenge.py --capabilities --compact
+```
+
+or stream one challenge through stdin:
+
+```bash
+python challenge_engine/challenge.py - --compact
+```
+
+## Mathematical proof-carrying layers
+
+### Proof-carrying numerical closure
+
+The numerical interface is fail-closed. Exact integers/rationals/finite decimals occupy the zero-arithmetic-radius sector. Approximate results can be represented as directed intervals or balls, with arithmetic uncertainty kept separate from analytic/truncation uncertainty.
+
+The layer:
+
+```text
+proof-carrying-numeric-closure-v1
+```
+
+requires an admitted source-bound validation trace before approximate numerical evidence may promote a formal claim. A participant-supplied radius, analytic tail, backend label, or overlapping set of claimed enclosures does not self-validate.
+
+See [`challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md`](challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md) and [`challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md`](challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md).
 
 ### First-visible-jet seam quotient
 
-The Challenge Engine also exposes the exact finite-jet subset of the Recognition-Kernel first-visible-jet seam quotient theorem through:
+The Challenge Engine exposes the exact finite-jet subset of the Recognition-Kernel first-visible-jet seam quotient theorem through:
 
 ```text
 first-visible-jet-seam-quotient-v1
 ```
 
-This does **not** redefine ordinary division by zero. Raw `1/0` and raw algebraic `0/0` remain invalid. For two exact vanishing polynomial jets on one named seam, the engine compares their first nonzero orders:
+This does **not** redefine ordinary division by zero. Raw `1/0` and raw algebraic `0/0` remain invalid. For two exact vanishing polynomial jets on one named seam:
 
 ```text
 numerator order > denominator order    quotient -> 0
@@ -105,29 +231,15 @@ numerator order < denominator order    no finite quotient
 all denominator jets zero              INCOMPLETE_FLAT_OR_UNRESOLVED
 ```
 
-The general analytic/remainder-bearing seam model remains `INCOMPLETE` until a trusted remainder/denominator-separation validator closes the hypotheses. A participant cannot promote a quotient merely by submitting a field called `claimed_remainder`.
+The general analytic/remainder-bearing seam model remains `INCOMPLETE` until a trusted remainder/denominator-separation validator closes the hypotheses.
 
 See [`challenge_engine/SEAM_QUOTIENT_AUDIT.md`](challenge_engine/SEAM_QUOTIENT_AUDIT.md).
 
-The default package is `math`; `logic`, `code`, and authorization-gated `security_audit` packages are included. A connector can discover the contract with:
+## Verification boundary
 
-```bash
-python challenge_engine/challenge.py --capabilities --compact
-```
+The foundational mathematics package currently records **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. Software tests and mathematical/adversarial cases are intentionally reported separately because they are different forms of evidence.
 
-or stream one JSON challenge through stdin:
-
-```bash
-python challenge_engine/challenge.py - --compact
-```
-
-Meaningful break classes include false acceptance, blindness escape, scope escape, negative-control escape, invalid promotion, flow-consistency escape, and ledger-integrity failure. See [`challenge_engine/RED_TEAM_RULES.md`](challenge_engine/RED_TEAM_RULES.md) and [`challenge_engine/CONNECTOR_CONTRACT.md`](challenge_engine/CONNECTOR_CONTRACT.md).
-
-### Verification boundary
-
-The foundational mathematics package currently carries **236,456 exact/random/exhaustive adversarial cases** across the finite core, Hilbert finite-channel extension, and native flow-completion extension. The current Challenge Engine workflow carries **124 unit/adversarial tests** after parser/ledger, arithmetic-enclosure, exact seam-quotient, and proof-carrying numerical-provenance hardening. These are intentionally reported separately because software unit tests and mathematical/adversarial cases are not the same kind of evidence.
-
-Current audit statuses:
+Current established audit statuses include:
 
 ```text
 PASS_FINAL_CHALLENGE_SEAL_AUDIT
@@ -136,9 +248,9 @@ PASS_EXACT_FINITE_JET_SEAM_QUOTIENT_AUDIT
 PASS_PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT
 ```
 
-The audit series found and repaired concrete issues including duplicate-key parser differentials, malformed default fallback, package path abuse, scoped TOE mismatch, missing package-manifest commitment, missing evaluation-outcome hashes, binary floating-point boundary errors, long-decimal loss before exact comparison, missing-radius behavior, incompatible numeric enclosures, unsafe finite-jet interpretations of apparent `0/0` forms, self-validating numerical-radius/tail assumptions, and incorrect strict-bound treatment under uncertainty.
+The audit series found and repaired concrete issues including parser differentials, malformed fallback behavior, package path abuse, scoped TOE mismatch, missing manifest/outcome commitments, floating-point boundary errors, long-decimal loss, missing-radius behavior, incompatible enclosures, unsafe finite-jet interpretations, self-validating numerical assumptions, and strict-bound errors under uncertainty.
 
-The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, correctness of arbitrary external interval/ball backends, real-world authenticity of self-asserted evidence, universal source completeness, stateless replay detection, or resistance to all resource-exhaustion attacks. They establish fail-closed behavior against the documented attack classes and leave external evidence/backend authenticity, deployment resource budgets, and replay memory to the relevant connector/package or persistent ledger unless separately authenticated.
+The audits do not claim universal correctness, unrestricted semantic truth, universal numerical stability, real-world authenticity of self-asserted evidence, universal source completeness, universal agent security, stateless replay detection, or resistance to all resource-exhaustion attacks.
 
 ## Quick start
 
@@ -166,75 +278,33 @@ Set `AI_TRUST_API_TOKEN` before exposing the service beyond localhost.
 
 ## ECL finality bridge
 
-The AI Trust stack can seal recognition, repair, release, retrieval-resolution, Lambda-Laplace, topological-memory, or Future Arrow certificates into an append-only ECL-style finality ledger.
+The AI Trust stack can seal recognition, repair, release, retrieval-resolution, Lambda-Laplace, topological-memory, or Future Arrow certificates into an append-only ECL-style finality ledger. See [`docs/ECL_FINALITY_INTEGRATION.md`](docs/ECL_FINALITY_INTEGRATION.md).
 
-```python
-from dataclasses import asdict
-from ai_trust_enablement.ai_hallucination_recognition_engine import AIHallucinationRecognitionEngine
-from ai_trust_enablement.ecl_commit_adapter import ECLCommitAdapter
+## Lambda-Laplace, topological memory, and Future Arrow
 
-engine = AIHallucinationRecognitionEngine()
-certificate = asdict(engine.evaluate(
-    reference_text="The Eiffel Tower is located in Paris. It was completed in 1889.",
-    prompt="Answer using only the supplied context.",
-    answer="The Eiffel Tower is located in Berlin. It was completed in 1789.",
-))
-
-commit = ECLCommitAdapter().commit_certificate(certificate)
-print(commit.to_dict())
-```
-
-This creates a chained finality record with certificate hash, proposal hash, positive entropy delta, previous commit pointer, and commit hash. See `docs/ECL_FINALITY_INTEGRATION.md`.
-
-## Lambda-Laplace analytic layer
-
-The Lambda-Laplace layer evaluates lambda trajectories through diffusion, skew drift, entropic drift, heat-trace proxy, and seam/spectral-gap diagnostics. It emits an `AI_LAMBDA_LAPLACE_CERTIFICATE`.
-
-```bash
-python ai_trust_enablement/lambda_laplace_operator.py --demo
-```
-
-Lambda-Laplace provides analytic seam evidence before topological-memory diagnostics mark a winding-sector transition. See `docs/LAMBDA_LAPLACE_INTEGRATION.md`.
-
-## Topological-memory / winding-sector layer
-
-The topological-memory layer evaluates a phase trajectory, computes winding-sector movement, and emits an `AI_TOPOLOGICAL_MEMORY_CERTIFICATE` when the trajectory crosses a memory/sector seam.
-
-This extends the service from one-answer hallucination detection to temporal recognition-drift detection. See `docs/TOPOLOGICAL_MEMORY_INTEGRATION.md`.
-
-## Future Arrow forecasting layer
-
-The Future Arrow Operator projects the current recognition or topological-memory state forward into a probability-coated future cone and emits an `AI_FUTURE_ARROW_CERTIFICATE`.
-
-```bash
-python ai_trust_enablement/future_arrow_operator.py --demo
-```
-
-Future Arrow estimates where the recognition trajectory may go next. ECL can seal either actual events or forecast certificates. See `docs/FUTURE_ARROW_INTEGRATION.md`.
+- Lambda-Laplace evaluates lambda trajectories through diffusion, skew drift, entropic drift, heat-trace proxy, and seam/spectral-gap diagnostics. See [`docs/LAMBDA_LAPLACE_INTEGRATION.md`](docs/LAMBDA_LAPLACE_INTEGRATION.md).
+- Topological memory evaluates phase trajectories and winding-sector movement. See [`docs/TOPOLOGICAL_MEMORY_INTEGRATION.md`](docs/TOPOLOGICAL_MEMORY_INTEGRATION.md).
+- Future Arrow projects current recognition/topological-memory state into a probability-coated future cone. See [`docs/FUTURE_ARROW_INTEGRATION.md`](docs/FUTURE_ARROW_INTEGRATION.md).
 
 ## Documentation
 
-- `RNKE_PUBLIC_INTRODUCTION.md` - publication-safe RNKE definition, Challenge special-case relation, candidate applications, and claim boundary.
-- `challenge_engine/README.md` - challenge definition, packages, modes, genesis, flow probes, arithmetic and seam-quotient checks.
+- `RNKE_PUBLIC_INTRODUCTION.md` - publication-safe RNKE definition and claim boundary.
+- `challenge_engine/MAIN_CHALLENGE.md` - flagship Proof-Before-Action challenge.
+- `challenge_engine/PROOF_BEFORE_ACTION_AUDIT.md` - initial self-red-team campaign and security boundary.
+- `challenge_engine/README.md` - Challenge Engine package/mode/protocol reference.
 - `challenge_engine/RED_TEAM_RULES.md` - red-team rules of engagement and meaningful break classes.
-- `challenge_engine/CONNECTOR_CONTRACT.md` - stable connector stdin/stdout, arithmetic and seam-quotient contract.
-- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - first hostile pre-release audit.
-- `challenge_engine/FINAL_SEAL_AUDIT.md` - parser, threshold, scoped-TOE, Genesis and evaluation-ledger seal audit.
-- `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md` - exact-rational, long-decimal, interval/ball and outward-promotion audit.
-- `challenge_engine/SEAM_QUOTIENT_AUDIT.md` - exact finite-jet apparent-`0/0` classification and integration audit.
-- `challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md` - source-bound numerical provenance and formal-overclaim audit.
+- `challenge_engine/CONNECTOR_CONTRACT.md` - connector stdin/stdout contract.
+- `challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md` - hostile pre-release audit.
+- `challenge_engine/FINAL_SEAL_AUDIT.md` - parser, threshold, scoped-TOE, Genesis and evaluation-ledger audit.
+- `challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md` - arithmetic enclosure audit.
+- `challenge_engine/SEAM_QUOTIENT_AUDIT.md` - exact finite-jet seam audit.
+- `challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md` - source-bound numerical provenance audit.
 - `ai_trust_enablement/README.md` - enablement walkthrough and glossary.
 - `docs/DEPLOYMENT.md` - deployment guide.
 - `docs/PRODUCTION_CHECKLIST.md` - production readiness checklist.
-- `docs/ECL_FINALITY_INTEGRATION.md` - AI certificate to ECL-style finality commit bridge.
-- `docs/LAMBDA_LAPLACE_INTEGRATION.md` - Lambda-Laplace analytic diffusion and seam diagnostics.
-- `docs/TOPOLOGICAL_MEMORY_INTEGRATION.md` - topological-memory / winding-sector diagnostics.
-- `docs/FUTURE_ARROW_INTEGRATION.md` - Future Arrow probability-cone forecasting.
 - `docs/PUBLIC_RELEASE_BOUNDARY.md` - public release scope and exclusions.
-- `PATENT_NOTICE.md` - patent-rights notice.
-- `COPYRIGHT_NOTICE.md` - copyright ownership and restriction notice.
-- `LICENSE` - all-rights-reserved repository license boundary.
-- `CITATION.cff` - citation metadata for academic and technical references.
+- `PATENT_NOTICE.md`, `COPYRIGHT_NOTICE.md`, `LICENSE` - rights and use boundary.
+- `CITATION.cff` - citation metadata.
 
 ## Citation
 
@@ -242,6 +312,6 @@ Dabas, M. (2026). *Recognition Null Kernel Engine (RNKE): Challenge Engine and F
 
 ## Status
 
-Version 1.2.0 is the audited Challenge Engine release candidate plus the existing AI trust-enablement stack. It is intended for technical inspection, citation, reproducibility review, and challenge evaluation within the repository licence and any separately declared authorization/scope. It is not a standalone truth oracle and not a substitute for domain validation.
+Version 1.2.0 is the audited Challenge Engine release line plus the AI trust-enablement stack. Proof Before Action is an adversarially tested extension in this release path. It is intended for technical inspection, citation, reproducibility review, and challenge evaluation within the repository licence and any separately declared authorization/scope. It is not a standalone truth oracle, a universal agent-security guarantee, or a substitute for domain validation.
 
 This public release is a technical and citation layer associated with inventor-controlled intellectual-property materials.

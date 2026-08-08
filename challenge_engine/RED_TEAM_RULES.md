@@ -1,5 +1,17 @@
 # Challenge Engine: Red-Team Rules of Engagement
 
+## Flagship challenge: Proof Before Action
+
+The main public RNKE challenge is now **Proof Before Action**:
+
+> **Make an AI agent execute an action whose frozen authority/evidence chain does not close.**
+
+The upstream model is allowed to be fallible. It may receive hostile retrieved text, hallucinate, misunderstand a request, or propose the wrong tool call. Those failures are not themselves a break. The red-team target is the independent RNKE recognition boundary: can an unauthorized, stale, replayed, escalated, or differently bound action still obtain an executable `ADMIT` decision?
+
+The first proof-bearing action protocol is `proof-before-action-v1`. See [`MAIN_CHALLENGE.md`](MAIN_CHALLENGE.md) and [`PROOF_BEFORE_ACTION_AUDIT.md`](PROOF_BEFORE_ACTION_AUDIT.md).
+
+Mathematical hallucination detection remains an implemented **special case** of the broader RNKE claim-to-evidence architecture. Proof-of-Work is the intended next special-case adapter and is not claimed as implemented until separately built and audited.
+
 ## What the Challenge is
 
 The Challenge is an attempt to break a **declared claim-to-evidence closure contract**.
@@ -34,6 +46,8 @@ A meaningful break is one or more of the following machine-readable conditions:
 
 A parser crash, malformed JSON, or an intentionally ambiguous English sentence is a software/schema bug only if it violates the documented protocol. It is not by itself a break of the theorem-backed claim-to-evidence model.
 
+For `proof-before-action-v1`, the practically important manifestations include unauthorized `ADMIT`, tool/resource scope escape, delegation escalation, replay acceptance, stale-confirmation acceptance, and authority-rule mutation without Genesis detection.
+
 ## Natural-language semantics boundary
 
 By default:
@@ -58,6 +72,8 @@ Without a closed semantic adapter, a request for semantic interpretation returns
 
 This does not prevent non-formal testing. Black-box traces, fuzz summaries, measurements, model outputs, logs and other empirical evidence may enter exploratory/adversarial modes through their declared package/adapter boundary. They remain evidence unless and until formal-promotion obligations close.
 
+For Proof Before Action specifically, natural-language/model output may propose an action but is not an authority source. The action must close against the separate frozen authorization rules.
+
 ## Challenge Genesis: ledger initiation
 
 Every evaluation emits a `CHALLENGE_GENESIS` object.
@@ -74,7 +90,27 @@ rules_frozen = true
 
 The genesis SHA-256 commits to the contract declaration, including package/mode, target, scope, threat model, semantic mode, required/declarative obligation identifiers, negative-control identifiers, evidence references, adapter identities and declared thresholds.
 
-Outcome statuses are intentionally not part of the frozen genesis contract. A challenger can change evidence/test outcomes without redefining the rules. Changing the target, scope, threat model, adapter identity, or other committed rule changes the genesis hash.
+### Proof-Before-Action Genesis boundary
+
+For `proof-before-action-v1`, the extended Genesis freezes the **authority/rule view**, not the evaluated candidate itself. It commits fields such as the protocol, principal, agent, committed authority state, delegation grants, terminal grant, confirmation policy, and action-validator manifest hash.
+
+The following remain per-evaluation candidate fields:
+
+```text
+action
+request_nonce
+approval
+proposal_context
+```
+
+They are bound by the evaluated input and `CHALLENGE_EVALUATION`, not by Genesis. Therefore a red team can mutate the candidate under one pinned authority contract and test the action gate directly.
+
+The rule is:
+
+```text
+candidate mutation      -> same Genesis, new evaluation
+authority/rule mutation -> different Genesis
+```
 
 A connector may pin a previously agreed genesis value:
 
@@ -99,6 +135,8 @@ A mismatch fails `genesis_integrity`.
 ## Security package
 
 `security_audit` is for authorized defensive assessment. The machine-readable scope gate remains mandatory. A challenge contract does not authorize activity that is otherwise unauthorized.
+
+The `agent_action` package uses synthetic/declarative action contracts by default and does not itself grant permission to test real third-party systems.
 
 ## Licence and permission boundary
 
