@@ -14,12 +14,14 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import string
 import threading
 from typing import Any
 
 PROTOCOL = "dynamic-rnke-transition-v1"
 COMMIT_MODE = "compare_and_swap"
 ACCEPTING_RESULTS = {"OBSERVED", "ADVERSARIAL_PASS", "CERTIFIED"}
+_HEX = set(string.hexdigits)
 
 
 def _canonical(value: Any) -> str:
@@ -30,6 +32,10 @@ def sha256_json(value: Any) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
+def _is_hex64(value: Any) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(ch in _HEX for ch in value)
+
+
 def validator_manifest_sha256() -> str:
     return sha256_json({
         "protocol": PROTOCOL,
@@ -37,6 +43,7 @@ def validator_manifest_sha256() -> str:
         "recognition_rule": "global closure and local/domain closure must both hold before commit preparation",
         "state_rule": "state is evaluation lineage, not a frozen Genesis rule",
         "atomicity_rule": "commit iff current_state_hash equals certified state_before_hash",
+        "certificate_rule": "connector must pin the exact transition certificate digest emitted by RNKE evaluation",
         "replay_rule": "successful CAS changes state hash, so a duplicate certificate becomes stale",
         "decision_states": ["ADMIT", "REJECT", "INCOMPLETE", "INVALID"],
     })
@@ -69,10 +76,10 @@ def prepare_dynamic_transition(
         errors.append("state_after must be an object")
     if not isinstance(transition_id, str) or not transition_id.strip():
         errors.append("transition_id must be a non-empty string")
-    if not isinstance(payload_sha256, str) or len(payload_sha256) != 64:
-        errors.append("payload_sha256 must be a 64-character digest string")
-    if not isinstance(genesis_hash, str) or len(genesis_hash) != 64:
-        errors.append("genesis_hash must be a 64-character digest string")
+    if not _is_hex64(payload_sha256):
+        errors.append("payload_sha256 must be a 64-character hexadecimal digest")
+    if not _is_hex64(genesis_hash):
+        errors.append("genesis_hash must be a 64-character hexadecimal digest")
 
     if errors:
         return {
@@ -95,8 +102,8 @@ def prepare_dynamic_transition(
         "atomic_commit_required": True,
         "commit_mode": COMMIT_MODE,
         "transition_id": transition_id,
-        "payload_sha256": payload_sha256,
-        "genesis_hash": genesis_hash,
+        "payload_sha256": payload_sha256.lower(),
+        "genesis_hash": genesis_hash.lower(),
         "recognition_result": recognition_result,
         "state_before_sha256": before_hash,
         "state_after_sha256": after_hash,
@@ -183,12 +190,36 @@ class InMemoryAtomicStateStore:
             return True
 
 
-def commit_prepared_transition(store: InMemoryAtomicStateStore, certificate: Any) -> dict[str, Any]:
-    """Atomically commit a prepared transition to the reference store."""
+def commit_prepared_transition(
+    store: InMemoryAtomicStateStore,
+    certificate: Any,
+    expected_certificate_sha256: Any,
+) -> dict[str, Any]:
+    """Atomically commit exactly the transition certificate emitted by RNKE.
+
+    `expected_certificate_sha256` is supplied by the trusted evaluation/connector
+    path. This prevents a caller from replacing S_{t+1} and presenting the
+    replacement as if it were the transition RNKE actually prepared.
+    """
     if not isinstance(certificate, dict):
         return {"status": "INVALID", "committed": False, "reason": "certificate must be an object"}
+    if not _is_hex64(expected_certificate_sha256):
+        return {"status": "INVALID", "committed": False, "reason": "expected certificate digest is required"}
     if certificate.get("protocol") != PROTOCOL:
         return {"status": "INVALID", "committed": False, "reason": "unsupported dynamic transition protocol"}
+    if certificate.get("commit_mode") != COMMIT_MODE or certificate.get("atomic_commit_required") is not True:
+        return {"status": "INVALID", "committed": False, "reason": "atomic CAS contract is not closed"}
+    if certificate.get("validator_manifest_sha256") != validator_manifest_sha256():
+        return {"status": "INVALID", "committed": False, "reason": "dynamic validator manifest mismatch"}
+
+    supplied_digest = certificate.get("certificate_sha256")
+    body = {key: value for key, value in certificate.items() if key != "certificate_sha256"}
+    computed_digest = sha256_json(body)
+    if supplied_digest != computed_digest:
+        return {"status": "INVALID", "committed": False, "reason": "transition certificate self-hash mismatch"}
+    if supplied_digest != str(expected_certificate_sha256).lower():
+        return {"status": "INVALID", "committed": False, "reason": "transition certificate is not the RNKE-evaluated certificate"}
+
     if certificate.get("decision") != "ADMIT" or certificate.get("commit_ready") is not True:
         return {"status": "NOT_COMMITTABLE", "committed": False, "reason": "recognition did not admit transition"}
     state_after = certificate.get("state_after")
@@ -204,7 +235,7 @@ def commit_prepared_transition(store: InMemoryAtomicStateStore, certificate: Any
         "status": "COMMITTED" if committed else "STALE_STATE",
         "committed": committed,
         "transition_id": certificate.get("transition_id"),
-        "certificate_sha256": certificate.get("certificate_sha256"),
+        "certificate_sha256": supplied_digest,
         "state_before_sha256": certificate.get("state_before_sha256"),
         "state_after_sha256": certificate.get("state_after_sha256") if committed else store.state_sha256(),
     }
