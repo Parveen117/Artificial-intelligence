@@ -30,6 +30,18 @@ except ImportError:
 ENGINE_VERSION = _v6.ENGINE_VERSION
 SCHEMA_VERSION = _v6.SCHEMA_VERSION
 AGENT_ACTION_PACKAGE = "agent_action"
+ACTION_EVALUATION_FIELDS = {"action", "request_nonce", "approval", "proposal_context"}
+
+
+def _authority_declaration(action_authorization: Any) -> Any:
+    """Return the frozen authority/rule view, excluding per-evaluation candidate fields."""
+    if not isinstance(action_authorization, dict):
+        return action_authorization
+    return {
+        key: value
+        for key, value in action_authorization.items()
+        if key not in ACTION_EVALUATION_FIELDS
+    }
 
 
 def _action_check(challenge: dict[str, Any], package_name: str | None):
@@ -67,9 +79,13 @@ def _extended_genesis(challenge: dict[str, Any], base_result: dict[str, Any]) ->
     package_name = base_result.get("package")
     if package_name != AGENT_ACTION_PACKAGE and "action_authorization" not in challenge:
         return base_result["challenge_genesis"]
+
     contract = _v6._v5._v4._canonicalize(dict(base_result["challenge_genesis"]["contract"]))
     contract["proof_before_action_protocol"] = PROOF_BEFORE_ACTION_PROTOCOL
-    contract["action_authorization"] = _v6._v5._v4._canonicalize(challenge.get("action_authorization"))
+    contract["action_authority_rules"] = _v6._v5._v4._canonicalize(
+        _authority_declaration(challenge.get("action_authorization"))
+    )
+    contract["action_evaluation_fields"] = sorted(ACTION_EVALUATION_FIELDS)
     contract["action_validator_manifest_sha256"] = action_validator_manifest_sha256()
     digest = _v6._v5._v4._sha256(contract)
     return {
@@ -79,7 +95,7 @@ def _extended_genesis(challenge: dict[str, Any], base_result: dict[str, Any]) ->
         "parent": None,
         "accepted_claims": 0,
         "rules_frozen": True,
-        "meaning": "immutable rules of engagement before candidate evaluation; no claim or action is accepted at genesis",
+        "meaning": "immutable authority/rules before candidate evaluation; proposed action, nonce, approval, and prompt context remain evaluation inputs",
         "contract": contract,
     }
 
@@ -119,6 +135,7 @@ def evaluate_challenge(challenge: Any) -> dict[str, Any]:
         "action_authorization_summary": action_summary,
         "action_validator_manifest_sha256": action_validator_manifest_sha256(),
         "agent_authority_boundary": "Natural-language/model output may propose an action but cannot enlarge the frozen authority contract.",
+        "action_genesis_boundary": "Genesis freezes authority/rules; proposed action, request nonce, approval, and prompt context are evaluation inputs.",
     })
     base_result["challenge_evaluation"] = _v6._v5._v4._evaluation_record(challenge, base_result, genesis)
     return base_result
@@ -132,6 +149,7 @@ def capabilities() -> dict[str, Any]:
         "action_decisions": ["ADMIT", "REJECT", "INCOMPLETE", "INVALID"],
         "llm_output_authority": False,
         "action_authority_rule": "proposal != authority; exact authority closure is required before execution",
+        "action_genesis_rule": "freeze authority/rules, not candidate action/nonce/approval/prompt context",
         "action_validator_manifest_sha256": action_validator_manifest_sha256(),
     })
     return base
