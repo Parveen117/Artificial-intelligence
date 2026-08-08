@@ -72,7 +72,7 @@ Without a closed semantic adapter, a request for semantic interpretation returns
 
 This does not prevent non-formal testing. Black-box traces, fuzz summaries, measurements, model outputs, logs and other empirical evidence may enter exploratory/adversarial modes through their declared package/adapter boundary. They remain evidence unless and until formal-promotion obligations close.
 
-For Proof Before Action specifically, natural-language/model output may propose an action but is not an authority source. The action must close against the separate frozen authorization contract.
+For Proof Before Action specifically, natural-language/model output may propose an action but is not an authority source. The action must close against the separate frozen authorization rules.
 
 ## Challenge Genesis: ledger initiation
 
@@ -90,9 +90,27 @@ rules_frozen = true
 
 The genesis SHA-256 commits to the contract declaration, including package/mode, target, scope, threat model, semantic mode, required/declarative obligation identifiers, negative-control identifiers, evidence references, adapter identities and declared thresholds.
 
-For Proof Before Action, the extended Genesis also commits the `action_authorization` contract and the action-validator manifest hash.
+### Proof-Before-Action Genesis boundary
 
-Outcome statuses are intentionally not part of the frozen genesis contract. A challenger can change evidence/test outcomes without redefining the rules. Changing the target, scope, threat model, adapter identity, authority contract, or other committed rule changes the genesis hash.
+For `proof-before-action-v1`, the extended Genesis freezes the **authority/rule view**, not the evaluated candidate itself. It commits fields such as the protocol, principal, agent, committed authority state, delegation grants, terminal grant, confirmation policy, and action-validator manifest hash.
+
+The following remain per-evaluation candidate fields:
+
+```text
+action
+request_nonce
+approval
+proposal_context
+```
+
+They are bound by the evaluated input and `CHALLENGE_EVALUATION`, not by Genesis. Therefore a red team can mutate the candidate under one pinned authority contract and test the action gate directly.
+
+The rule is:
+
+```text
+candidate mutation      -> same Genesis, new evaluation
+authority/rule mutation -> different Genesis
+```
 
 A connector may pin a previously agreed genesis value:
 
