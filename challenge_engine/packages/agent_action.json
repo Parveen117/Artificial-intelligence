@@ -1,0 +1,14 @@
+{
+  "package": "agent_action",
+  "version": "0.1",
+  "description": "RNKE Proof-Before-Action package: an AI agent may propose an action, but execution requires exact authority/evidence closure against committed state.",
+  "default_mode": "adversarial",
+  "allowed_modes": ["exploratory", "adversarial", "certified"],
+  "requires_authorization": false,
+  "certification_requires_formal_adapter": false,
+  "required_obligations": {
+    "exploratory": ["structure", "target", "evidence"],
+    "adversarial": ["structure", "target", "evidence"],
+    "certified": ["structure", "target", "evidence", "dependencies"]
+  }
+}
