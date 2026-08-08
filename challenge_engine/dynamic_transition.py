@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
-"""Dynamic RNKE state-transition primitives.
+"""Morphism-first Dynamic RNKE transition primitives.
 
-This module treats the verified object as a transition S_t -> S_{t+1}, not only
-as a static claim. Recognition prepares a hash-bound transition certificate;
-a stateful connector must then perform an atomic compare-and-swap (CAS) from
-the certified state-before hash to the certified state-after value.
+The native verified object is an admissible morphism ``a: x -> y``. A notation
+such as ``S_t -> S_{t+1}``, a timestamp, epoch, block height, JSON object, basis,
+or database row is a presentation of that morphism, not its primitive identity.
+
+Recognition prepares a representation-bound transition certificate. A stateful
+connector may then realize that admitted morphism by an atomic compare-and-swap
+(CAS) from the certified source-state representation to the certified target
+representation. A clock is not required by this module.
+
+Base/presentation independence is not inferred from canonical JSON. It requires
+a separately declared covariance/faithfulness adapter proving that two
+presentations represent the same native morphism. Canonical JSON supplies only
+deterministic serialization inside this connector presentation.
 
 The in-memory store below is a deterministic test/reference connector. It is
 not a distributed database or production persistence layer.
@@ -19,6 +28,7 @@ import threading
 from typing import Any
 
 PROTOCOL = "dynamic-rnke-transition-v1"
+NATIVE_PRIMITIVE = "admissible_morphism"
 COMMIT_MODE = "compare_and_swap"
 ACCEPTING_RESULTS = {"OBSERVED", "ADVERSARIAL_PASS", "CERTIFIED"}
 _HEX = set(string.hexdigits)
@@ -29,6 +39,7 @@ def _canonical(value: Any) -> str:
 
 
 def sha256_json(value: Any) -> str:
+    """Deterministic hash for this JSON presentation, not a universal native identity."""
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
@@ -39,12 +50,17 @@ def _is_hex64(value: Any) -> bool:
 def validator_manifest_sha256() -> str:
     return sha256_json({
         "protocol": PROTOCOL,
+        "native_primitive": NATIVE_PRIMITIVE,
+        "clock_required": False,
         "commit_mode": COMMIT_MODE,
-        "recognition_rule": "global closure and local/domain closure must both hold before commit preparation",
-        "state_rule": "state is evaluation lineage, not a frozen Genesis rule",
-        "atomicity_rule": "commit iff current_state_hash equals certified state_before_hash",
+        "recognition_rule": "every mandatory factor closes; endpoint or local closure cannot cancel an open factor",
+        "state_rule": "mutable state is evaluation lineage, not a frozen Genesis rule",
+        "presentation_rule": "state hashes and CAS are connector representations of the admitted morphism",
+        "base_independence_rule": "cross-presentation invariance requires a declared covariance/faithfulness adapter",
+        "serialization_rule": "canonical JSON gives deterministic bytes only; it is not a proof of coordinate independence",
+        "atomicity_rule": "commit iff current_state_hash equals certified source-state representation hash",
         "certificate_rule": "connector must pin the exact transition certificate digest emitted by RNKE evaluation",
-        "replay_rule": "successful CAS changes state hash, so a duplicate certificate becomes stale",
+        "replay_rule": "successful CAS changes state representation, so a duplicate certificate becomes stale",
         "decision_states": ["ADMIT", "REJECT", "INCOMPLETE", "INVALID"],
     })
 
@@ -68,7 +84,11 @@ def prepare_dynamic_transition(
     genesis_hash: Any,
     recognition_result: str,
 ) -> dict[str, Any]:
-    """Prepare a transition certificate after recognition, without committing it."""
+    """Prepare one morphism realization after recognition, without committing it.
+
+    ``state_before`` and ``state_after`` are connector presentations of the
+    source and target of the arrow. No time coordinate is required.
+    """
     errors: list[str] = []
     if not isinstance(state_before, dict):
         errors.append("state_before must be an object")
@@ -84,6 +104,8 @@ def prepare_dynamic_transition(
     if errors:
         return {
             "protocol": PROTOCOL,
+            "native_primitive": NATIVE_PRIMITIVE,
+            "clock_required": False,
             "decision": "INVALID",
             "commit_ready": False,
             "atomic_commit_required": True,
@@ -97,6 +119,10 @@ def prepare_dynamic_transition(
     after_hash = sha256_json(state_after) if decision == "ADMIT" else None
     certificate: dict[str, Any] = {
         "protocol": PROTOCOL,
+        "native_primitive": NATIVE_PRIMITIVE,
+        "clock_required": False,
+        "presentation_scope": "connector_json_state_v1",
+        "base_independence_status": "representation_bound_unless_covariance_adapter_closes",
         "decision": decision,
         "commit_ready": decision == "ADMIT",
         "atomic_commit_required": True,
@@ -105,6 +131,9 @@ def prepare_dynamic_transition(
         "payload_sha256": payload_sha256.lower(),
         "genesis_hash": genesis_hash.lower(),
         "recognition_result": recognition_result,
+        "source_state_representation_sha256": before_hash,
+        "target_state_representation_sha256": after_hash,
+        # Backward-compatible aliases used by the CAS reference connector.
         "state_before_sha256": before_hash,
         "state_after_sha256": after_hash,
         "state_after": copy.deepcopy(state_after) if decision == "ADMIT" else None,
@@ -121,11 +150,15 @@ def prepare_agent_action_transition(
     global_result: str,
     genesis_hash: str,
 ) -> dict[str, Any]:
-    """Derive the dynamic transition for proof-before-action-v1.
+    """Derive the morphism realization for ``proof-before-action-v1``.
 
-    A successful action consumes its request nonce in S_{t+1}. This turns replay
-    resistance into state evolution. The actual state update must still be CAS
-    committed by the connector before the external side effect is released.
+    A successful action consumes its request nonce in the target state. This
+    turns replay resistance into state evolution. The state update must still be
+    CAS committed by the connector before the external side effect is released.
+
+    The committed epoch used by the authorization contract is semantic state
+    when grant validity depends on it. It is therefore not treated as a removable
+    clock coordinate merely because it resembles time.
     """
     if not isinstance(action_authorization, dict) or not isinstance(action_summary, dict):
         return prepare_dynamic_transition(
@@ -166,7 +199,7 @@ def prepare_agent_action_transition(
 
 
 class InMemoryAtomicStateStore:
-    """Thread-safe reference CAS store used by tests and local demonstrations."""
+    """Thread-safe reference CAS store for one connector presentation."""
 
     def __init__(self, initial_state: dict[str, Any]):
         if not isinstance(initial_state, dict):
@@ -195,18 +228,20 @@ def commit_prepared_transition(
     certificate: Any,
     expected_certificate_sha256: Any,
 ) -> dict[str, Any]:
-    """Atomically commit exactly the transition certificate emitted by RNKE.
+    """Atomically realize exactly the morphism certificate emitted by RNKE.
 
-    `expected_certificate_sha256` is supplied by the trusted evaluation/connector
-    path. This prevents a caller from replacing S_{t+1} and presenting the
-    replacement as if it were the transition RNKE actually prepared.
+    ``expected_certificate_sha256`` is supplied by the trusted evaluation /
+    connector path. This prevents a caller from replacing the target-state
+    presentation and presenting the replacement as the morphism RNKE admitted.
     """
     if not isinstance(certificate, dict):
         return {"status": "INVALID", "committed": False, "reason": "certificate must be an object"}
     if not _is_hex64(expected_certificate_sha256):
         return {"status": "INVALID", "committed": False, "reason": "expected certificate digest is required"}
-    if certificate.get("protocol") != PROTOCOL:
-        return {"status": "INVALID", "committed": False, "reason": "unsupported dynamic transition protocol"}
+    if certificate.get("protocol") != PROTOCOL or certificate.get("native_primitive") != NATIVE_PRIMITIVE:
+        return {"status": "INVALID", "committed": False, "reason": "unsupported dynamic morphism protocol"}
+    if certificate.get("clock_required") is not False:
+        return {"status": "INVALID", "committed": False, "reason": "native transition certificate must not require an external clock"}
     if certificate.get("commit_mode") != COMMIT_MODE or certificate.get("atomic_commit_required") is not True:
         return {"status": "INVALID", "committed": False, "reason": "atomic CAS contract is not closed"}
     if certificate.get("validator_manifest_sha256") != validator_manifest_sha256():
@@ -225,19 +260,27 @@ def commit_prepared_transition(
     state_after = certificate.get("state_after")
     if not isinstance(state_after, dict):
         return {"status": "INVALID", "committed": False, "reason": "missing state_after"}
-    if sha256_json(state_after) != certificate.get("state_after_sha256"):
-        return {"status": "INVALID", "committed": False, "reason": "state_after hash mismatch"}
+    if sha256_json(state_after) != certificate.get("target_state_representation_sha256"):
+        return {"status": "INVALID", "committed": False, "reason": "target-state representation hash mismatch"}
+    if certificate.get("state_after_sha256") != certificate.get("target_state_representation_sha256"):
+        return {"status": "INVALID", "committed": False, "reason": "target-state compatibility alias mismatch"}
+    if certificate.get("state_before_sha256") != certificate.get("source_state_representation_sha256"):
+        return {"status": "INVALID", "committed": False, "reason": "source-state compatibility alias mismatch"}
 
-    committed = store.compare_and_swap(certificate.get("state_before_sha256"), state_after)
+    committed = store.compare_and_swap(certificate.get("source_state_representation_sha256"), state_after)
     receipt = {
         "kind": "RNKE_DYNAMIC_COMMIT_RECEIPT",
         "protocol": PROTOCOL,
+        "native_primitive": NATIVE_PRIMITIVE,
         "status": "COMMITTED" if committed else "STALE_STATE",
         "committed": committed,
         "transition_id": certificate.get("transition_id"),
         "certificate_sha256": supplied_digest,
-        "state_before_sha256": certificate.get("state_before_sha256"),
-        "state_after_sha256": certificate.get("state_after_sha256") if committed else store.state_sha256(),
+        "source_state_representation_sha256": certificate.get("source_state_representation_sha256"),
+        "target_state_representation_sha256": certificate.get("target_state_representation_sha256") if committed else store.state_sha256(),
+        # Backward-compatible receipt aliases.
+        "state_before_sha256": certificate.get("source_state_representation_sha256"),
+        "state_after_sha256": certificate.get("target_state_representation_sha256") if committed else store.state_sha256(),
     }
     receipt["receipt_sha256"] = sha256_json(receipt)
     return receipt
