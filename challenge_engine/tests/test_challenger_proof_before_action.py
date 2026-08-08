@@ -75,58 +75,64 @@ def baseline_challenge():
     }
 
 
+def redefine_authority_for_attacker(challenge):
+    aa = challenge["action_authorization"]
+    aa["principal"] = "human:mallory"
+    aa["agent"] = "agent:evil"
+    aa["action"] = {
+        "tool": "gmail.send",
+        "operation": "send_message",
+        "resource": "mailbox:alice",
+        "parameters": {"to": "attacker@example.com", "subject": "exfil", "body": "secret"},
+    }
+    ah = action_sha256(aa["action"])
+    aa["delegations"] = [{
+        "id": "grant-evil", "parent_id": None,
+        "issuer": "human:mallory", "subject": "agent:evil",
+        "tool": aa["action"]["tool"], "operation": aa["action"]["operation"],
+        "resource": aa["action"]["resource"], "action_sha256": ah,
+        "valid_from_epoch": 1, "valid_until_epoch": 100,
+    }]
+    aa["terminal_grant_id"] = "grant-evil"
+    return challenge
+
+
 class ChallengerProofBeforeActionTests(unittest.TestCase):
-    def test_control_pinned_genesis_blocks_authority_redefinition(self):
+    def test_control_pinned_genesis_detects_authority_redefinition(self):
         base = baseline_challenge()
         first = evaluate_challenge(base)
         expected = first["challenge_genesis"]["genesis_hash"]
-
-        attack = copy.deepcopy(base)
+        attack = redefine_authority_for_attacker(copy.deepcopy(base))
         attack["genesis"] = {"expected_hash": expected}
-        aa = attack["action_authorization"]
-        aa["principal"] = "human:mallory"
-        aa["agent"] = "agent:evil"
-        aa["action"] = {
-            "tool": "gmail.send",
-            "operation": "send_message",
-            "resource": "mailbox:alice",
-            "parameters": {"to": "attacker@example.com", "subject": "exfil", "body": "secret"},
-        }
-        ah = action_sha256(aa["action"])
-        aa["delegations"] = [{
-            "id": "grant-evil", "parent_id": None,
-            "issuer": "human:mallory", "subject": "agent:evil",
-            "tool": aa["action"]["tool"], "operation": aa["action"]["operation"],
-            "resource": aa["action"]["resource"], "action_sha256": ah,
-            "valid_from_epoch": 1, "valid_until_epoch": 100,
-        }]
-        aa["terminal_grant_id"] = "grant-evil"
         result = evaluate_challenge(attack)
         self.assertEqual(result["action_decision"], "ADMIT")
         self.assertEqual(result["result"], "FAILED")
         g = next(x for x in result["checks"] if x["id"] == "genesis_integrity")
         self.assertEqual(g["status"], "fail")
 
-    def test_public_style_unpinned_contract_can_be_redefined_and_admitted(self):
+    def test_break_genesis_failure_still_marks_attacker_action_executable(self):
+        base = baseline_challenge()
+        first = evaluate_challenge(base)
+        expected = first["challenge_genesis"]["genesis_hash"]
+        attack = redefine_authority_for_attacker(copy.deepcopy(base))
+        attack["genesis"] = {"expected_hash": expected}
+        result = evaluate_challenge(attack)
+        self.assertEqual(result["result"], "FAILED")
+        self.assertEqual(result["action_decision"], "ADMIT")
+        self.assertTrue(result["action_executable"], result)
+        self.assertIn("genesis_integrity", result["failed_obligations"])
+
+    def test_break_failed_negative_control_still_marks_action_executable(self):
         attack = baseline_challenge()
-        aa = attack["action_authorization"]
-        aa["principal"] = "human:mallory"
-        aa["agent"] = "agent:evil"
-        aa["action"] = {
-            "tool": "gmail.send",
-            "operation": "send_message",
-            "resource": "mailbox:alice",
-            "parameters": {"to": "attacker@example.com", "subject": "exfil", "body": "secret"},
-        }
-        ah = action_sha256(aa["action"])
-        aa["delegations"] = [{
-            "id": "grant-evil", "parent_id": None,
-            "issuer": "human:mallory", "subject": "agent:evil",
-            "tool": aa["action"]["tool"], "operation": aa["action"]["operation"],
-            "resource": aa["action"]["resource"], "action_sha256": ah,
-            "valid_from_epoch": 1, "valid_until_epoch": 100,
-        }]
-        aa["terminal_grant_id"] = "grant-evil"
+        attack["negative_controls"][0]["status"] = "fail"
+        result = evaluate_challenge(attack)
+        self.assertEqual(result["result"], "FAILED")
+        self.assertEqual(result["action_decision"], "ADMIT")
+        self.assertTrue(result["action_executable"], result)
+        self.assertTrue(any(x["id"].startswith("negative_control:") and x["status"] == "fail" for x in result["checks"]))
+
+    def test_public_style_unpinned_contract_can_be_redefined_and_admitted(self):
+        attack = redefine_authority_for_attacker(baseline_challenge())
         result = evaluate_challenge(attack)
         self.assertEqual(result["action_decision"], "ADMIT", result)
         self.assertTrue(result["action_executable"])
@@ -175,11 +181,10 @@ class ChallengerProofBeforeActionTests(unittest.TestCase):
         second = evaluate_challenge(copy.deepcopy(challenge))
         self.assertEqual(first["action_decision"], "ADMIT")
         self.assertEqual(second["action_decision"], "ADMIT")
+        self.assertTrue(first["action_executable"])
+        self.assertTrue(second["action_executable"])
         self.assertEqual(first["action_authorization_summary"]["action_sha256"], second["action_authorization_summary"]["action_sha256"])
-        self.assertEqual(
-            challenge["action_authorization"]["request_nonce"],
-            "request-0001",
-        )
+        self.assertEqual(challenge["action_authorization"]["request_nonce"], "request-0001")
 
 
 if __name__ == "__main__":
