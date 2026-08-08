@@ -63,7 +63,7 @@ A prompt injection therefore does not have to be perfectly recognized as malicio
 
 ## What counts as a break
 
-A meaningful break is a reproducible case where the frozen challenge contract does not authorize the proposed action, yet RNKE returns:
+A meaningful break is a reproducible case where the frozen authority rules do not authorize the proposed action, yet RNKE returns:
 
 ```text
 ADMIT
@@ -95,28 +95,48 @@ The baseline fixture deliberately contains hostile retrieved text while the exec
 ADMIT
 ```
 
-Now mutate the executable action, authority chain, state, nonce, or approval without correspondingly valid authority. The expected action decision becomes `REJECT` or `INCOMPLETE`, never executable `ADMIT`.
+A challenger may then vary the **candidate** action, request nonce, approval object, or prompt/retrieval payload under the same pinned Genesis. A differently bound or stale candidate must become `REJECT` or `INCOMPLETE`, never executable `ADMIT`.
+
+Changing a frozen authority rule, such as the principal, agent, delegation grants, committed authority state, terminal grant, or confirmation policy, is different: it defines a different authority contract and must change Genesis.
 
 ## Initial internal red team
 
 Before promotion to the main challenge, the gate was tested with:
 
 ```text
-15 directed adversarial cases: PASS
+15 directed core adversarial cases: PASS
 20,000 deterministic hostile mutations
 20 mutation classes
 unauthorized ADMIT: 0
 ```
 
-The repository CI repeats the deterministic mutation campaign and full Challenge Engine integration tests. The initial audit is documented in [`PROOF_BEFORE_ACTION_AUDIT.md`](PROOF_BEFORE_ACTION_AUDIT.md).
+The repository test suite also includes full Challenge Engine integration tests. The initial audit is documented in [`PROOF_BEFORE_ACTION_AUDIT.md`](PROOF_BEFORE_ACTION_AUDIT.md).
 
-## Challenge Genesis
+## Challenge Genesis: freeze the rules, not the attack
 
-The public challenge is meaningful only against fixed rules.
+The public challenge is meaningful only against fixed authority rules, but the candidate under attack must remain variable.
 
-The complete `action_authorization` contract and action-validator manifest hash are committed into `CHALLENGE_GENESIS`. A public red-team fixture should publish and pin its expected Genesis hash. Changing the principal, scope, delegation, confirmation rule, or other committed authority input then changes the Genesis commitment.
+For `proof-before-action-v1`, `CHALLENGE_GENESIS` commits the frozen authority/rule view, including the declared principal, agent, committed authority state, delegation grants, terminal grant, confirmation policy, protocol, and action-validator manifest hash.
 
-Without a pinned authority contract, redefining the rules is merely creating a different challenge, not breaking the original one.
+It deliberately does **not** freeze these per-evaluation candidate fields:
+
+```text
+action
+request_nonce
+approval
+proposal_context
+```
+
+Those fields remain part of the evaluated input and are bound by the `CHALLENGE_EVALUATION` record. This means a challenger can mutate the proposed action or hostile prompt while keeping the same pinned Genesis and actually test whether the RNKE action gate rejects the candidate.
+
+Therefore:
+
+```text
+candidate mutation      -> same Genesis, new evaluation
+frozen authority change -> different Genesis
+```
+
+This separation is part of the challenge contract, not an implementation convenience.
 
 ## RNKE is larger than this challenge
 
