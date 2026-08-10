@@ -7,16 +7,116 @@ content is intentionally not an authority source in this protocol.
 """
 from __future__ import annotations
 
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
+import math
 from typing import Any
+
+try:
+    from .strict_json import exact_json_lexeme
+except ImportError:
+    from strict_json import exact_json_lexeme
 
 PROTOCOL = "proof-before-action-v1"
 MAX_DELEGATION_DEPTH = 16
+MAX_ACTION_CANONICAL_DEPTH = 64
+MAX_ACTION_CANONICAL_NODES = 10_000
+MAX_ACTION_CANONICAL_BYTES = 1_048_576
+
+
+class ActionCanonicalizationError(ValueError):
+    pass
+
+
+def _canonical_number(value: int | float) -> str:
+    if isinstance(value, bool):
+        raise ActionCanonicalizationError("Boolean is not a numeric action value")
+    if isinstance(value, int):
+        return str(value)
+    if not math.isfinite(value):
+        raise ActionCanonicalizationError("action number must be finite")
+    token = exact_json_lexeme(value) or repr(value)
+    try:
+        declared = Decimal(token)
+    except (InvalidOperation, ValueError) as exc:
+        raise ActionCanonicalizationError("invalid finite action number") from exc
+    if not declared.is_finite():
+        raise ActionCanonicalizationError("action number must be finite")
+    if declared.is_zero():
+        return "0"
+    sign, digits_tuple, exponent = declared.as_tuple()
+    digits = "".join(str(digit) for digit in digits_tuple)
+    while len(digits) > 1 and digits.endswith("0"):
+        digits = digits[:-1]
+        exponent += 1
+    prefix = "-" if sign else ""
+    return f"{prefix}{digits}" if exponent == 0 else f"{prefix}{digits}e{exponent}"
+
+
+def _canonical_json(value: Any) -> str:
+    active: set[int] = set()
+    nodes = 0
+
+    def encode(item: Any, depth: int) -> str:
+        nonlocal nodes
+        nodes += 1
+        if nodes > MAX_ACTION_CANONICAL_NODES:
+            raise ActionCanonicalizationError(
+                f"action exceeds {MAX_ACTION_CANONICAL_NODES} canonical nodes"
+            )
+        if depth > MAX_ACTION_CANONICAL_DEPTH:
+            raise ActionCanonicalizationError(
+                f"action exceeds canonical depth {MAX_ACTION_CANONICAL_DEPTH}"
+            )
+        if item is None:
+            return "null"
+        if isinstance(item, bool):
+            return "true" if item else "false"
+        if isinstance(item, int):
+            return _canonical_number(item)
+        if isinstance(item, float):
+            return _canonical_number(item)
+        if isinstance(item, str):
+            return json.dumps(item, ensure_ascii=True, allow_nan=False)
+        if isinstance(item, list):
+            identity = id(item)
+            if identity in active:
+                raise ActionCanonicalizationError("cyclic action list is not JSON")
+            active.add(identity)
+            try:
+                return "[" + ",".join(encode(child, depth + 1) for child in item) + "]"
+            finally:
+                active.remove(identity)
+        if isinstance(item, dict):
+            identity = id(item)
+            if identity in active:
+                raise ActionCanonicalizationError("cyclic action object is not JSON")
+            if any(not isinstance(key, str) for key in item):
+                raise ActionCanonicalizationError("action object keys must be strings")
+            active.add(identity)
+            try:
+                fields = []
+                for key in sorted(item):
+                    encoded_key = json.dumps(key, ensure_ascii=True, allow_nan=False)
+                    fields.append(f"{encoded_key}:{encode(item[key], depth + 1)}")
+                return "{" + ",".join(fields) + "}"
+            finally:
+                active.remove(identity)
+        raise ActionCanonicalizationError(
+            f"unsupported action JSON type: {type(item).__name__}"
+        )
+
+    encoded = encode(value, 0)
+    if len(encoded.encode("utf-8")) > MAX_ACTION_CANONICAL_BYTES:
+        raise ActionCanonicalizationError(
+            f"action exceeds {MAX_ACTION_CANONICAL_BYTES} canonical bytes"
+        )
+    return encoded
 
 
 def _canonical(value: Any) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+    return _canonical_json(value)
 
 
 def _sha256(value: Any) -> str:
@@ -24,7 +124,7 @@ def _sha256(value: Any) -> str:
 
 
 def action_sha256(action: dict[str, Any]) -> str:
-    """Hash the exact executable action, including parameters."""
+    """Hash the exact executable action, including exact numeric values."""
     return _sha256(action)
 
 
@@ -32,8 +132,12 @@ def validator_manifest_sha256() -> str:
     return _sha256({
         "protocol": PROTOCOL,
         "max_delegation_depth": MAX_DELEGATION_DEPTH,
+        "max_action_canonical_depth": MAX_ACTION_CANONICAL_DEPTH,
+        "max_action_canonical_nodes": MAX_ACTION_CANONICAL_NODES,
+        "max_action_canonical_bytes": MAX_ACTION_CANONICAL_BYTES,
         "authority_source": "declared capability/delegation chain only",
         "natural_language_authority": False,
+        "action_canonicalization": "exact-decimal-value-canonical-json-v2",
         "grant_binding": ["tool", "operation", "resource", "action_sha256"],
         "state_checks": ["epoch", "revocation", "request_nonce_replay"],
         "confirmation_binding": ["approver", "action_sha256", "request_nonce"],
@@ -106,8 +210,8 @@ def evaluate_action_authorization(contract: Any) -> dict[str, Any]:
             normalized_action.setdefault("parameters", {})
             try:
                 action_hash = action_sha256(normalized_action)
-            except (TypeError, ValueError):
-                _check(checks, "action", "invalid", "action must be canonical JSON without NaN/Infinity")
+            except (ActionCanonicalizationError, TypeError, ValueError, OverflowError, RecursionError, UnicodeError):
+                _check(checks, "action", "invalid", "action must be bounded canonical JSON with finite exact numeric values")
             else:
                 action = normalized_action
                 _check(checks, "action", "pass", f"exact action bound by sha256:{action_hash}")
@@ -295,4 +399,5 @@ def _summary(action_hash: str | None, checks: list[dict[str, str]]) -> dict[str,
         "invalid_fields": [x["id"] for x in checks if x["status"] == "invalid"],
         "validator_manifest_sha256": validator_manifest_sha256(),
         "authority_rule": "Natural-language content may propose an action but cannot enlarge authority.",
+        "action_canonicalization": "exact-decimal-value-canonical-json-v2",
     }
