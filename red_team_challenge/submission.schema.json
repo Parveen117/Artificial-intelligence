@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Parveen117/Artificial-intelligence/red_team_challenge/submission.schema.json",
+  "title": "RNKE Red-Team Submission v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "submission_id",
+    "participant",
+    "engine_subject_commit",
+    "challenge_file",
+    "observed_output_file",
+    "pinned_genesis_sha256",
+    "claimed_break_class",
+    "authorization_argument",
+    "reproduction_command",
+    "environment",
+    "safety_acknowledgement"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "submission_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+    },
+    "participant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["handle"],
+      "properties": {
+        "handle": {"type": "string", "minLength": 2, "maxLength": 80},
+        "contact": {"type": "string", "maxLength": 200},
+        "credit_name": {"type": "string", "maxLength": 120}
+      }
+    },
+    "engine_subject_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "challenge_file": {"$ref": "#/$defs/repositoryPath"},
+    "observed_output_file": {"$ref": "#/$defs/repositoryPath"},
+    "pinned_genesis_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "claimed_break_class": {
+      "enum": [
+        "unauthorized_admit",
+        "replay_escape",
+        "delegation_escape",
+        "genesis_integrity_escape",
+        "negative_control_escape",
+        "parser_or_canonicalization_escape"
+      ]
+    },
+    "authorization_argument": {
+      "type": "string",
+      "minLength": 50,
+      "maxLength": 12000
+    },
+    "reproduction_command": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 2000
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python", "os"],
+      "properties": {
+        "python": {"type": "string", "minLength": 3, "maxLength": 40},
+        "os": {"type": "string", "minLength": 2, "maxLength": 120},
+        "architecture": {"type": "string", "maxLength": 80},
+        "container": {"type": "string", "maxLength": 160}
+      }
+    },
+    "safety_acknowledgement": {
+      "const": "I used only the authorized local synthetic challenge scope and included no secrets, personal data, or real-world side effects."
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "value"],
+        "properties": {
+          "kind": {"type": "string", "minLength": 1, "maxLength": 80},
+          "value": {"type": "string", "minLength": 1, "maxLength": 4000}
+        }
+      }
+    },
+    "notes": {"type": "string", "maxLength": 12000}
+  },
+  "$defs": {
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 500,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._@+-]+(?:/[A-Za-z0-9._@+-]+)*$"
+    }
+  }
+}

@@ -1,0 +1,99 @@
+name: RNKE Red-Team Break Report
+description: Report a reproducible Proof-Before-Action break candidate under the pinned public Challenge Genesis.
+title: "[RNKE Red Team] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report only against the authorized local synthetic challenge scope. Do not include passwords, tokens, personal data, sensitive links, or real-world exploit details.
+
+        A flagship break candidate requires executable `ADMIT` for a candidate that the pinned authority contract does not authorize.
+
+  - type: input
+    id: submission_id
+    attributes:
+      label: Submission ID
+      description: Stable lowercase identifier used in your reproduction package.
+      placeholder: handle-case-001
+    validations:
+      required: true
+
+  - type: input
+    id: source_commit
+    attributes:
+      label: Engine subject commit
+      description: Copy the pinned engine subject commit from red_team_challenge/CHALLENGE_MANIFEST.json.
+      placeholder: 40-hex commit
+    validations:
+      required: true
+
+  - type: input
+    id: genesis
+    attributes:
+      label: Pinned Challenge Genesis SHA-256
+      description: The 64-hex Genesis hash reproduced by your candidate.
+      placeholder: 64-hex SHA-256
+    validations:
+      required: true
+
+  - type: dropdown
+    id: break_class
+    attributes:
+      label: Claimed break class
+      options:
+        - unauthorized_admit
+        - replay_escape
+        - delegation_escape
+        - genesis_integrity_escape
+        - negative_control_escape
+        - parser_or_canonicalization_escape
+    validations:
+      required: true
+
+  - type: textarea
+    id: authorization_argument
+    attributes:
+      label: Why the candidate is unauthorized
+      description: Identify the exact frozen authority rule that does not authorize the candidate. "It looks malicious" is not sufficient.
+      placeholder: Explain the tool/operation/resource/action-hash/delegation/epoch/revocation/nonce/confirmation violation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide a public fork/branch or pull request plus the exact local command. Use synthetic data only.
+      placeholder: Repository path, challenge fixture, observed output, and command.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_output
+    attributes:
+      label: Observed RNKE decision
+      description: Do not paste secrets. Include action_decision, action_executable, challenge result, and relevant check identifiers.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Python version, operating system, architecture/container, deterministic seed if used.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety and scope acknowledgements
+      options:
+        - label: I tested only the authorized local synthetic repository challenge and did not target any third-party or production system.
+          required: true
+        - label: I included no passwords, tokens, personal data, private keys, or sensitive live links.
+          required: true
+        - label: I understand that a reproducible ADMIT candidate still requires independent authorization-contract adjudication.
+          required: true
+        - label: I understand that v1 announces no monetary bounty or guaranteed reward.
+          required: true
