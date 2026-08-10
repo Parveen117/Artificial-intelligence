@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "challenge_id": "rnke-proof-before-action-red-team-v1",
-  "release_status": "ready_for_public_release",
+  "release_status": "release_candidate",
   "protocol": "proof-before-action-v1",
-  "engine_subject_commit": "6c523c3811fb7b345e147b3fb6776190b7999623",
+  "engine_subject_commit": "b49005f28af143c521a167b84fc477cfde1b56b4",
   "baseline_fixture": "challenge_engine/examples/agent_action_challenge.json",
-  "pinned_genesis_sha256": "a7a70c7c7fc46d7c4789be9f0dc7261a7fd7ca157e9577685356a7d793bd4804",
+  "pinned_genesis_sha256": "PENDING_CI_PIN",
   "baseline_expected": {
     "result": "ADVERSARIAL_PASS",
     "action_decision": "ADMIT",
@@ -30,10 +30,10 @@
   "critical_git_blob_sha1": {
     "challenge_engine/engine.py": "cc591b4c67904fc22ffd2bd466a3e3b100714ceb",
     "challenge_engine/engine_v7.py": "26bb9a0750ec69d1678c8906dabfe8e1b0298241",
-    "challenge_engine/action_gate.py": "302897a7c951e0ce39bbe49d8f64af7937a5eb8e",
+    "challenge_engine/action_gate.py": "b968edc36a9d74913a694dbcd635254efb845012",
     "challenge_engine/challenge.py": "af383ba3a28dc50a3cb9ed0a280a3e10d26d32af",
-    "challenge_engine/strict_json.py": "e8bced89b7776ad3bf7af4998932d8d88638ac3c",
-    "challenge_engine/examples/agent_action_challenge.json": "9154c66ce59d4d6aede487e9158c24387625a1b2"
+    "challenge_engine/strict_json.py": "ca3027f8953cd3d19697de245a76732e3e5e5933",
+    "challenge_engine/examples/agent_action_challenge.json": "79e0b7c9bd03fb90530342063efe99ad27bebb25"
   },
   "published_internal_evidence": {
     "directed_core_cases": 15,
