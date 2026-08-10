@@ -71,6 +71,10 @@ def main() -> int:
         require(manifest.get("protocol") == "proof-before-action-v1", "unexpected Proof-Before-Action protocol")
         require(HEX40.fullmatch(str(manifest.get("engine_subject_commit", ""))) is not None, "invalid engine subject commit")
         require(manifest.get("no_bounty_promised") is True, "v1 must not imply an undeclared bounty")
+        require(
+            manifest.get("self_red_team_audit") == "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
+            "public release must bind the pre-public self-red-team audit",
+        )
 
         for required in [
             "red_team_challenge/README.md",
@@ -78,10 +82,14 @@ def main() -> int:
             "red_team_challenge/SUBMISSION_SPEC.md",
             "red_team_challenge/submission.schema.json",
             "red_team_challenge/verify_submission.py",
+            "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
+            "challenge_engine/tests/test_proof_before_action_self_red_team.py",
         ]:
             repo_file(required, "required_launch_file")
 
-        for relative, expected in manifest.get("critical_git_blob_sha1", {}).items():
+        critical = manifest.get("critical_git_blob_sha1")
+        require(isinstance(critical, dict) and len(critical) >= 6, "critical engine blob pins are incomplete")
+        for relative, expected in critical.items():
             require(isinstance(expected, str) and HEX40.fullmatch(expected) is not None,
                     f"invalid manifest blob pin for {relative}")
             observed = git_blob_sha1(repo_file(relative, "critical_git_blob_sha1"))
@@ -111,9 +119,21 @@ def main() -> int:
                 require(pin == genesis, "candidate Genesis pin does not match the baseline")
 
         evidence = manifest.get("published_internal_evidence", {})
+        require(isinstance(evidence, dict), "published_internal_evidence must be an object")
         require(evidence.get("directed_core_cases") == 15, "directed-case evidence drift")
         require(evidence.get("deterministic_hostile_mutations") == 20000, "mutation-count evidence drift")
-        require(evidence.get("unauthorized_admit") == 0, "internal evidence must not claim an unauthorized ADMIT")
+        require(evidence.get("mutation_classes") == 20, "mutation-class evidence drift")
+        require(evidence.get("full_regression_tests") == 159, "full regression count drift")
+        require(evidence.get("self_red_team_test_methods") == 14, "self-red-team method count drift")
+        require(evidence.get("deterministic_decimal_alias_probes") == 1500, "decimal-alias campaign count drift")
+        require(evidence.get("pre_fix_unauthorized_admit_reproductions") == 3,
+                "pre-fix unauthorized-ADMIT reproduction count must remain disclosed")
+        require(evidence.get("pre_fix_numeric_alias_root_causes") == 2,
+                "pre-fix numeric-alias root-cause count drift")
+        require(evidence.get("pre_fix_genesis_boundary_defects") == 1,
+                "pre-fix Genesis-boundary defect count drift")
+        require(evidence.get("unauthorized_admit") == 0,
+                "post-repair evidence must not contain an unauthorized ADMIT")
 
         output = {
             "result": "RNKE_RED_TEAM_RELEASE_CHECK_PASS",
@@ -126,7 +146,11 @@ def main() -> int:
             "baseline_genesis_sha256": genesis,
             "manifest_genesis_pin": pin,
             "genesis_pin_required_before_public_release": pin == "PENDING_CI_PIN",
-            "critical_blob_count": len(manifest.get("critical_git_blob_sha1", {})),
+            "critical_blob_count": len(critical),
+            "full_regression_tests": evidence["full_regression_tests"],
+            "decimal_alias_probes": evidence["deterministic_decimal_alias_probes"],
+            "pre_fix_unauthorized_admit_reproductions": evidence["pre_fix_unauthorized_admit_reproductions"],
+            "post_fix_unauthorized_admit": evidence["unauthorized_admit"],
         }
         print(json.dumps(output, sort_keys=True))
         print(f"RNKE_RED_TEAM_BASELINE_GENESIS={genesis}")
