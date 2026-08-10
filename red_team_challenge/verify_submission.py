@@ -15,10 +15,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from challenge_engine.engine import evaluate_challenge
 from challenge_engine.strict_json import StrictJSONError, loads_strict
 
-ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "red_team_challenge" / "CHALLENGE_MANIFEST.json"
 SAFETY_TEXT = (
     "I used only the authorized local synthetic challenge scope and included "
