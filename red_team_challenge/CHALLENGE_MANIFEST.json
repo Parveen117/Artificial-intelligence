@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "challenge_id": "rnke-proof-before-action-red-team-v1",
-  "release_status": "release_candidate",
+  "release_status": "ready_for_public_release",
   "protocol": "proof-before-action-v1",
   "engine_subject_commit": "6c523c3811fb7b345e147b3fb6776190b7999623",
   "baseline_fixture": "challenge_engine/examples/agent_action_challenge.json",
-  "pinned_genesis_sha256": "PENDING_CI_PIN",
+  "pinned_genesis_sha256": "a7a70c7c7fc46d7c4789be9f0dc7261a7fd7ca157e9577685356a7d793bd4804",
   "baseline_expected": {
     "result": "ADVERSARIAL_PASS",
     "action_decision": "ADMIT",
