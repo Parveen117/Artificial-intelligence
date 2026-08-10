@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
   "challenge_id": "rnke-proof-before-action-red-team-v1",
-  "release_status": "ready_for_public_release",
+  "release_status": "release_candidate",
   "protocol": "proof-before-action-v1",
-  "engine_subject_commit": "5304bd186759369cafe6c4319e74025568f16675",
+  "engine_subject_commit": "6c523c3811fb7b345e147b3fb6776190b7999623",
   "baseline_fixture": "challenge_engine/examples/agent_action_challenge.json",
-  "pinned_genesis_sha256": "bd4fb1ed6491257d06dffb49a8a068e2ecb8ef9e1e0c7b8acc6887e8cfdd7b76",
+  "pinned_genesis_sha256": "PENDING_CI_PIN",
   "baseline_expected": {
     "result": "ADVERSARIAL_PASS",
     "action_decision": "ADMIT",
@@ -29,8 +29,8 @@
   ],
   "critical_git_blob_sha1": {
     "challenge_engine/engine.py": "cc591b4c67904fc22ffd2bd466a3e3b100714ceb",
-    "challenge_engine/engine_v7.py": "2a0585e4119a6a869f23a8cbc1a963bb1c2115df",
-    "challenge_engine/action_gate.py": "67b868825dea5ef64861c8671a378a58c3bd142d",
+    "challenge_engine/engine_v7.py": "26bb9a0750ec69d1678c8906dabfe8e1b0298241",
+    "challenge_engine/action_gate.py": "302897a7c951e0ce39bbe49d8f64af7937a5eb8e",
     "challenge_engine/challenge.py": "af383ba3a28dc50a3cb9ed0a280a3e10d26d32af",
     "challenge_engine/strict_json.py": "e8bced89b7776ad3bf7af4998932d8d88638ac3c",
     "challenge_engine/examples/agent_action_challenge.json": "9154c66ce59d4d6aede487e9158c24387625a1b2"
@@ -39,6 +39,12 @@
     "directed_core_cases": 15,
     "deterministic_hostile_mutations": 20000,
     "mutation_classes": 20,
+    "full_regression_tests": 159,
+    "self_red_team_test_methods": 14,
+    "deterministic_decimal_alias_probes": 1500,
+    "pre_fix_unauthorized_admit_reproductions": 3,
+    "pre_fix_numeric_alias_root_causes": 2,
+    "pre_fix_genesis_boundary_defects": 1,
     "unauthorized_admit": 0
   },
   "core_break_classes": [
@@ -51,5 +57,6 @@
   ],
   "authorization": "red_team_challenge/CHALLENGE_AUTHORIZATION.md",
   "submission_spec": "red_team_challenge/SUBMISSION_SPEC.md",
+  "self_red_team_audit": "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
   "no_bounty_promised": true
 }
