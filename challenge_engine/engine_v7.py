@@ -31,6 +31,9 @@ ENGINE_VERSION = _v6.ENGINE_VERSION
 SCHEMA_VERSION = _v6.SCHEMA_VERSION
 AGENT_ACTION_PACKAGE = "agent_action"
 ACTION_EVALUATION_FIELDS = {"action", "request_nonce", "approval", "proposal_context"}
+ACTION_EVALUATION_PATH_PREFIXES = tuple(
+    f"$.action_authorization.{field}" for field in sorted(ACTION_EVALUATION_FIELDS)
+)
 
 
 def _authority_declaration(action_authorization: Any) -> Any:
@@ -42,6 +45,37 @@ def _authority_declaration(action_authorization: Any) -> Any:
         for key, value in action_authorization.items()
         if key not in ACTION_EVALUATION_FIELDS
     }
+
+
+def _candidate_numeric_path(path: Any) -> bool:
+    if not isinstance(path, str):
+        return False
+    return any(
+        path == prefix or path.startswith(prefix + ".") or path.startswith(prefix + "[")
+        for prefix in ACTION_EVALUATION_PATH_PREFIXES
+    )
+
+
+def _remove_candidate_numeric_declarations(contract: dict[str, Any]) -> None:
+    """Prevent candidate numeric lexemes from leaking into frozen Genesis.
+
+    The base exact-number layer records connector decimal declarations in the
+    generic Genesis contract. For Proof-Before-Action, numbers inside action,
+    nonce, approval, or proposal context are per-evaluation candidate data and
+    must remain bound by CHALLENGE_EVALUATION rather than CHALLENGE_GENESIS.
+    """
+    declarations = contract.get("exact_numeric_declarations")
+    if not isinstance(declarations, dict):
+        return
+    filtered = {
+        path: value
+        for path, value in declarations.items()
+        if not _candidate_numeric_path(path)
+    }
+    if filtered:
+        contract["exact_numeric_declarations"] = filtered
+    else:
+        contract.pop("exact_numeric_declarations", None)
 
 
 def _action_check(challenge: dict[str, Any], package_name: str | None):
@@ -81,6 +115,7 @@ def _extended_genesis(challenge: dict[str, Any], base_result: dict[str, Any]) ->
         return base_result["challenge_genesis"]
 
     contract = _v6._v5._v4._canonicalize(dict(base_result["challenge_genesis"]["contract"]))
+    _remove_candidate_numeric_declarations(contract)
     contract["proof_before_action_protocol"] = PROOF_BEFORE_ACTION_PROTOCOL
     contract["action_authority_rules"] = _v6._v5._v4._canonicalize(
         _authority_declaration(challenge.get("action_authorization"))
@@ -135,7 +170,7 @@ def evaluate_challenge(challenge: Any) -> dict[str, Any]:
         "action_authorization_summary": action_summary,
         "action_validator_manifest_sha256": action_validator_manifest_sha256(),
         "agent_authority_boundary": "Natural-language/model output may propose an action but cannot enlarge the frozen authority contract.",
-        "action_genesis_boundary": "Genesis freezes authority/rules; proposed action, request nonce, approval, and prompt context are evaluation inputs.",
+        "action_genesis_boundary": "Genesis freezes authority/rules; proposed action, request nonce, approval, prompt context, and their exact numeric lexemes are evaluation inputs.",
     })
     base_result["challenge_evaluation"] = _v6._v5._v4._evaluation_record(challenge, base_result, genesis)
     return base_result
@@ -149,7 +184,7 @@ def capabilities() -> dict[str, Any]:
         "action_decisions": ["ADMIT", "REJECT", "INCOMPLETE", "INVALID"],
         "llm_output_authority": False,
         "action_authority_rule": "proposal != authority; exact authority closure is required before execution",
-        "action_genesis_rule": "freeze authority/rules, not candidate action/nonce/approval/prompt context",
+        "action_genesis_rule": "freeze authority/rules, not candidate action/nonce/approval/prompt context or their exact numeric lexemes",
         "action_validator_manifest_sha256": action_validator_manifest_sha256(),
     })
     return base
