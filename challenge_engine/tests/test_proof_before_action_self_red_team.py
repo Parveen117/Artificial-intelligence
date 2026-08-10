@@ -1,5 +1,4 @@
 import copy
-import json
 import unittest
 
 from challenge_engine.action_gate import action_sha256, evaluate_action_authorization
@@ -9,9 +8,9 @@ from challenge_engine.strict_json import loads_strict
 
 def parsed_action(number_token: str, *, nested: bool = False):
     parameters = (
-        f'{{"payment":{{"amount":{number_token},"currency":"USD"}}}}'
+        f'{"payment":{"amount":{number_token},"currency":"USD"}}'
         if nested
-        else f'{{"amount":{number_token},"currency":"USD"}}'
+        else f'{"amount":{number_token},"currency":"USD"}'
     )
     return loads_strict(
         '{'
@@ -128,12 +127,54 @@ class ExactActionBindingSelfRedTeam(unittest.TestCase):
         attack["action"] = candidate
         self.assertNotExecutable(attack)
 
+    def test_large_integer_adjacent_decimals_do_not_alias_after_float_rounding(self):
+        lower = parsed_action("9007199254740992.0")
+        upper = parsed_action("9007199254740993.0")
+        self.assertNotEqual(action_sha256(lower), action_sha256(upper))
+
     def test_equivalent_decimal_spellings_have_one_numeric_authority(self):
-        first = parsed_action("1.0")
-        second = parsed_action("1.00")
+        spellings = ["1", "1.0", "1.00", "10e-1", "0.1e1"]
+        hashes = {action_sha256(parsed_action(token)) for token in spellings}
+        self.assertEqual(len(hashes), 1, hashes)
+
+    def test_numeric_string_and_boolean_remain_type_distinct(self):
+        numeric = parsed_action("1")
+        string_value = copy.deepcopy(numeric)
+        string_value["parameters"]["amount"] = "1"
+        boolean_value = copy.deepcopy(numeric)
+        boolean_value["parameters"]["amount"] = True
+        self.assertEqual(len({
+            action_sha256(numeric),
+            action_sha256(string_value),
+            action_sha256(boolean_value),
+        }), 3)
+
+    def test_object_key_order_does_not_change_action_authority(self):
+        first = loads_strict(
+            '{"tool":"x","operation":"y","resource":"z",'
+            '"parameters":{"a":1.0,"b":"two"}}'
+        )
+        second = loads_strict(
+            '{"resource":"z","parameters":{"b":"two","a":1.00},'
+            '"operation":"y","tool":"x"}'
+        )
         self.assertEqual(action_sha256(first), action_sha256(second))
 
-    def test_lone_surrogate_fails_closed_instead_of_crashing(self):
+    def test_deterministic_decimal_alias_campaign(self):
+        zero_hash = action_sha256(parsed_action("0"))
+        for exponent in range(400, 1400):
+            with self.subTest(kind="underflow", exponent=exponent):
+                self.assertNotEqual(
+                    action_sha256(parsed_action(f"1e-{exponent}")),
+                    zero_hash,
+                )
+        baseline = action_sha256(parsed_action("0.1"))
+        for zeros in range(16, 516):
+            token = "0.1" + ("0" * zeros) + "1"
+            with self.subTest(kind="precision", zeros=zeros):
+                self.assertNotEqual(action_sha256(parsed_action(token)), baseline)
+
+    def test_lone_surrogate_is_canonicalized_without_crash_and_never_falls_open(self):
         action = {
             "tool": "synthetic.echo",
             "operation": "write",
@@ -146,6 +187,54 @@ class ExactActionBindingSelfRedTeam(unittest.TestCase):
             "agent": "agent:alpha",
             "action": action,
             "request_nonce": "request-surrogate",
+            "committed_state": {"epoch": 1, "revoked_grant_ids": [], "used_request_nonces": []},
+            "delegations": [],
+            "terminal_grant_id": "missing",
+            "confirmation_required": False,
+        }
+        self.assertNotExecutable(contract)
+
+    def test_cyclic_direct_api_action_is_invalid_not_executable(self):
+        action = {
+            "tool": "synthetic.echo",
+            "operation": "write",
+            "resource": "sandbox:alice",
+            "parameters": {},
+        }
+        action["parameters"]["cycle"] = action["parameters"]
+        contract = {
+            "protocol": "proof-before-action-v1",
+            "principal": "human:alice",
+            "agent": "agent:alpha",
+            "action": action,
+            "request_nonce": "request-cycle",
+            "committed_state": {"epoch": 1, "revoked_grant_ids": [], "used_request_nonces": []},
+            "delegations": [],
+            "terminal_grant_id": "missing",
+            "confirmation_required": False,
+        }
+        result = evaluate_action_authorization(contract)
+        self.assertEqual(result["decision"], "INVALID", result)
+        self.assertFalse(result["executable"], result)
+
+    def test_overdeep_direct_api_action_is_invalid_not_executable(self):
+        nested = current = []
+        for _ in range(70):
+            child = []
+            current.append(child)
+            current = child
+        action = {
+            "tool": "synthetic.echo",
+            "operation": "write",
+            "resource": "sandbox:alice",
+            "parameters": {"nested": nested},
+        }
+        contract = {
+            "protocol": "proof-before-action-v1",
+            "principal": "human:alice",
+            "agent": "agent:alpha",
+            "action": action,
+            "request_nonce": "request-depth",
             "committed_state": {"epoch": 1, "revoked_grant_ids": [], "used_request_nonces": []},
             "delegations": [],
             "terminal_grant_id": "missing",
