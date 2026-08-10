@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:formal-proof-gate:public-receipt:v1",
+  "title": "Formal Proof Gate Public Receipt v1",
+  "type": "object",
+  "required": [
+    "version",
+    "engine",
+    "proof_certificate",
+    "ecl_decision",
+    "iel_entry",
+    "cryptographic_binding",
+    "receipt_hash"
+  ],
+  "properties": {
+    "version": {"const": "1.0.0"},
+    "engine": {"const": "FormalProofPublicReceipt"},
+    "proof_certificate": {
+      "type": "object",
+      "required": ["proof_id", "status", "rule_set_hash", "certificate_hash"],
+      "properties": {
+        "proof_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["VALID_PROOF", "REJECTED"]},
+        "rule_set_hash": {"$ref": "#/$defs/hash"},
+        "certificate_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "ecl_decision": {
+      "type": "object",
+      "required": ["policy_id", "policy_hash", "action", "classification", "decision_hash"],
+      "properties": {
+        "policy_id": {"const": "formal-proof-gate-ecl-closure-policy-v1"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "action": {"enum": ["COMMIT", "REJECT"]},
+        "classification": {"enum": ["FORMAL_PROOF_CLOSED", "FORMAL_PROOF_OPEN_OR_INVALID"]},
+        "decision_hash": {"$ref": "#/$defs/hash"},
+        "rejection_codes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "iel_entry": {
+      "type": "object",
+      "required": [
+        "ledger_id",
+        "event_index",
+        "action",
+        "previous_entry_hash",
+        "state_before",
+        "entropy_delta",
+        "state_after",
+        "entry_hash"
+      ],
+      "properties": {
+        "ledger_id": {"const": "formal-proof-gate-iel-audit-ledger-v1"},
+        "event_index": {"type": "integer", "minimum": 1},
+        "action": {"enum": ["COMMIT", "REJECT"]},
+        "previous_entry_hash": {"$ref": "#/$defs/hash"},
+        "state_before": {"$ref": "#/$defs/state"},
+        "entropy_delta": {"type": "integer", "minimum": 1},
+        "state_after": {"$ref": "#/$defs/state"},
+        "entry_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "cryptographic_binding": {
+      "type": "object",
+      "required": [
+        "binding_id",
+        "algorithm",
+        "proof_certificate_hash",
+        "ecl_decision_hash",
+        "iel_entry_hash",
+        "previous_entry_hash",
+        "receipt_payload_hash",
+        "replay_key"
+      ],
+      "properties": {
+        "binding_id": {"const": "formal-proof-gate-sha256-chain-v1"},
+        "algorithm": {"const": "SHA-256"},
+        "proof_certificate_hash": {"$ref": "#/$defs/hash"},
+        "ecl_decision_hash": {"$ref": "#/$defs/hash"},
+        "iel_entry_hash": {"$ref": "#/$defs/hash"},
+        "previous_entry_hash": {"$ref": "#/$defs/hash"},
+        "receipt_payload_hash": {"$ref": "#/$defs/hash"},
+        "replay_key": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "state": {
+      "type": "object",
+      "required": ["I", "E", "theta"],
+      "properties": {
+        "I": {"$ref": "#/$defs/hash"},
+        "E": {"type": "integer", "minimum": 0},
+        "theta": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

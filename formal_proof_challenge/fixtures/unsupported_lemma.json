@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "proof_id": "unsupported-lemma",
+  "assumptions": [],
+  "target": {"op": "atom", "name": "RH"},
+  "steps": [{"id": "S1", "rule": "ASSUMPTION", "premises": [], "conclusion": {"op": "atom", "name": "RH"}}],
+  "conclusion_step": "S1"
+}

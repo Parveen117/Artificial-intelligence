@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Formal Proof Gate External Anchor</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#080a0f;color:#f3f6fb}body{margin:0;background:radial-gradient(circle at top,#182035,#080a0f 55%);min-height:100vh}main{max-width:920px;margin:auto;padding:48px 18px}.tag{font-weight:800;color:#a9bbff}h1{font-size:clamp(2rem,7vw,4.5rem);line-height:.95}.card{background:#10141ee8;border:1px solid #30384c;border-radius:18px;padding:20px;margin:18px 0;box-shadow:0 20px 70px #0008}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.metric{background:#080a0f;border:1px solid #30384c;border-radius:13px;padding:14px}.label{color:#9aa6bc;font-size:.85rem}.value{font-size:1.25rem;font-weight:850;margin-top:5px}.hash{font:12px/1.45 ui-monospace,monospace;word-break:break-all;color:#c4d0ff}a{color:#b9c8ff}.ok{color:#77f2b0}.bad{color:#ff8994}
+</style>
+</head>
+<body><main>
+<div class="tag">INDEPENDENT CHECKPOINT</div>
+<h1>Formal Proof Gate<br>External Anchor</h1>
+<p>This page publishes a checkpoint of the public receipt ledger. Retain the anchor hash or page commit to detect later history replacement.</p>
+<div id="status" class="card">Loading latest anchor…</div>
+<div id="content"></div>
+<p><a href="https://github.com/Parveen117/Artificial-intelligence">Source repository</a> · <a href="https://github.com/Parveen117/Artificial-intelligence/issues/new?template=formal-proof-gate-break.yml">Submit a reproducible break</a></p>
+<script>
+async function run(){const s=document.querySelector('#status'),c=document.querySelector('#content');try{const r=await fetch('latest-anchor.json',{cache:'no-store'});if(!r.ok)throw new Error(r.statusText);const d=await r.json(),a=d.anchor||{};s.innerHTML=`<strong class="ok">ANCHOR PUBLISHED</strong><div class="hash">${d.anchor_hash||''}</div>`;const app=a.public_app_url?`<p><a href="${a.public_app_url}" rel="noopener">Open live challenge</a></p>`:'';c.innerHTML=`<div class="card"><div class="grid"><div class="metric"><div class="label">Receipts</div><div class="value">${a.receipt_count??'?'}</div></div><div class="metric"><div class="label">COMMIT</div><div class="value">${a.action_counts?.COMMIT??'?'}</div></div><div class="metric"><div class="label">REJECT</div><div class="value">${a.action_counts?.REJECT??'?'}</div></div><div class="metric"><div class="label">IEL θ</div><div class="value">${a.final_state?.theta??'?'}</div></div></div>${app}<h3>Ledger head</h3><div class="hash">${a.last_entry_hash||''}</div><h3>Receipt Merkle root</h3><div class="hash">${a.receipt_merkle_root||''}</div><h3>Rule-set hash</h3><div class="hash">${a.rule_set_hash||''}</div><h3>Observed</h3><div>${d.observed_at_utc||''}</div><h3>Document hash</h3><div class="hash">${d.document_hash||''}</div></div>`}catch(e){s.innerHTML=`<strong class="bad">ANCHOR UNAVAILABLE</strong><p>${String(e)}</p>`}}
+run();
+</script></main></body></html>
