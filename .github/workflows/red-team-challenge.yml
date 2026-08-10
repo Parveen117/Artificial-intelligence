@@ -42,6 +42,25 @@ jobs:
       - name: Challenge Engine regression suite
         run: python -m unittest discover -s challenge_engine/tests -v
 
+      - name: Report reconstructed baseline Genesis
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from challenge_engine.engine import evaluate_challenge
+          from challenge_engine.strict_json import loads_strict
+
+          manifest = loads_strict(
+              Path('red_team_challenge/CHALLENGE_MANIFEST.json').read_text(encoding='utf-8')
+          )
+          challenge = loads_strict(
+              Path(manifest['baseline_fixture']).read_text(encoding='utf-8')
+          )
+          result = evaluate_challenge(challenge)
+          genesis = result['challenge_genesis']['genesis_hash']
+          print(f'RNKE_RED_TEAM_BASELINE_GENESIS={genesis}')
+          print(f'::notice title=RNKE Baseline Genesis::{genesis}')
+          PY
+
       - name: Public launch release check
         run: python red_team_challenge/release_check.py
 
