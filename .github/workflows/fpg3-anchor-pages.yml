@@ -1,0 +1,108 @@
+name: FPG3 Publish External Anchor
+
+on:
+  pull_request:
+    paths:
+      - "formal_proof_challenge/**"
+      - ".github/workflows/fpg3-anchor-pages.yml"
+  push:
+    branches: [main]
+    paths:
+      - "formal_proof_challenge/**"
+      - ".github/workflows/fpg3-anchor-pages.yml"
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: "Public app base URL, e.g. https://owner-space.hf.space"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: fpg3-pages
+  cancel-in-progress: true
+
+jobs:
+  build-anchor:
+    runs-on: ubuntu-latest
+    outputs:
+      app_url: ${{ steps.resolve.outputs.app_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve public app URL
+        id: resolve
+        env:
+          INPUT_URL: ${{ inputs.app_url }}
+          CONFIGURED_URL: ${{ vars.FPG_PUBLIC_APP_URL }}
+        run: |
+          url="$INPUT_URL"
+          if [ -z "$url" ]; then url="$CONFIGURED_URL"; fi
+          url="${url%/}"
+          echo "app_url=$url" >> "$GITHUB_OUTPUT"
+      - name: Fetch live anchor or build genesis anchor
+        env:
+          APP_URL: ${{ steps.resolve.outputs.app_url }}
+        run: |
+          if [ -n "$APP_URL" ]; then
+            curl --fail --show-error --silent --retry 3 --retry-delay 5 \
+              "$APP_URL/api/anchor" -o latest-anchor.json
+          else
+            python -m formal_proof_challenge.anchor \
+              --ledger formal_proof_challenge/outputs/formal_proof_public_receipts.jsonl \
+              --output latest-anchor.json \
+              --source-revision "$GITHUB_SHA"
+          fi
+          python -m formal_proof_challenge.anchor --verify latest-anchor.json
+      - name: Build static checkpoint site
+        env:
+          APP_URL: ${{ steps.resolve.outputs.app_url }}
+        run: |
+          mkdir -p _site
+          cp formal_proof_challenge/anchor_site/index.html _site/index.html
+          cp latest-anchor.json _site/latest-anchor.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          payload = {
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "revision": os.environ["GITHUB_SHA"],
+              "workflow_run": os.environ["GITHUB_RUN_ID"],
+              "public_app_url": os.environ.get("APP_URL", ""),
+          }
+          Path("_site/deployment.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fpg3-external-anchor-${{ github.sha }}
+          path: |
+            latest-anchor.json
+            _site
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request' && vars.FPG_PAGES_ENABLED == 'true'
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request' && vars.FPG_PAGES_ENABLED == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy-pages:
+    if: github.event_name != 'pull_request' && vars.FPG_PAGES_ENABLED == 'true'
+    needs: build-anchor
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy checkpoint site
+        id: deployment
+        uses: actions/deploy-pages@v4
