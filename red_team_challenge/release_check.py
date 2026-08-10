@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from challenge_engine.engine import evaluate_challenge
+from challenge_engine.action_gate import ACTION_CANONICALIZATION
 from challenge_engine.strict_json import StrictJSONError, loads_strict
 
 MANIFEST = ROOT / "red_team_challenge" / "CHALLENGE_MANIFEST.json"
@@ -75,6 +76,10 @@ def main() -> int:
             manifest.get("self_red_team_audit") == "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
             "public release must bind the pre-public self-red-team audit",
         )
+        require(
+            manifest.get("action_canonicalization") == ACTION_CANONICALIZATION,
+            "manifest action canonicalization does not match the executable validator",
+        )
 
         for required in [
             "red_team_challenge/README.md",
@@ -84,6 +89,7 @@ def main() -> int:
             "red_team_challenge/verify_submission.py",
             "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
             "challenge_engine/tests/test_proof_before_action_self_red_team.py",
+            "challenge_engine/tests/test_proof_before_action_external_red_team.py",
         ]:
             repo_file(required, "required_launch_file")
 
@@ -106,6 +112,15 @@ def main() -> int:
         genesis = result.get("challenge_genesis", {}).get("genesis_hash")
         require(isinstance(genesis, str) and HEX64.fullmatch(genesis) is not None, "baseline Genesis is not a SHA-256 digest")
 
+        authority = challenge.get("action_authorization", {}) if isinstance(challenge, dict) else {}
+        state = authority.get("committed_state", {}) if isinstance(authority, dict) else {}
+        require(isinstance(state, dict) and bool(state.get("used_request_nonces")),
+                "public replay_escape track is inert: baseline used-nonce set is empty")
+        require(authority.get("confirmation_required") is True,
+                "public confirmation track is inert: confirmation_required is not true")
+        require(isinstance(authority.get("approval"), dict),
+                "public confirmation track is inert: baseline approval is missing")
+
         release_status = manifest.get("release_status")
         pin = manifest.get("pinned_genesis_sha256")
         require(release_status in {"release_candidate", "ready_for_public_release"}, "invalid release status")
@@ -123,8 +138,14 @@ def main() -> int:
         require(evidence.get("directed_core_cases") == 15, "directed-case evidence drift")
         require(evidence.get("deterministic_hostile_mutations") == 20000, "mutation-count evidence drift")
         require(evidence.get("mutation_classes") == 20, "mutation-class evidence drift")
-        require(evidence.get("full_regression_tests") == 159, "full regression count drift")
+        require(evidence.get("full_regression_tests") == 159, "pre-external regression count drift")
         require(evidence.get("self_red_team_test_methods") == 14, "self-red-team method count drift")
+        require(evidence.get("external_red_team_test_methods") == 8, "external red-team method count drift")
+        require(evidence.get("combined_regression_tests") == 167, "combined regression count drift")
+        require(evidence.get("external_pre_repair_failures") == 8,
+                "external pre-repair failure count must remain disclosed")
+        require(evidence.get("external_post_repair_failures") == 0,
+                "external post-repair failures must be zero for release")
         require(evidence.get("deterministic_decimal_alias_probes") == 1500, "decimal-alias campaign count drift")
         require(evidence.get("pre_fix_unauthorized_admit_reproductions") == 3,
                 "pre-fix unauthorized-ADMIT reproduction count must remain disclosed")
@@ -140,6 +161,7 @@ def main() -> int:
             "release_status": release_status,
             "challenge_id": manifest["challenge_id"],
             "engine_subject_commit": manifest["engine_subject_commit"],
+            "action_canonicalization": ACTION_CANONICALIZATION,
             "baseline_result": result.get("result"),
             "baseline_action_decision": result.get("action_decision"),
             "baseline_action_executable": result.get("action_executable"),
@@ -147,7 +169,8 @@ def main() -> int:
             "manifest_genesis_pin": pin,
             "genesis_pin_required_before_public_release": pin == "PENDING_CI_PIN",
             "critical_blob_count": len(critical),
-            "full_regression_tests": evidence["full_regression_tests"],
+            "combined_regression_tests": evidence["combined_regression_tests"],
+            "external_red_team_tests": evidence["external_red_team_test_methods"],
             "decimal_alias_probes": evidence["deterministic_decimal_alias_probes"],
             "pre_fix_unauthorized_admit_reproductions": evidence["pre_fix_unauthorized_admit_reproductions"],
             "post_fix_unauthorized_admit": evidence["unauthorized_admit"],
