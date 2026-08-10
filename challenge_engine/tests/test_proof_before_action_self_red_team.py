@@ -8,9 +8,9 @@ from challenge_engine.strict_json import loads_strict
 
 def parsed_action(number_token: str, *, nested: bool = False):
     parameters = (
-        f'{"payment":{"amount":{number_token},"currency":"USD"}}'
+        f'{{"payment":{{"amount":{number_token},"currency":"USD"}}}}'
         if nested
-        else f'{"amount":{number_token},"currency":"USD"}'
+        else f'{{"amount":{number_token},"currency":"USD"}}'
     )
     return loads_strict(
         '{'
