@@ -25,7 +25,13 @@ Decision_G(c) = ADMIT
 
 ## Status
 
-This directory is the public-launch package for the already implemented `proof-before-action-v1` gate in `challenge_engine/`.
+This directory is the public-launch package for the implemented `proof-before-action-v1` gate in `challenge_engine/`.
+
+The package is still a **release candidate** until the repaired engine identities, reconstructed Genesis, and complete exact-head CI set are pinned and green. Challenge participation authorization becomes effective only after the package reaches the default branch or an official repository release.
+
+Before public activation, an independent maintainer self-red-team found three unauthorized-`ADMIT` reproductions caused by exact-decimal values collapsing through binary-float action hashing. It also found that exact numeric values inside candidate actions leaked into the frozen Genesis view. Both defects were repaired before release and are now permanent regression tests.
+
+Read [`SELF_RED_TEAM_AUDIT.md`](SELF_RED_TEAM_AUDIT.md) for the exact findings, repairs, and remaining boundaries.
 
 The current launch track is:
 
@@ -56,6 +62,8 @@ approval
 proposal_context
 ```
 
+Exact numeric lexemes inside those fields are candidate data as well. They remain bound by `CHALLENGE_EVALUATION` and the exact action hash, not by frozen Genesis.
+
 The following belong to the frozen authority/rule view and changing them defines a different challenge contract:
 
 ```text
@@ -76,13 +84,32 @@ The exact pinned values are published in [`CHALLENGE_MANIFEST.json`](CHALLENGE_M
 Primary break classes:
 
 1. **unauthorized_admit** — a candidate outside the exact tool, operation, resource, parameter, principal, agent, delegation, epoch, revocation, nonce, or confirmation contract receives executable `ADMIT`;
-2. **replay_escape** — a consumed/stale nonce or approval is accepted as fresh;
+2. **replay_escape** — a consumed/stale nonce or approval is accepted as fresh within the declared committed-state model;
 3. **delegation_escape** — escalation, broken issuer continuity, cycle, or invalid terminal grant is accepted;
 4. **genesis_integrity_escape** — a frozen authority/rule mutation does not change or fail the pinned Genesis check;
 5. **negative_control_escape** — a declared invalid control is not detected while the contract still passes;
 6. **parser_or_canonicalization_escape** — two materially different executable candidates collapse to the same accepted binding contrary to the protocol.
 
 A parser crash, malformed JSON, documentation ambiguity, model jailbreak, or denial of service is useful bug evidence, but it is **not automatically a break of the flagship authorization claim**.
+
+## Exact-action numeric boundary
+
+The official challenge input path is strict JSON. It rejects duplicate keys and non-standard numeric tokens and preserves exact finite decimal lexemes before ordinary binary-float rounding can erase their declared value.
+
+Executable action hashing uses:
+
+```text
+exact-decimal-value-canonical-json-v2
+```
+
+Therefore:
+
+- numerically equal spellings such as `1`, `1.0`, and `10e-1` share one authority;
+- distinct exact values such as `0.1` and `0.10000000000000001` must not share authority;
+- exact nonzero values that underflow in a binary float must not alias zero;
+- numbers, strings, and Booleans remain different action values.
+
+A direct API caller that constructs an already-rounded raw Python float has already destroyed its original decimal lexeme before RNKE receives it. Such an object is not equivalent to the official strict-JSON connector input.
 
 ## How to submit
 
@@ -119,18 +146,39 @@ Participation is limited to the local synthetic Challenge Engine, included fixtu
 
 Read [`CHALLENGE_AUTHORIZATION.md`](CHALLENGE_AUTHORIZATION.md) before participating. The repository's general `LICENSE` remains controlling for every use outside the narrow challenge authorization.
 
-## Internal evidence already published
+## Evidence already published
 
-The initial self-red-team campaign reports:
+### Original internal campaign
 
 ```text
 15 directed core adversarial cases: PASS
 20,000 deterministic hostile mutations
 20 mutation classes
-unauthorized ADMIT: 0
+post-repair unauthorized ADMIT: 0
 ```
 
-That result is evidence against the tested classes, not a claim that no break exists.
+### Independent pre-public self-red-team
+
+The first independent run deliberately failed CI and produced:
+
+```text
+3 unauthorized-ADMIT reproductions
+2 numeric-alias root causes
+1 candidate/Genesis-boundary defect
+```
+
+After repair, the expanded suite reports:
+
+```text
+159 full regression tests: PASS
+1,500 deterministic exact-decimal alias probes: PASS
+20,000 inherited hostile mutations: PASS
+post-repair unauthorized ADMIT: 0
+```
+
+The fact that the first run broke the candidate is part of the evidence, not something hidden to preserve a green badge. See [`SELF_RED_TEAM_AUDIT.md`](SELF_RED_TEAM_AUDIT.md).
+
+These results are evidence against the tested classes, not a proof that no break exists.
 
 ## No bounty promise
 
@@ -138,4 +186,4 @@ Version 1 announces no monetary bounty or guaranteed reward. Verified findings m
 
 ## The boundary
 
-This challenge does not claim universal AI-agent security. The synthetic fixture performs no real side effect; persistent cross-request replay resistance, real identity authentication, connector integrity, and actual placement on the execution path remain deployment obligations.
+This challenge does not claim universal AI-agent security. The synthetic fixture performs no real side effect; persistent and concurrent cross-request replay resistance, real identity authentication, connector integrity, and actual placement on the execution path remain deployment obligations.
