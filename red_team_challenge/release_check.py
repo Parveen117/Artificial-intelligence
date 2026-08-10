@@ -9,10 +9,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from challenge_engine.engine import evaluate_challenge
 from challenge_engine.strict_json import StrictJSONError, loads_strict
 
-ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "red_team_challenge" / "CHALLENGE_MANIFEST.json"
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
