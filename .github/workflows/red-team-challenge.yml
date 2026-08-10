@@ -1,0 +1,114 @@
+name: RNKE Public Red-Team Challenge
+
+on:
+  pull_request:
+    paths:
+      - 'red_team_challenge/**'
+      - 'challenge_engine/**'
+      - '.github/ISSUE_TEMPLATE/rnke-red-team-break.yml'
+      - '.github/workflows/red-team-challenge.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'red_team_challenge/**'
+      - 'challenge_engine/**'
+      - '.github/ISSUE_TEMPLATE/rnke-red-team-break.yml'
+      - '.github/workflows/red-team-challenge.yml'
+
+permissions:
+  contents: read
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONHASHSEED: '0'
+
+jobs:
+  red-team-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact subject
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Challenge Engine regression suite
+        run: python -m unittest discover -s challenge_engine/tests -v
+
+      - name: Report reconstructed baseline Genesis
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from challenge_engine.engine import evaluate_challenge
+          from challenge_engine.strict_json import loads_strict
+
+          manifest = loads_strict(
+              Path('red_team_challenge/CHALLENGE_MANIFEST.json').read_text(encoding='utf-8')
+          )
+          challenge = loads_strict(
+              Path(manifest['baseline_fixture']).read_text(encoding='utf-8')
+          )
+          result = evaluate_challenge(challenge)
+          genesis = result['challenge_genesis']['genesis_hash']
+          print(f'RNKE_RED_TEAM_BASELINE_GENESIS={genesis}')
+          print(f'::notice title=RNKE Baseline Genesis::{genesis}')
+          PY
+
+      - name: Public launch release check
+        run: python red_team_challenge/release_check.py
+
+      - name: Submission verifier self-test
+        run: python red_team_challenge/verify_submission.py --self-test
+
+      - name: Validate submitted reproduction packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -d red_team_challenge/submissions ]]; then
+            echo 'No external submission packages in this change.'
+            exit 0
+          fi
+          mapfile -t submissions < <(find red_team_challenge/submissions -type f -name submission.json -print | sort)
+          if [[ ${#submissions[@]} -eq 0 ]]; then
+            echo 'No submission.json files found.'
+            exit 0
+          fi
+          for submission in "${submissions[@]}"; do
+            echo "Validating ${submission}"
+            python red_team_challenge/verify_submission.py "${submission}" --require-break-candidate
+          done
+
+      - name: Reject credential-like material in public challenge package
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib, re, sys
+          roots = [pathlib.Path('red_team_challenge')]
+          patterns = {
+              'github_pat': re.compile(r'github_pat_[A-Za-z0-9_]{20,}'),
+              'classic_github_pat': re.compile(r'gh[pousr]_[A-Za-z0-9]{30,}'),
+              'aws_access_key': re.compile(r'AKIA[0-9A-Z]{16}'),
+              'private_key': re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),
+          }
+          failures = []
+          for root in roots:
+              for path in root.rglob('*'):
+                  if not path.is_file() or path.suffix.lower() in {'.png','.jpg','.jpeg','.gif','.pdf','.zip'}:
+                      continue
+                  text = path.read_text(encoding='utf-8', errors='ignore')
+                  for name, pattern in patterns.items():
+                      if pattern.search(text):
+                          failures.append(f'{path}: {name}')
+          if failures:
+              print('Credential-like material detected:', *failures, sep='\n', file=sys.stderr)
+              raise SystemExit(1)
+          print('Public challenge credential scan: PASS')
+          PY

@@ -7,16 +7,127 @@ content is intentionally not an authority source in this protocol.
 """
 from __future__ import annotations
 
+from decimal import Decimal, InvalidOperation
 import hashlib
 import json
+import math
 from typing import Any
+
+try:
+    from .strict_json import exact_json_lexeme
+except ImportError:
+    from strict_json import exact_json_lexeme
 
 PROTOCOL = "proof-before-action-v1"
 MAX_DELEGATION_DEPTH = 16
+MAX_ACTION_CANONICAL_DEPTH = 64
+MAX_ACTION_CANONICAL_NODES = 10_000
+MAX_ACTION_CANONICAL_BYTES = 1_048_576
+MAX_SAFE_JSON_INTEGER = 9_007_199_254_740_991
+MAX_REQUEST_NONCE_BYTES = 4_096
+MAX_STATE_LIST_ITEMS = 10_000
+MAX_STATE_TOKEN_BYTES = 4_096
+ACTION_CANONICALIZATION = "carrier-stable-exact-json-v3"
+
+
+class ActionCanonicalizationError(ValueError):
+    pass
+
+
+def _normalized_decimal(token: str) -> str:
+    try:
+        declared = Decimal(token)
+    except (InvalidOperation, ValueError) as exc:
+        raise ActionCanonicalizationError("invalid finite action number") from exc
+    if not declared.is_finite():
+        raise ActionCanonicalizationError("action number must be finite")
+    if declared.is_zero():
+        return "-0" if declared.as_tuple().sign else "0"
+    sign, digits_tuple, exponent = declared.as_tuple()
+    digits = "".join(str(digit) for digit in digits_tuple)
+    while len(digits) > 1 and digits.endswith("0"):
+        digits = digits[:-1]
+        exponent += 1
+    prefix = "-" if sign else ""
+    return f"{prefix}{digits}" if exponent == 0 else f"{prefix}{digits}e{exponent}"
+
+
+def _canonical_number(value: int | float) -> str:
+    if isinstance(value, bool):
+        raise ActionCanonicalizationError("Boolean is not a numeric action value")
+    token = exact_json_lexeme(value)
+    if token is not None:
+        return "n:" + _normalized_decimal(token)
+    if isinstance(value, int):
+        return f"i:{value}"
+    if not math.isfinite(value):
+        raise ActionCanonicalizationError("action number must be finite")
+    return "f:" + _normalized_decimal(repr(value))
+
+
+def _canonical_json(value: Any) -> str:
+    active: set[int] = set()
+    nodes = 0
+
+    def encode(item: Any, depth: int) -> str:
+        nonlocal nodes
+        nodes += 1
+        if nodes > MAX_ACTION_CANONICAL_NODES:
+            raise ActionCanonicalizationError(
+                f"action exceeds {MAX_ACTION_CANONICAL_NODES} canonical nodes"
+            )
+        if depth > MAX_ACTION_CANONICAL_DEPTH:
+            raise ActionCanonicalizationError(
+                f"action exceeds canonical depth {MAX_ACTION_CANONICAL_DEPTH}"
+            )
+        if item is None:
+            return "null"
+        if isinstance(item, bool):
+            return "true" if item else "false"
+        if isinstance(item, int):
+            return _canonical_number(item)
+        if isinstance(item, float):
+            return _canonical_number(item)
+        if isinstance(item, str):
+            return json.dumps(item, ensure_ascii=True, allow_nan=False)
+        if isinstance(item, list):
+            identity = id(item)
+            if identity in active:
+                raise ActionCanonicalizationError("cyclic action list is not JSON")
+            active.add(identity)
+            try:
+                return "[" + ",".join(encode(child, depth + 1) for child in item) + "]"
+            finally:
+                active.remove(identity)
+        if isinstance(item, dict):
+            identity = id(item)
+            if identity in active:
+                raise ActionCanonicalizationError("cyclic action object is not JSON")
+            if any(not isinstance(key, str) for key in item):
+                raise ActionCanonicalizationError("action object keys must be strings")
+            active.add(identity)
+            try:
+                fields = []
+                for key in sorted(item):
+                    encoded_key = json.dumps(key, ensure_ascii=True, allow_nan=False)
+                    fields.append(f"{encoded_key}:{encode(item[key], depth + 1)}")
+                return "{" + ",".join(fields) + "}"
+            finally:
+                active.remove(identity)
+        raise ActionCanonicalizationError(
+            f"unsupported action JSON type: {type(item).__name__}"
+        )
+
+    encoded = encode(value, 0)
+    if len(encoded.encode("utf-8")) > MAX_ACTION_CANONICAL_BYTES:
+        raise ActionCanonicalizationError(
+            f"action exceeds {MAX_ACTION_CANONICAL_BYTES} canonical bytes"
+        )
+    return encoded
 
 
 def _canonical(value: Any) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
+    return _canonical_json(value)
 
 
 def _sha256(value: Any) -> str:
@@ -24,7 +135,7 @@ def _sha256(value: Any) -> str:
 
 
 def action_sha256(action: dict[str, Any]) -> str:
-    """Hash the exact executable action, including parameters."""
+    """Hash the executable action with connector-number and runtime-carrier identity."""
     return _sha256(action)
 
 
@@ -32,10 +143,21 @@ def validator_manifest_sha256() -> str:
     return _sha256({
         "protocol": PROTOCOL,
         "max_delegation_depth": MAX_DELEGATION_DEPTH,
+        "max_action_canonical_depth": MAX_ACTION_CANONICAL_DEPTH,
+        "max_action_canonical_nodes": MAX_ACTION_CANONICAL_NODES,
+        "max_action_canonical_bytes": MAX_ACTION_CANONICAL_BYTES,
+        "max_safe_json_integer": MAX_SAFE_JSON_INTEGER,
+        "max_request_nonce_bytes": MAX_REQUEST_NONCE_BYTES,
+        "max_state_list_items": MAX_STATE_LIST_ITEMS,
+        "max_state_token_bytes": MAX_STATE_TOKEN_BYTES,
         "authority_source": "declared capability/delegation chain only",
         "natural_language_authority": False,
+        "action_canonicalization": ACTION_CANONICALIZATION,
+        "connector_numeric_identity": "exact-json-number-value",
+        "direct_api_numeric_identity": "runtime-carrier-typed",
+        "runtime_carrier_fidelity_required": True,
         "grant_binding": ["tool", "operation", "resource", "action_sha256"],
-        "state_checks": ["epoch", "revocation", "request_nonce_replay"],
+        "state_checks": ["epoch", "revocation", "request_nonce_replay", "bounded_state"],
         "confirmation_binding": ["approver", "action_sha256", "request_nonce"],
         "decision_states": ["ADMIT", "REJECT", "INCOMPLETE", "INVALID"],
     })
@@ -49,8 +171,17 @@ def _nonempty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
-def _string_list(value: Any) -> bool:
-    return isinstance(value, list) and all(_nonempty_string(x) for x in value) and len(set(value)) == len(value)
+def _bounded_nonempty_string(value: Any, max_bytes: int) -> bool:
+    return _nonempty_string(value) and len(value.encode("utf-8")) <= max_bytes
+
+
+def _bounded_string_list(value: Any) -> bool:
+    return (
+        isinstance(value, list)
+        and len(value) <= MAX_STATE_LIST_ITEMS
+        and all(_bounded_nonempty_string(x, MAX_STATE_TOKEN_BYTES) for x in value)
+        and len(set(value)) == len(value)
+    )
 
 
 def _valid_epoch(value: Any) -> bool:
@@ -66,6 +197,81 @@ def _decision(checks: list[dict[str, str]]) -> str:
     if "open" in statuses:
         return "INCOMPLETE"
     return "ADMIT"
+
+
+def _action_carrier_issue(value: Any) -> str | None:
+    """Return a fail-closed reason when declared exact numbers outlive their runtime carrier."""
+    active: set[int] = set()
+    nodes = 0
+
+    def walk(item: Any, path: str, depth: int) -> str | None:
+        nonlocal nodes
+        nodes += 1
+        if nodes > MAX_ACTION_CANONICAL_NODES or depth > MAX_ACTION_CANONICAL_DEPTH:
+            return None
+        if item is None or isinstance(item, bool) or isinstance(item, str):
+            return None
+        if isinstance(item, int):
+            if abs(int(item)) > MAX_SAFE_JSON_INTEGER:
+                return f"{path} exceeds cross-runtime safe JSON integer range"
+            token = exact_json_lexeme(item)
+            if token is not None:
+                try:
+                    declared = Decimal(token)
+                except (InvalidOperation, ValueError):
+                    return f"{path} has an invalid exact integer declaration"
+                carried = Decimal(str(int(item)))
+                if declared != carried or (
+                    declared.is_zero()
+                    and declared.as_tuple().sign != carried.as_tuple().sign
+                ):
+                    return f"{path} exact integer declaration is not preserved by runtime carrier"
+            return None
+        if isinstance(item, float):
+            if not math.isfinite(float(item)):
+                return f"{path} float carrier is not finite"
+            token = exact_json_lexeme(item)
+            if token is not None:
+                try:
+                    declared = Decimal(token)
+                except (InvalidOperation, ValueError):
+                    return f"{path} has an invalid exact decimal declaration"
+                carried = Decimal(repr(float(item)))
+                if declared != carried or (
+                    declared.is_zero()
+                    and declared.as_tuple().sign != carried.as_tuple().sign
+                ):
+                    return f"{path} exact decimal declaration is not preserved by runtime carrier"
+            return None
+        if isinstance(item, list):
+            identity = id(item)
+            if identity in active:
+                return None
+            active.add(identity)
+            try:
+                for index, child in enumerate(item):
+                    issue = walk(child, f"{path}[{index}]", depth + 1)
+                    if issue is not None:
+                        return issue
+            finally:
+                active.remove(identity)
+            return None
+        if isinstance(item, dict):
+            identity = id(item)
+            if identity in active:
+                return None
+            active.add(identity)
+            try:
+                for key, child in item.items():
+                    issue = walk(child, f"{path}.{key}", depth + 1)
+                    if issue is not None:
+                        return issue
+            finally:
+                active.remove(identity)
+            return None
+        return None
+
+    return walk(value, "$", 0)
 
 
 def evaluate_action_authorization(contract: Any) -> dict[str, Any]:
@@ -106,15 +312,24 @@ def evaluate_action_authorization(contract: Any) -> dict[str, Any]:
             normalized_action.setdefault("parameters", {})
             try:
                 action_hash = action_sha256(normalized_action)
-            except (TypeError, ValueError):
-                _check(checks, "action", "invalid", "action must be canonical JSON without NaN/Infinity")
+            except (ActionCanonicalizationError, TypeError, ValueError, OverflowError, RecursionError, UnicodeError):
+                _check(checks, "action", "invalid", "action must be bounded canonical JSON with finite exact numeric values")
             else:
                 action = normalized_action
-                _check(checks, "action", "pass", f"exact action bound by sha256:{action_hash}")
+                carrier_issue = _action_carrier_issue(normalized_action)
+                if carrier_issue is not None:
+                    _check(checks, "action_carrier", "invalid", carrier_issue)
+                else:
+                    _check(checks, "action", "pass", f"exact action bound by sha256:{action_hash}")
 
     request_nonce = contract.get("request_nonce")
-    if not _nonempty_string(request_nonce):
-        _check(checks, "request_nonce", "invalid", "request_nonce must be a non-empty string")
+    if not _bounded_nonempty_string(request_nonce, MAX_REQUEST_NONCE_BYTES):
+        _check(
+            checks,
+            "request_nonce",
+            "invalid",
+            f"request_nonce must be a non-empty UTF-8 string bounded to {MAX_REQUEST_NONCE_BYTES} bytes",
+        )
     else:
         _check(checks, "request_nonce", "pass", request_nonce)
 
@@ -132,13 +347,23 @@ def evaluate_action_authorization(contract: Any) -> dict[str, Any]:
             _check(checks, "state_epoch", "pass", str(epoch))
         revoked = state.get("revoked_grant_ids", [])
         used_nonces = state.get("used_request_nonces", [])
-        if not _string_list(revoked):
-            _check(checks, "revocation_state", "invalid", "revoked_grant_ids must be a duplicate-free string list")
+        if not _bounded_string_list(revoked):
+            _check(
+                checks,
+                "revocation_state",
+                "invalid",
+                f"revoked_grant_ids must be a duplicate-free bounded string list (<= {MAX_STATE_LIST_ITEMS} items)",
+            )
             revoked = []
         else:
             _check(checks, "revocation_state", "pass", f"revoked={len(revoked)}")
-        if not _string_list(used_nonces):
-            _check(checks, "replay_state", "invalid", "used_request_nonces must be a duplicate-free string list")
+        if not _bounded_string_list(used_nonces):
+            _check(
+                checks,
+                "replay_state",
+                "invalid",
+                f"used_request_nonces must be a duplicate-free bounded string list (<= {MAX_STATE_LIST_ITEMS} items)",
+            )
             used_nonces = []
         elif _nonempty_string(request_nonce) and request_nonce in used_nonces:
             _check(checks, "replay_guard", "fail", "request nonce already committed; replay rejected")
@@ -295,4 +520,5 @@ def _summary(action_hash: str | None, checks: list[dict[str, str]]) -> dict[str,
         "invalid_fields": [x["id"] for x in checks if x["status"] == "invalid"],
         "validator_manifest_sha256": validator_manifest_sha256(),
         "authority_rule": "Natural-language content may propose an action but cannot enlarge authority.",
+        "action_canonicalization": ACTION_CANONICALIZATION,
     }

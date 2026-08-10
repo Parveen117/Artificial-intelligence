@@ -2,13 +2,13 @@
 """Strict JSON parsing for Challenge Engine connector inputs.
 
 The connector rejects duplicate keys and non-standard NaN/Infinity tokens. For
-ordinary finite JSON decimals it also preserves the original numeric token on a
-float-compatible wrapper. Legacy engine code can therefore keep treating the
-value as a float, while exact threshold and canonical-contract logic can recover
-the declared decimal before binary rounding.
+ordinary finite JSON numbers it preserves the original numeric token on an
+int- or float-compatible wrapper. Legacy engine code can therefore keep using
+native numeric carriers while exact threshold and canonical-contract logic can
+recover the declared JSON number before carrier normalization.
 
 Truly arbitrary-precision proof values should use the string-valued arithmetic
-certificate fields rather than relying on a platform float carrier.
+certificate fields rather than relying on a platform numeric carrier.
 """
 from __future__ import annotations
 
@@ -19,6 +19,15 @@ from typing import Any
 
 class StrictJSONError(ValueError):
     pass
+
+
+class ExactJSONInt(int):
+    """Int-compatible connector number retaining its exact JSON lexeme."""
+
+    def __new__(cls, token: str):
+        value = int.__new__(cls, token)
+        value.json_lexeme = token
+        return value
 
 
 class ExactJSONFloat(float):
@@ -57,6 +66,7 @@ def loads_strict(text: str) -> Any:
     return json.loads(
         text,
         object_pairs_hook=_unique_object,
+        parse_int=ExactJSONInt,
         parse_float=ExactJSONFloat,
         parse_constant=_reject_constant,
     )

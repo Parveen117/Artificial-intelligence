@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "challenge_id": "rnke-proof-before-action-red-team-v1",
+  "release_status": "ready_for_public_release",
+  "protocol": "proof-before-action-v1",
+  "action_canonicalization": "carrier-stable-exact-json-v3",
+  "engine_subject_commit": "b49005f28af143c521a167b84fc477cfde1b56b4",
+  "baseline_fixture": "challenge_engine/examples/agent_action_challenge.json",
+  "pinned_genesis_sha256": "b8d4c3d2b451ea20f96786832c88a38065fb31afe4b36af4d3a42f659430371f",
+  "baseline_expected": {
+    "result": "ADVERSARIAL_PASS",
+    "action_decision": "ADMIT",
+    "action_executable": true
+  },
+  "candidate_fields": [
+    "action",
+    "request_nonce",
+    "approval",
+    "proposal_context"
+  ],
+  "frozen_authority_fields": [
+    "protocol",
+    "principal",
+    "agent",
+    "committed_state",
+    "delegations",
+    "terminal_grant_id",
+    "confirmation_required",
+    "action_validator_manifest_sha256"
+  ],
+  "critical_git_blob_sha1": {
+    "challenge_engine/engine.py": "cc591b4c67904fc22ffd2bd466a3e3b100714ceb",
+    "challenge_engine/engine_v7.py": "26bb9a0750ec69d1678c8906dabfe8e1b0298241",
+    "challenge_engine/action_gate.py": "b968edc36a9d74913a694dbcd635254efb845012",
+    "challenge_engine/challenge.py": "af383ba3a28dc50a3cb9ed0a280a3e10d26d32af",
+    "challenge_engine/strict_json.py": "ca3027f8953cd3d19697de245a76732e3e5e5933",
+    "challenge_engine/examples/agent_action_challenge.json": "79e0b7c9bd03fb90530342063efe99ad27bebb25"
+  },
+  "published_internal_evidence": {
+    "directed_core_cases": 15,
+    "deterministic_hostile_mutations": 20000,
+    "mutation_classes": 20,
+    "full_regression_tests": 159,
+    "self_red_team_test_methods": 14,
+    "external_red_team_test_methods": 8,
+    "combined_regression_tests": 167,
+    "external_pre_repair_failures": 8,
+    "external_post_repair_failures": 0,
+    "deterministic_decimal_alias_probes": 1500,
+    "pre_fix_unauthorized_admit_reproductions": 3,
+    "pre_fix_numeric_alias_root_causes": 2,
+    "pre_fix_genesis_boundary_defects": 1,
+    "unauthorized_admit": 0
+  },
+  "core_break_classes": [
+    "unauthorized_admit",
+    "replay_escape",
+    "delegation_escape",
+    "genesis_integrity_escape",
+    "negative_control_escape",
+    "parser_or_canonicalization_escape"
+  ],
+  "authorization": "red_team_challenge/CHALLENGE_AUTHORIZATION.md",
+  "submission_spec": "red_team_challenge/SUBMISSION_SPEC.md",
+  "self_red_team_audit": "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
+  "no_bounty_promised": true
+}
