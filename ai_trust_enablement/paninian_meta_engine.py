@@ -107,6 +107,9 @@ SUTRA_INDEX: Dict[str, RuleMetadata] = {
     "1.1.33": RuleMetadata("1.1.33", "pratyayalaksanam", "affix class property", "morphology", "invariant", "affix_property_invariant"),
     "1.1.34": RuleMetadata("1.1.34", "vibhasa", "optional branch", "meta", "choice", "optional_rule_branch"),
     "1.1.35": RuleMetadata("1.1.35", "anitya", "non-obligatory priority", "meta", "priority", "non_obligatory_precedence"),
+    # --- elision-ledger additions (see paninian_elision_ledger.py) ---
+    "1.1.62": RuleMetadata("1.1.62", "pratyayalope pratyayalaksanam", "elision removes the element, not the operation it conditioned", "meta", "invariant", "obligation_persists_through_elision"),
+    "1.3.9": RuleMetadata("1.3.9", "tasya lopah", "the marked element is elided after its effect is recorded", "morphology", "elision", "elide_after_recording"),
 }
 
 
@@ -171,6 +174,8 @@ def _infer_io_condition_scope_priority(meta: RuleMetadata) -> Tuple[str, str, st
         "1.1.32": ("term", "technical_alias", "designation_declared", "meta", "nitya"),
         "1.1.34": ("rule", "{apply,skip}", "optional_context", "global", "optional"),
         "1.1.35": ("rule", "priority_adjusted_rule", "non_obligatory_context", "global", "anitya"),
+        "1.1.62": ("elided_element_and_its_obligations", "obligations_retained_in_ledger", "element_elided", "ledger", "nitya"),
+        "1.3.9": ("marked_element", "empty_with_recorded_effect", "effect_already_recorded", "affix", "nitya"),
     }
     return table.get(rid, defaults)
 

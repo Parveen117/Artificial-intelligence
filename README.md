@@ -35,6 +35,23 @@ This is a statement about the architecture, **not** a claim that every possible 
 
 The full publication-safe framing is in [`RNKE_PUBLIC_INTRODUCTION.md`](RNKE_PUBLIC_INTRODUCTION.md).
 
+## Elision ledger: three grammar-derived gates
+
+`ai_trust_enablement/paninian_elision_ledger.py` adds three gates to the frame kernel, each translated from a rule of the Paninian system into a concrete failure mode of evidence-gated AI. They are checked in CI and ship certificates on the same canonical-JSON / SHA-256 discipline as the rest of the stack.
+
+**1.1.62 — the elision ledger** (`pratyayalope pratyayalaksanam`: when an affix is elided, the operation it conditioned still applies). Context gets pruned, summarized, compressed, or re-chunked between the moment a claim acquires its support and the moment an agent acts on it. The supporting item disappears; the claim silently keeps the authority it drew from that item. A plain evidence check cannot see this, because after pruning the frame merely looks smaller. The gate: an evidence item may be elided, but every obligation it induced must still be discharged by something present or explicitly carried in the ledger. Elision without a ledger entry is `REJECT`. (This complements the existing 1.1.16-style protection: that keeps an element from being deleted; this lets it go and holds onto its effect.)
+
+**Non-vacuous control.** A check that cannot fail is not evidence. Each control must declare a planted mutation and flip under it; a control that still passes under its own mutation is reported vacuous and the frame is `REJECT`. A control shipped with no mutation at all is `INCOMPLETE` — its discriminating power is unknown, which is not the same as absent.
+
+**Provenance sweep** (`samjna`: a designation must say who defines it). Every object names the authority that defines it; an undeclared authority, or one outside the frame's declared set, yields `INCOMPLETE` rather than `REJECT`, since a gap is not a contradiction.
+
+```bash
+python ai_trust_enablement/paninian_elision_ledger.py --json
+python -m unittest tests.test_paninian_elision_ledger -v
+```
+
+Sutra entries `1.1.62` and `1.3.9` are also available from the derivation engine (`paninian_meta_engine.derive`).
+
 ## 🔥 Main Challenge: Proof Before Action
 
 > **Make an AI agent execute an action whose frozen authority/evidence chain does not close.**

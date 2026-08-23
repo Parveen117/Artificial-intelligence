@@ -16,6 +16,10 @@ jobs:
           python-version: '3.11'
       - name: Compile
         run: python -m compileall ai_trust_enablement
+      - name: Elision-ledger gates
+        run: |
+          python -m unittest tests.test_paninian_elision_ledger -v
+          python ai_trust_enablement/paninian_elision_ledger.py --json > /dev/null
       - name: Run enablement tests
         run: python ai_trust_enablement/run_enablement_tests.py
       - name: Run batch evaluator
