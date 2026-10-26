@@ -1,5 +1,8 @@
 # Recognition Null Kernel Engine (RNKE)
 
+> **Research record:** [Dated snapshot, content hashes and archive links](RESEARCH_PROVENANCE.md) · [Canonical repository governance](GOVERNANCE.md). Cite the exact version used.
+
+
 ## Artificial Intelligence Trust Enablement and Challenge Engine
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21300179.svg)](https://doi.org/10.5281/zenodo.21300179)

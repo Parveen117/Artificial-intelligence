@@ -1,0 +1,1587 @@
+{
+  "schema_version": 1,
+  "repository": "Parveen117/Artificial-intelligence",
+  "recorded_at_utc": "2026-10-26T14:24:22.218045+00:00",
+  "scope": "Default-branch content immediately before the 2026-10-26 provenance update.",
+  "baseline_branch": "main",
+  "baseline_commit": "fd43eb69328aaed8fb2468c592a2f4a527cc8605",
+  "baseline_tree": "e328bd81a46338520fab65f201b83b457c653b02",
+  "baseline_commit_url": "https://github.com/Parveen117/Artificial-intelligence/commit/fd43eb69328aaed8fb2468c592a2f4a527cc8605",
+  "git_object_hash_algorithm": "sha1",
+  "content_hash_algorithm": "sha256",
+  "limits": [
+    "Git timestamps are metadata, not independent trusted timestamps.",
+    "This manifest excludes its own later provenance update.",
+    "A prior DOI covers its archived version, not later commits.",
+    "Hashes establish content identity, not scientific validity, authorship adjudication, or legal priority."
+  ],
+  "files": [
+    {
+      "path": ".github/ISSUE_TEMPLATE/config.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "627f4794e7a97a4261c88a93f2cc3fbebb7c0417",
+      "size_bytes": 274,
+      "sha256": "554884ef498fd58f2194e6b4aa4842e6138a0aabb7d8f8bee51529fdd1591633"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/formal-proof-gate-break.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "af3670bf3721e8cb8810171dfb82c42016a4fb08",
+      "size_bytes": 3058,
+      "sha256": "ec0d9fde9e21d1aa2a26ed60d1d535bc885e3a278d13a7ace78d770d8582ef0b"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/rnke-red-team-break.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "2eff0d5a47f89e2117763ba5ab15c33bf3b1654d",
+      "size_bytes": 3535,
+      "sha256": "8fa3e4e1a8dd5823e223ed96fdd084f387e39e3ca925d4793e4debe1cee5c8a2"
+    },
+    {
+      "path": ".github/workflows/challenge-engine.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "1045795ba4d939fdf052e5b1a7e52bb6a7a5d7ea",
+      "size_bytes": 6297,
+      "sha256": "70b1b2b8f40dfdf9071e9a212342b71720bb5be9e5f93430c3cf3d02aa9e8f54"
+    },
+    {
+      "path": ".github/workflows/ci-proof-pack.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "9bfea019f95a1175ea75448f8a12e81188c41879",
+      "size_bytes": 896,
+      "sha256": "d27999930f99cf7f8d19ef972d91b59582b6be12bddb1a9077b0ffb0b77715a7"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d1aff03d69207d11be5bfd3a1a8c2feb03fc22d9",
+      "size_bytes": 895,
+      "sha256": "c601130a34a4ff6268e3956223b07c51d38e7fc34bd50e2d11a0ddd246f56510"
+    },
+    {
+      "path": ".github/workflows/formal-proof-gate.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "cfff343154dceebfa74953ddd02f82255bdd3bd1",
+      "size_bytes": 6187,
+      "sha256": "80d8c65543df3cb9ffe20c994ec62294b4365124df1e01cdd6271d7c0f39813f"
+    },
+    {
+      "path": ".github/workflows/foundational-math-audit.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e8ba6cd60f12df18223747b322b79583b4e9a371",
+      "size_bytes": 2449,
+      "sha256": "8f44993e7edc5a1668c4c5e83e6bf5c7062cd12cfdf5f21ea6f9d78cd025499f"
+    },
+    {
+      "path": ".github/workflows/fpg3-anchor-pages.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "5b33601fc090773447c3da80954073addbf69647",
+      "size_bytes": 3525,
+      "sha256": "6222f0b35db7774a5399fd04096a4aa392aa13c9e2e1c849271d96272f3f192a"
+    },
+    {
+      "path": ".github/workflows/fpg3-deploy-space.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "84572d8eaca1888a3ba13d223660376a4a5b406b",
+      "size_bytes": 1990,
+      "sha256": "0ed3f4d14bd3ac68866a411902be0459a448606e3ee7b45e9a96be800a5d6288"
+    },
+    {
+      "path": ".github/workflows/red-team-challenge.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "38fa7e5432d00d5e9a42208356dada43e2ee37ae",
+      "size_bytes": 4055,
+      "sha256": "0a6bd221bf5fe979201937361a40d6af6f600b1f8a59ebaa023faee00c59935f"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "1344ed2632ddad425a60e55a50511628b917c4c5",
+      "size_bytes": 1419,
+      "sha256": "44bb2644f574e7cc18926a141031be5c2d75dcc9c130aa4c1344a47ed6dc2151"
+    },
+    {
+      "path": "ADVERSARIAL_PROOF_PACK_V1_MANIFEST.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "f383f64105e3000e99bcf7d40de13df27a7ab2df",
+      "size_bytes": 1271,
+      "sha256": "e83c1fa365ede693338bf2033c49022d29948375eb81fceafceb35028ae4811d"
+    },
+    {
+      "path": "ADVERSARIAL_PROOF_PACK_V1_REPORT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4fbf24947e8670b224d2187fef3d546d3a3f405f",
+      "size_bytes": 5113,
+      "sha256": "2c8772e24449f5fbfe1ac45b8ffd33c70b2ec3b112f867e1907b9f22e20609ed"
+    },
+    {
+      "path": "BASELINE_COMPARISON_V1_MANIFEST.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d62557aea43381341da3ca82d51ea0d5ab5a9f3c",
+      "size_bytes": 719,
+      "sha256": "59cd474755eff2241738e92fe7eff8cad2027ddca7457ac0d165da60459e1590"
+    },
+    {
+      "path": "BASELINE_COMPARISON_V1_REPORT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "f7960b2f5ed4d46f20785aa83ab50ecd71a4dce0",
+      "size_bytes": 2193,
+      "sha256": "e9f6f39e9c16e6dd40989ef3eb9bbc80c7c9a01025571d2a837ca03755475fd1"
+    },
+    {
+      "path": "CITATION.cff",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "57135c2e5dd819422cbf0adf71f784eadc9f3f58",
+      "size_bytes": 1718,
+      "sha256": "b212cb4ef895f6edc5bdbf00e1cb23343b8c6e98ce2ce11f58607d8a51713837"
+    },
+    {
+      "path": "COPYRIGHT_NOTICE.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "9d80fa52b466ffd08f4e318f8fd5527c734d3b4c",
+      "size_bytes": 775,
+      "sha256": "b94908ae61f28805704dd4e622231c72def25d14676c5b18d2eb00f1e052f6bf"
+    },
+    {
+      "path": "Dockerfile",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "5b72da085f8f7d675f7ce6b572ff9960c45603d4",
+      "size_bytes": 560,
+      "sha256": "73f6678b303194d443fc09ae8b882f020ef0615a48b4083ad6376149665e9b57"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "31c82140259f6f3b6ba74ef3d802886f498e8b72",
+      "size_bytes": 1258,
+      "sha256": "75e00defd85f815fbb158aba0d087486c80e34e693b713d342e1fbeab417ba2e"
+    },
+    {
+      "path": "LOCAL_DEVELOPMENT_NOTES.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "3f62874cb18c813014e5f64b020084b637e0fcbd",
+      "size_bytes": 1373,
+      "sha256": "30e4466331bba2998148e858bebe49de371db08dc1a15717294ab1946e2d0787"
+    },
+    {
+      "path": "LOCAL_PROOF_PACK_V1_MANIFEST.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "67f4f466fc183a6d4c7acd57cd69968718c77841",
+      "size_bytes": 2172,
+      "sha256": "cb358947c6870d2a3f516023f86b89800566e83a536140c6867a681e07cd6479"
+    },
+    {
+      "path": "LOCAL_PROOF_PACK_V1_REPORT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "af9b4568c7e455548323658b6f182f75bd733b2c",
+      "size_bytes": 2061,
+      "sha256": "a7dfa6b93de19ea0c4e43e24cd25427855a778d0c8a0083290fdf7af0c0417a5"
+    },
+    {
+      "path": "Makefile",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "c1fff62f7bfcea11d2826a3f7ad65ab39790c2a3",
+      "size_bytes": 1247,
+      "sha256": "da19cd727fef85d6e1a6e5e2f1ebcb362084813aa074194b9543ff99496267d0"
+    },
+    {
+      "path": "PATENT_NOTICE.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "f85692c20f054f042a9e0acfc3e4c34b08b1df31",
+      "size_bytes": 762,
+      "sha256": "9eaf16827e9b459dd586907ebb98bdccf96dc7242d3ea37cf779c1d226221bfd"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6dca21e16fc07d6d0879cb090eef335dfbefff32",
+      "size_bytes": 20373,
+      "sha256": "e740dba8e5e8c9d5c90e42720e4b54b0fe6aebde658112581a2ff67be629ec47"
+    },
+    {
+      "path": "RELEASE_MANIFEST_v1.0.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "66aeab4f1e96507174c171df6d800e784af163e9",
+      "size_bytes": 1039,
+      "sha256": "359ddc2d28a40246f13894ae1c0f72bd475dd31acf2cefedf0c336898aa6336c"
+    },
+    {
+      "path": "RELEASE_NOTES_v1.2.0.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "06905486c20a08539a7bd2affdc2332878623689",
+      "size_bytes": 11156,
+      "sha256": "419b5b3ab12161dcbd78b83112588bb18a422d4c9788de906ec9f0be69004988"
+    },
+    {
+      "path": "RNKE_PUBLIC_INTRODUCTION.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "9760df7a2d053a6da78b5a2ad3a8ef0c955b28d4",
+      "size_bytes": 6711,
+      "sha256": "9ee19c546a263e3aab4937aeaf74eaa043de998fcc40bb324028384ed2fad0b4"
+    },
+    {
+      "path": "ZENODO_RELEASE_METADATA_v1.2.0.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "51528cf58473f9134b06b85defa97ea78f21b10d",
+      "size_bytes": 9434,
+      "sha256": "9517e9887ef857d5eab3bbf1e079c4b37e628f128b6a791e726e68f49755789d"
+    },
+    {
+      "path": "ai_native_coherence_v2.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "280a3cde4fa76b3273ddd7c481c1098578dfcfb4",
+      "size_bytes": 6561,
+      "sha256": "3139133ddc815f12b16578d55fda075622585a04e0df3d15fd51d4633dc57a64"
+    },
+    {
+      "path": "ai_trust_enablement/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "5a2bd370f8f176bab0719cf162beca0cb61e221e",
+      "size_bytes": 4327,
+      "sha256": "87cfb00b61afe033b3b9c96d273727de20cc2d030baa8d059397afc9f0c2d16a"
+    },
+    {
+      "path": "ai_trust_enablement/__init__.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "58d05cd7184be06a35eedeb1bf483522a309485d",
+      "size_bytes": 1423,
+      "sha256": "538af4397ab049f6f2fc3faf036e0092189162064f10f704a2f75f3087b582c5"
+    },
+    {
+      "path": "ai_trust_enablement/ai_hallucination_recognition_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "19a33e183a69f1a474fdb33fd708e2a2ddde54da",
+      "size_bytes": 15732,
+      "sha256": "de1601472d7bb214d48f997116ca1a99d11657a3278faaf0f4726f91abfe46d7"
+    },
+    {
+      "path": "ai_trust_enablement/api_client.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "dd590e105336979097ed07c69c77fdb02c2208c2",
+      "size_bytes": 2005,
+      "sha256": "e695455168430d743b37482c79f1dd33de4a9d0259089b16ebef47ca7d06e453"
+    },
+    {
+      "path": "ai_trust_enablement/batch_evaluator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "cb4fef1af89a7172b3a382140b418e45b7441851",
+      "size_bytes": 4183,
+      "sha256": "3aef480826ccf399b82504b9dab65389392cd8bc05e1d7ba9ce78d765c4345a7"
+    },
+    {
+      "path": "ai_trust_enablement/benchmark_cases_v1.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a343c2dc221cf972d1cbb1e534ef732f9615daad",
+      "size_bytes": 4035,
+      "sha256": "199f438363afcef8ff2003627b7c48229e061298e57564cb009068bc1f380d19"
+    },
+    {
+      "path": "ai_trust_enablement/certificate_schema_v1.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "2472be88438d2683987f2e44b8bed36204df2c7c",
+      "size_bytes": 4634,
+      "sha256": "f4e53ca57b6c98b41f85916a7c5db3495b3e90eac93324c98eb6da7197b2f5b5"
+    },
+    {
+      "path": "ai_trust_enablement/ci_proof_pack.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "25bcb40eda9d37bb7dc944a0fdc17685ab96c9f0",
+      "size_bytes": 10288,
+      "sha256": "99737a1857a3d0abd80e71cadeb180be793a75a6c2d8d965e01cc9b7a3fbe770"
+    },
+    {
+      "path": "ai_trust_enablement/claim_frame_kernel.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "8877e0b31d78361ee89a0ed700621061489f94df",
+      "size_bytes": 22627,
+      "sha256": "2dfab81f535b157bea6b612bb0296bc8d6c038751a51802bd580c6150056be8a"
+    },
+    {
+      "path": "ai_trust_enablement/claim_repair_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a91f3b5814621f2f4c409d873525eccbe458051b",
+      "size_bytes": 10993,
+      "sha256": "4daad1c91f2a88b384fde19bcef1ba3421238d532dd61e0d09d53536a97759ae"
+    },
+    {
+      "path": "ai_trust_enablement/ecl_commit_adapter.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "45034ea7b677b7a9fceeefee75e9f3889314a81d",
+      "size_bytes": 11340,
+      "sha256": "99d6b34c43b9b94cded69bb24beefb9a0c808d4722167af7ad525ef9c06594ea"
+    },
+    {
+      "path": "ai_trust_enablement/ecl_finality_demo.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "03ac31634e39dc38b530f68e017e1570fe4070af",
+      "size_bytes": 2332,
+      "sha256": "cd6a68f5c7caa83020c4b8b9959f71cb1d2bba95f528667200b869c281466069"
+    },
+    {
+      "path": "ai_trust_enablement/evidence_ledger.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4efd87248e8bedeff9ec632d4a727a9a6039a61b",
+      "size_bytes": 10243,
+      "sha256": "e82bc8151ea1f328651b8dbc121c887ec7c81c78a138ca19e745217ef22f1a14"
+    },
+    {
+      "path": "ai_trust_enablement/fusion_certificate_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "47efe02c386a1c2133230a3b6484ec01a00504e4",
+      "size_bytes": 11548,
+      "sha256": "dc58448c622cd887e2943b84adedf349472ff4fb611ce8eff819e62462b2cc7e"
+    },
+    {
+      "path": "ai_trust_enablement/future_arrow_operator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ecfa0d4d29db34868bb4b470a896d172a3eed54b",
+      "size_bytes": 14760,
+      "sha256": "03c2ca156e9953c6776cfd2b7ea70a3724af9b12e69843690be85bb8235f9544"
+    },
+    {
+      "path": "ai_trust_enablement/lambda_laplace_operator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "57622c4e018e70c93491ba9a03eac15038be6def",
+      "size_bytes": 16468,
+      "sha256": "ef9a1f1cf2f69ffa906d0de09d3a7ef9de8d3d0ea01d5a2698a09dff7b9afa23"
+    },
+    {
+      "path": "ai_trust_enablement/local_smoke_suite.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "69f677d032bde1873ce02f4a4e7d51ed78fc45c7",
+      "size_bytes": 10701,
+      "sha256": "0247f2f8ee790d9fdf0408d0a5e070f43402373ad8e6c3352dd528b3d060a295"
+    },
+    {
+      "path": "ai_trust_enablement/panini_nyaya_claim_verifier.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "3bf5a3c716c28db0cc3bfd3d6d144c533fd76270",
+      "size_bytes": 20398,
+      "sha256": "c57be1fd3dbe0695b537c009a975e858a6cf85dc600cb50a86b8c215a178c55f"
+    },
+    {
+      "path": "ai_trust_enablement/paninian_certificate_adapter.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d7bea946c40e908d5e7d7dc87168de7459d43561",
+      "size_bytes": 3076,
+      "sha256": "82e596af4720b84f3c61b4473834d86b0e6ea2bb69474b8aa64e751ca0aaf769"
+    },
+    {
+      "path": "ai_trust_enablement/paninian_elision_ledger.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4f63f21d60a118bb43d01b11f403d749c9e98581",
+      "size_bytes": 11744,
+      "sha256": "bb6b476e9bd01193715247df23655935acf48b963463d08cc6ec4552057185b8"
+    },
+    {
+      "path": "ai_trust_enablement/paninian_meta_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "868237b20f90485515f8bba2a6c25495727b69a8",
+      "size_bytes": 14816,
+      "sha256": "454b6708704972ad650069914a42745e21d054b1f7ffac74636bb9c82e515af3"
+    },
+    {
+      "path": "ai_trust_enablement/release_controller.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "bad7d8bdf81b7d9a8e02dffb02cc11b1402c55fa",
+      "size_bytes": 5974,
+      "sha256": "3de39bf998e89df519bff0fd1091fa787734d7c7a73c91a183978193f8cc0d04"
+    },
+    {
+      "path": "ai_trust_enablement/retrieval_resolution_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4777e37160738653d9edf9e1f083ddd15de407ce",
+      "size_bytes": 14287,
+      "sha256": "485c80d15a1ff6b0f20b1a5be0047f4c069877eb0df356a6c06e034fb7218cd6"
+    },
+    {
+      "path": "ai_trust_enablement/retrieval_router.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a401a8289cc572c7602276df55ebe6ea9db02b0b",
+      "size_bytes": 8075,
+      "sha256": "3e7859bf6f2f20a1d161a2471c05ce040d9148e4d91ef5f1a714360579362930"
+    },
+    {
+      "path": "ai_trust_enablement/rnke_closure_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "da093d4403138b504e6656edffac17a040f56e84",
+      "size_bytes": 3856,
+      "sha256": "48f15830b6bc7ba3c2759d7e2410ba384fbf4e429647a96deee6aaa275ca04b2"
+    },
+    {
+      "path": "ai_trust_enablement/run_enablement_tests.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "3b2aa71158d85e10a3c4fa2f12cd843f35b08caa",
+      "size_bytes": 13176,
+      "sha256": "3d9d1e0ac25e51c5ef17a0b08a36042b32dcd4b2018503d4a6cbce42701691cd"
+    },
+    {
+      "path": "ai_trust_enablement/sample_cases.jsonl",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6588f08d0e349010586c6761a003bb3bf59069ef",
+      "size_bytes": 1477,
+      "sha256": "d99fe741cdbae94523d96f6d2222feca7861890a546aab5a14b3ff5e9e41356a"
+    },
+    {
+      "path": "ai_trust_enablement/server.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "c6ca584807ba4fe3f8b26a9aac1748667d01b21d",
+      "size_bytes": 20231,
+      "sha256": "a798247f031354dc56dab10f1028e73627addb38161827d9e139bd8d68377d2c"
+    },
+    {
+      "path": "ai_trust_enablement/service_contract.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "12ba16c158550b78d09f4f18df3e04f847ae4c95",
+      "size_bytes": 1370,
+      "sha256": "9788aa6679058f9dd7f10a6d8598e137ae4a151d62facceefbb824008412d09c"
+    },
+    {
+      "path": "ai_trust_enablement/topological_memory_operator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "60e571018539f8cf25b90a5f8903ec0c6160ccfd",
+      "size_bytes": 17995,
+      "sha256": "6198e35e3d586a6a1bee0a25041bac35c1495d8b3b1cc21c700f66b61a8e2f99"
+    },
+    {
+      "path": "artificial intelligence.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "02493f95947ef8728fe140a4ad1597b2dfd1f69a",
+      "size_bytes": 50602,
+      "sha256": "aefb519df8dc4f7b4b749842744655dbebf2967ab45698d0831f0fdbb9fbcb8d"
+    },
+    {
+      "path": "challenge_engine/ARITHMETIC_ENCLOSURE_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ba500b151d59fbd28b8c882670c5ebcbb56f337f",
+      "size_bytes": 5189,
+      "sha256": "e8a59a69a3951b376134cef69aeda17cb15ac76d6d2430457cba378e8402fcd3"
+    },
+    {
+      "path": "challenge_engine/CONNECTOR_CONTRACT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "96f2a3e6357841a4c3cad3ba78723aba82266289",
+      "size_bytes": 10104,
+      "sha256": "0aa506b2153cdb7e4d49777ec8279e1dd55dc20f24b29706db87b5c9b402fc9a"
+    },
+    {
+      "path": "challenge_engine/FINAL_ADVERSARIAL_RELEASE_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "8fb39ab32926b17c1db9f1da5203de37ffed3596",
+      "size_bytes": 3673,
+      "sha256": "ae69d41f8a173f5572280300c57ff8d470149e79a40780fa5a9de2e430aa1080"
+    },
+    {
+      "path": "challenge_engine/FINAL_SEAL_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "599532134812167cb17a79077a532e3e2b38df0e",
+      "size_bytes": 5335,
+      "sha256": "28271190b9a864cdac13b0fb1b843e49cf6128cbceb97073c638705b84a77500"
+    },
+    {
+      "path": "challenge_engine/MAIN_CHALLENGE.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "db8a358c3a9c1ff6be876df5177a489243210fd8",
+      "size_bytes": 6359,
+      "sha256": "e906d97ecc9a554cf4f748d86de63c382f75c18339fff3f0ccdf6df0dc156e00"
+    },
+    {
+      "path": "challenge_engine/PROOF_BEFORE_ACTION_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "bd9449395a603c237658a526582399f485be7d4e",
+      "size_bytes": 5581,
+      "sha256": "ac28a102e607e8c217d3d551fc0cf225775a68a3fd25bd463a359cf77ba567a8"
+    },
+    {
+      "path": "challenge_engine/PROOF_CARRYING_NUMERIC_HALLUCINATION_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "365c6c55e5241562d8f34bc3bf0a4a8d2aabaeab",
+      "size_bytes": 4052,
+      "sha256": "9b7c7f2d56061759d97e2a4865aceb781c9379940a07e22e6f920101b1eaa889"
+    },
+    {
+      "path": "challenge_engine/PUBLIC_CHALLENGE_SCOPE.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "5404d203ed570982c70a659f8deaa0565bad2421",
+      "size_bytes": 11008,
+      "sha256": "580561ca00cd8fefa6022da2f80e3cb5b458d52e1cc1bce36f1da86d7e9a4a49"
+    },
+    {
+      "path": "challenge_engine/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "912e3225c2110873f062b671f2a380925dd016c4",
+      "size_bytes": 18358,
+      "sha256": "95d85c3229205f354f9d091d4307ea2ac4fa3cbce8954a47a8e5fd0e4d75b613"
+    },
+    {
+      "path": "challenge_engine/RED_TEAM_RULES.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "2a554528b8408c6fdce69ec598e9157bce54d7c0",
+      "size_bytes": 7150,
+      "sha256": "0572a5cf5ba30194fc837894698e1d9511eb83c783f89574dabf9d606ae4b739"
+    },
+    {
+      "path": "challenge_engine/SEAM_QUOTIENT_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6d20b3a2644c679358751a93cb2e2e05f9f8b8ba",
+      "size_bytes": 5163,
+      "sha256": "d64a7b5c7fc2dcb4e55c959f181ac31cf1edaf17b1854d259b9c36d5bb3b3abc"
+    },
+    {
+      "path": "challenge_engine/__init__.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "391ea3cefc93c08e436a4cf71c3ed68fd8ca2ae6",
+      "size_bytes": 53,
+      "sha256": "e2cbf57bb39a18d1b29edf6b08463d3e276c620a2ed879c3d3f33f7d3b554a8f"
+    },
+    {
+      "path": "challenge_engine/action_gate.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b968edc36a9d74913a694dbcd635254efb845012",
+      "size_bytes": 23053,
+      "sha256": "b1cc1a9ecd45b0ed3fb785008a87cb6d52864f19fcab25cd1c37a83fdb63a403"
+    },
+    {
+      "path": "challenge_engine/challenge.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "af383ba3a28dc50a3cb9ed0a280a3e10d26d32af",
+      "size_bytes": 1955,
+      "sha256": "87b7b6e49b0a8591a9058729460ecc2ae8d854019d0832cb785b788b033c7557"
+    },
+    {
+      "path": "challenge_engine/engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "cc591b4c67904fc22ffd2bd466a3e3b100714ceb",
+      "size_bytes": 228,
+      "sha256": "51ac54667dbc3bf6aaa69bb1c17a4c045e213ab1bfc1d6ab7ef80004070737f8"
+    },
+    {
+      "path": "challenge_engine/engine_v2.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "73c7e32a889225707660a850f28fff0c7a42c54b",
+      "size_bytes": 30385,
+      "sha256": "d2ffb1bf32f026d8a740bd3477a14a6298a58a776f1bd70364e1a0912e61e02a"
+    },
+    {
+      "path": "challenge_engine/engine_v3.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "463c6715ee8488a285c77ee39b4254ec1c3d6fb0",
+      "size_bytes": 15274,
+      "sha256": "5f9ab35168efaed3b721faab1642476cfd697b95ea28fd4738c0d7c098d468cc"
+    },
+    {
+      "path": "challenge_engine/engine_v4.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "7ebaa5cac4b4097e98611cc9c59b10210407454c",
+      "size_bytes": 25531,
+      "sha256": "f83c9c79ff909dfd661fa9dafb17fc437026b416846a0252a3db9896669d1686"
+    },
+    {
+      "path": "challenge_engine/engine_v5.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "655240e3c5cb2704297e8e09d0d19e18eff0c378",
+      "size_bytes": 10722,
+      "sha256": "11e2c46743d8aca14a3a11854491cf473803405b097b95db789b4d60e9dc2562"
+    },
+    {
+      "path": "challenge_engine/engine_v6.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "8ce0a7828f620cf122014f2a45afe27453983c1f",
+      "size_bytes": 13006,
+      "sha256": "bc297a6d16b0c0027752f1c5fea343e04d53c45bd7aee59a80031d8a979858bf"
+    },
+    {
+      "path": "challenge_engine/engine_v7.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "26bb9a0750ec69d1678c8906dabfe8e1b0298241",
+      "size_bytes": 8302,
+      "sha256": "61f34b61dea37c12517cea24c08f005d4d72ff60f3946116fb28597facfa6460"
+    },
+    {
+      "path": "challenge_engine/examples/agent_action_challenge.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "79e0b7c9bd03fb90530342063efe99ad27bebb25",
+      "size_bytes": 2403,
+      "sha256": "47925390772856a15a5bd2e9f8d9615cfd98c78f6884257bca83d4628b74aa68"
+    },
+    {
+      "path": "challenge_engine/examples/arithmetic_ball_challenge.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "788da87ae18c8eba8251d14b8498cf50336f5616",
+      "size_bytes": 1930,
+      "sha256": "8df5df9c7deb5dde7a479fe9f535da099b547776588d7ff2ad7c4501d3a10eb5"
+    },
+    {
+      "path": "challenge_engine/examples/math_challenge.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d08571b1a063676f1030846dc3f2e06fd912b3c1",
+      "size_bytes": 1215,
+      "sha256": "cd07779e0a8b8108d3efbb94d81734477fe5da86b4b8a8e29af309c3d61d2947"
+    },
+    {
+      "path": "challenge_engine/examples/nonformal_behavioral_challenge.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "031a6ccc8aa71f58a10b35b7e15127426b711115",
+      "size_bytes": 1325,
+      "sha256": "ca11ccd86dce151e4ced1d9ee5b3889aa217c873d25c46f6681b11ae44afa929"
+    },
+    {
+      "path": "challenge_engine/examples/seam_quotient_challenge.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "54d43290d2f5bd98993261de53b0a7a1e4c3ddf5",
+      "size_bytes": 1354,
+      "sha256": "a4da53125d9d74c12ece35d12786c49a61384bef97075ef802806ac42b309edf"
+    },
+    {
+      "path": "challenge_engine/examples/security_audit_challenge.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "3646c96b4a1e2c018133259f99013e6a82b6a6d2",
+      "size_bytes": 1307,
+      "sha256": "bda5b164160c096ef94e07ad795b735d06a529911e6327dbbe72a0d270815740"
+    },
+    {
+      "path": "challenge_engine/packages/agent_action.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "839c17552b6fae6957fb51431c6f7db2f33626f0",
+      "size_bytes": 618,
+      "sha256": "450340e44e9196f0ab3fb40748d902d4da05f18348b3a17ccf0cdcd6530e30ee"
+    },
+    {
+      "path": "challenge_engine/packages/code.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "0b6acc4da69933204f17a32eb78d759b5ea029fb",
+      "size_bytes": 535,
+      "sha256": "8f47e1f189663dbf9db7998adf7fa77ee3ddaaaf02cc2c82f25eb41ab1dc8a18"
+    },
+    {
+      "path": "challenge_engine/packages/logic.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b3673501c9a9a156526a23c2b30cc98cffc46a6c",
+      "size_bytes": 497,
+      "sha256": "9398d09336ca13b15bd876d3876ff6e91e527329190f7921e9d234a83b8e21b3"
+    },
+    {
+      "path": "challenge_engine/packages/math.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4c4eb2048d25910e4a95a2ba4941a4a87d947325",
+      "size_bytes": 536,
+      "sha256": "9b152beecd85cb8b4fa9f8859e1255212c57e4429e37d2cf642dc3d28180065f"
+    },
+    {
+      "path": "challenge_engine/packages/security_audit.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d24dbd7289770b90c20d767f21842a8feac4ff51",
+      "size_bytes": 612,
+      "sha256": "2225b6970fac93a5fead9f4c26113192036360e5c55ccabc69e7222175815147"
+    },
+    {
+      "path": "challenge_engine/schema/challenge.schema.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b2eda8770d05990e11beab1c5cf94d73549cff05",
+      "size_bytes": 7651,
+      "sha256": "04241d298c916a882b2d43b98a93c2661277df893950055f31126dbb2620a7a0"
+    },
+    {
+      "path": "challenge_engine/schema/result.schema.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "3cd01674d826d5cd211b9f707da808ff774c9459",
+      "size_bytes": 1570,
+      "sha256": "8cbe0bff0604a356edbe118a30e77353f945616a8fcf847f125e5e4aa7523d3c"
+    },
+    {
+      "path": "challenge_engine/strict_json.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ca3027f8953cd3d19697de245a76732e3e5e5933",
+      "size_bytes": 2302,
+      "sha256": "820da32d16829d73b0ea28e4b8ccba0b7b5b05f6fb4e695fa680eb635c285198"
+    },
+    {
+      "path": "challenge_engine/tests/test_challenge_engine.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "25c4e12addd8d60415baed9211b69e675cb6896b",
+      "size_bytes": 4542,
+      "sha256": "7499c6d047f764633d82b7cd7d33bb98180b5b682c4f71ebb39a9b81a592840b"
+    },
+    {
+      "path": "challenge_engine/tests/test_exact_rational_ball_arithmetic.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e125d6bdda7406beeb6918f1b9fc27c1c3a823d5",
+      "size_bytes": 7288,
+      "sha256": "4cd2d861e68807bc1a97d430ff5228fe875ba057b24f79a476391220404f0d88"
+    },
+    {
+      "path": "challenge_engine/tests/test_final_parser_ledger_audit.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4569ab6ed6c8ff4c0164ec054b1e82afe81e9f85",
+      "size_bytes": 8175,
+      "sha256": "9c5779854bb7d74496348574c2f0e076cd284e5f0b41df0fdf747208ceb9d83a"
+    },
+    {
+      "path": "challenge_engine/tests/test_final_release_adversarial.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "21db0c26f9f010c1419728c7ac7a327d651aa12f",
+      "size_bytes": 8861,
+      "sha256": "532c3c0488cc4932eafe4b3a4ef5b181661fce064dfa98def90a04790e125721"
+    },
+    {
+      "path": "challenge_engine/tests/test_proof_before_action.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "832613dd6e9a4a04a0712122a6405e1159790aee",
+      "size_bytes": 14035,
+      "sha256": "8705e547d0b7c5c4f7c5bf005a4bd022dd4fbbc720138ae64a631b6ab381a0ba"
+    },
+    {
+      "path": "challenge_engine/tests/test_proof_before_action_external_red_team.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "871460033e2b76636a81894d63b653aef6b733bb",
+      "size_bytes": 5607,
+      "sha256": "17b22ec4631bd2ea9943f65cf61e654c6c72f92a8e5c6e5dc5f21422209f680c"
+    },
+    {
+      "path": "challenge_engine/tests/test_proof_before_action_self_red_team.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "03c8489209b6357695dc3f43192a56dab51cef8c",
+      "size_bytes": 13101,
+      "sha256": "779d18e9c8261213cde5bb49ef2c008a3290859ca59267206ef916c28754276d"
+    },
+    {
+      "path": "challenge_engine/tests/test_proof_carrying_numeric_hallucination.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d3fadccb4b8a2be71de5a55a5eabdd0fbc393ccb",
+      "size_bytes": 5547,
+      "sha256": "1e7666984b8ae5a4161b3e62ddff7f7c0f7977cc547c55a3ab41048bc509a378"
+    },
+    {
+      "path": "challenge_engine/tests/test_red_team_contract.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "dbb50c5c116c67bded314462ebf54054de127854",
+      "size_bytes": 4844,
+      "sha256": "64a436bb1a5c9f788dcbf914312887114ec82a08f1d5f3038b84c1fa32234726"
+    },
+    {
+      "path": "challenge_engine/tests/test_seam_quotient_theorem46.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e72d83b9040bb5a51faa7d3d891e68933a896a79",
+      "size_bytes": 5765,
+      "sha256": "37044ee2c989faaafd7c51634cc544b572faaa25b95c3765a248abdbd777f347"
+    },
+    {
+      "path": "docker-compose.yml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "1f99fa1b960ec1b4281db8dc9512a8409be9dd2e",
+      "size_bytes": 386,
+      "sha256": "7df7a1f12c583baacab666100f6effb3f3e131bd9126dd487f4ce086ef893415"
+    },
+    {
+      "path": "docs/DEPLOYMENT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "78d76143ea70b010a754b3a95c7d23a034e6ce3f",
+      "size_bytes": 6319,
+      "sha256": "796c4d1e44d680a4bdcb45c2265ea21165343b9c5231b160085a37cc5a86a17c"
+    },
+    {
+      "path": "docs/ECL_FINALITY_INTEGRATION.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "1b025373d9e1381f58eb151d3554c55c702810b6",
+      "size_bytes": 3665,
+      "sha256": "1f19500636950c57d3fc14c7944443ac609dce4d391e093271238124b01bfb11"
+    },
+    {
+      "path": "docs/FUTURE_ARROW_INTEGRATION.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "77beb0d4fb9a247fe196727d5d97f3c3326380b8",
+      "size_bytes": 4680,
+      "sha256": "0f5149c6daea8efbf3df59c5e233a40e40e7bc10f68c4d23c6254ebf3aa55ab7"
+    },
+    {
+      "path": "docs/LAMBDA_LAPLACE_INTEGRATION.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "fa1e4ace3bf66664b08be925381bbc8c3e79149a",
+      "size_bytes": 4412,
+      "sha256": "b8fe868c45a812f09f7610f154bce4fb506704840f6f56832b2b7737126345c2"
+    },
+    {
+      "path": "docs/PRODUCTION_CHECKLIST.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e18c35fdee03a316499137e4e1a64c427f2b030d",
+      "size_bytes": 1778,
+      "sha256": "d192b3777e18f92458cfb9fe6c7b25d701e182398643ca0f82bae10d6ed9588e"
+    },
+    {
+      "path": "docs/PUBLIC_RELEASE_BOUNDARY.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a11da5e1110be010d40ec1d9c257d8c21529b021",
+      "size_bytes": 1146,
+      "sha256": "7b33cab13e569284a684ced506c8e8176423e2018e6790e493d6ba77b690849a"
+    },
+    {
+      "path": "examples/evaluate_request.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b543d8079c7651848760a7c72b7c7c4fb4700eca",
+      "size_bytes": 394,
+      "sha256": "977a7bf0a9f042f08351660d5f011464ad127c5bdb9fb4f0f385d152c467a05d"
+    },
+    {
+      "path": "formal_proof_challenge/FPG3_PUBLIC_LAUNCH.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6c15100372f77bdd6d5f809820cfb15966f1a53b",
+      "size_bytes": 4180,
+      "sha256": "63bb258f8207b870c88a9687abccc1ac69dee7d19cd5d6fe26f3b291c9e1d0a8"
+    },
+    {
+      "path": "formal_proof_challenge/FPG3_VERIFICATION_STATUS.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "f7cb1fb225e59ed4c8f1a1aa955c4f2a81f32834",
+      "size_bytes": 788,
+      "sha256": "e27d97a8b9318c2d85c5db5aac41d4152babc12c1da60a2fe0a5e11552e16dda"
+    },
+    {
+      "path": "formal_proof_challenge/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "0d007a6315bc27ce0acec4c5af046664a9c5f5c5",
+      "size_bytes": 5299,
+      "sha256": "fee0fa2ce5ef54b5c933c58f360dad45f93e827158f63635693844034b6c5a1f"
+    },
+    {
+      "path": "formal_proof_challenge/THREAT_MODEL.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b88d62b8d987a1849a5a8c80966ff9579b7c9e04",
+      "size_bytes": 1750,
+      "sha256": "48e67f2a64d468063575ab8c3f5045fcb521c874b390d55585f5fe6ac84ed13c"
+    },
+    {
+      "path": "formal_proof_challenge/__init__.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "057c39a38bae8d59906793ede4c2bb7e928c78b5",
+      "size_bytes": 73,
+      "sha256": "ec34db6568b3f59eb93196f43e9b4516ecc730ab7fc29fbcbf72aa11e256aa74"
+    },
+    {
+      "path": "formal_proof_challenge/anchor.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a8f710e7bd31381d6ec8504a73a8c2d54a005b47",
+      "size_bytes": 13259,
+      "sha256": "dc0b515b3a9242ccfcd0dca309590ff8b49b12a8243329b60be5036826021b9b"
+    },
+    {
+      "path": "formal_proof_challenge/anchor_site/index.html",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e72b1e770ed40b5010bf211602ce2b69a299a83a",
+      "size_bytes": 3071,
+      "sha256": "0cf1e77a91744e97a533bd1521505af786659d13ef99ae0961b2575cf822e18e"
+    },
+    {
+      "path": "formal_proof_challenge/app.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "9a415febe09522599de05f83239801a97f199ad3",
+      "size_bytes": 18687,
+      "sha256": "8b1088d63dd1c6487033a2c447cf20686b52758fe82cba3fb6123a0473788ee6"
+    },
+    {
+      "path": "formal_proof_challenge/deployment/build_hf_space_bundle.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "25749ea97d8c0903008763e745911a78baa20f0b",
+      "size_bytes": 2587,
+      "sha256": "f7b19ddf41d4644721118868cb4ec524560159d17f9140313c218864a538c633"
+    },
+    {
+      "path": "formal_proof_challenge/deployment/huggingface-space/Dockerfile",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "cd09766a16cc3cc3d3849f0ff19da7944868d1b4",
+      "size_bytes": 701,
+      "sha256": "1b041100429d32bcb0919748698c0258d64e1ffa58ab72667dd6ba77d233c180"
+    },
+    {
+      "path": "formal_proof_challenge/deployment/huggingface-space/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "17a14b86ca10122ddfb63e80222172db6b15b38c",
+      "size_bytes": 898,
+      "sha256": "de5063c05f529cfa6d0df32d5f94cf469abbb40134941c23ddace0cc6773bf14"
+    },
+    {
+      "path": "formal_proof_challenge/finality.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "faec2d9064d352c3855d229f9851fef5cbd29020",
+      "size_bytes": 26144,
+      "sha256": "f71d8da101ade69625f2aa93ccdbe3ce30e178f541dbcdf0bf2c6613be52b4c9"
+    },
+    {
+      "path": "formal_proof_challenge/fixtures/circular_proof.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "8da68afa599a1554ecfd6ffe080b3c6cd587f821",
+      "size_bytes": 438,
+      "sha256": "ef4c902866c6791f0e2bce793e90c9cd3c25ec1aff5b382cf9e5e18591031588"
+    },
+    {
+      "path": "formal_proof_challenge/fixtures/false_arithmetic.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e17b697f6b36f4a4f0905f6fe2ff3122fd460359",
+      "size_bytes": 358,
+      "sha256": "a194fe09ae9af437f5cccf5c9cf94215b8e4a4bef2e35d7281e624ac1a6e46e2"
+    },
+    {
+      "path": "formal_proof_challenge/fixtures/target_mismatch.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "f69d2a77050d8d32cb5b97013b14eb147e4d52e3",
+      "size_bytes": 348,
+      "sha256": "f2a48c109f3e93bf5f8cdf3998db562ec39837df164df2f29b83a72f273ab584"
+    },
+    {
+      "path": "formal_proof_challenge/fixtures/unsupported_lemma.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "22e6f92ad93b8bde3f2a46c8fdcd9320f42f795d",
+      "size_bytes": 259,
+      "sha256": "e64fb290d3e79add64cd9ec5e78fc61dd9290299c99790f0a8c7a2f06e20b1be"
+    },
+    {
+      "path": "formal_proof_challenge/fixtures/valid_arithmetic.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "25a79193abbd9b0cf8d395bf8dc96342711ac48f",
+      "size_bytes": 358,
+      "sha256": "9bde1d77d7a6537a71b6b488855e948eb9b28723d70c19d4cba6a090c3db8b87"
+    },
+    {
+      "path": "formal_proof_challenge/fixtures/valid_modus_ponens.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "5cb7dd35b3337cb49d167e270ae16a0c631d7143",
+      "size_bytes": 674,
+      "sha256": "087df59c192180d7c0bd910684c2c1dd2b5a3505a7b2436570f69d06743f56f9"
+    },
+    {
+      "path": "formal_proof_challenge/proof_schema.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "918162b2b660d019a84e91da1126f515e208f75b",
+      "size_bytes": 2946,
+      "sha256": "50a74452f78d0cbfc14cd0b6c372769eb9143958769d90caefe2f3b2aadcebf8"
+    },
+    {
+      "path": "formal_proof_challenge/public_receipt_schema.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "27dd23ac5f73cb7232115c898a56b0ce6ffa8da6",
+      "size_bytes": 3375,
+      "sha256": "20c3a71b63c15c6647acc6d28e07bdfa84f789fd51160f4e04afce5f2df5a447"
+    },
+    {
+      "path": "formal_proof_challenge/verifier.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "702a10d5c94f40a93ab283ce8541388af397d1cf",
+      "size_bytes": 18602,
+      "sha256": "be3461154e0db9f176a7cb7455643cc42e12cb389922fd2979e1701095768bea"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "0cdb97206b1a706777324ca26344428aa0368972",
+      "size_bytes": 4417,
+      "sha256": "73e33500c370f264dc5a75ea072890f59e7f4f469cec3d64ccbd1c55d39dc47a"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/ADVERSARIAL_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "cb541037dce1bf501e736883a5cc177060e7305a",
+      "size_bytes": 4184,
+      "sha256": "4cc5d5f28f707471a6bb61de8260f0fa411695aa1fc085b16f0c138de90ae261"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/HILBERT_EXTENSION_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "1de9c137a8689a61a3555a900bb7dbc7bf389afc",
+      "size_bytes": 2227,
+      "sha256": "f25f984d778a9ab507113ff3177b02d21ccd493ecc14207b97f2a615399b53c7"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/NATIVE_FLOW_COMPLETION_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "230945e456bf5d9167ab3433a3fe2af7d314b3a5",
+      "size_bytes": 2642,
+      "sha256": "5977bd2d6a086926dcfd4c11ff6242890c86e63db16d31263757eb3ed3ef65e5"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/hilbert_extension_result.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "bfe7f397ab4273035bc2658b71c4a9e0fef1d9b0",
+      "size_bytes": 686,
+      "sha256": "30b8bf95ee84a7056a65f246dd4a45249ec9635febdef64930443571316925b2"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/native_flow_completion_result.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "30683fab732d3f1686e04dc339791613c7446226",
+      "size_bytes": 1433,
+      "sha256": "289fa94b70b6e5719b9f69549d128190e6644d1e814750059b17f501104ebf64"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/result.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a705eaa57b77494bddfc24b5dadfe77262329d05",
+      "size_bytes": 1747,
+      "sha256": "679fc084919297b8ffb4dd2a7feefa0d9709ef25608ca92a4c303d0ad06ba208"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/run_adversarial_audit.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ffd3d70ea7777b384bbc4d76e1eb326fb089d0df",
+      "size_bytes": 12455,
+      "sha256": "46363f207f98fbe1181b3e5fc4478cc209836e32d7128a08826a97f758e3c342"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/run_hilbert_extension_audit.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "0660cab498b5d3c9cb9761488ae4c0ab49be309a",
+      "size_bytes": 6531,
+      "sha256": "449c9b48022a9c3fdc91f1c2856106eee22c8469d00fd2154afecaa582937e10"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/audit/run_native_flow_completion_audit.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "0998e4a4ad3aa10ae0c5250fd28aa25fe68130b6",
+      "size_bytes": 10872,
+      "sha256": "194ae3500ac47c7499a4ad6b6b69f6fb37e0810e824ad37801dc5ae0a571489c"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/main.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6ab00f52c3399cdf5706a8bbbd7bc92410899c5b",
+      "size_bytes": 4663,
+      "sha256": "9125fb4a4a456deb878a0fda9c84c735b96322b39f567e488964be1f6d63a325"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/01_architecture_and_invariant.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ec5e9d24070fa00e7e142ced718d0faacc7b8bb1",
+      "size_bytes": 9665,
+      "sha256": "a7cbe781a9ef853561b73ee7d6303cd964a32054e46e1a039e2879c9a9ade90e"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/02_validator_and_target.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "9d557de14f14c17e3a53ccfdb0835646350c0608",
+      "size_bytes": 4947,
+      "sha256": "603cc2fbcbfd5c061c56421a2111ac570293dc664872fe425cc77b2c5951426a"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/03_curvature_and_proof.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "2b44b1954402f03924800247223c9c4ca079b7a6",
+      "size_bytes": 5833,
+      "sha256": "7c96f6b3d92a2a31e43f4ac40f4335222ecea1f36caa9153b1f05a6a41275a08"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/04_gate_and_status.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "c93935d5dcd79d33afef5f4006287857b378f41c",
+      "size_bytes": 5443,
+      "sha256": "002cd127a9c4561937d7de03b2cab388731d7492789e684ee68f66164d543edb"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/05_refinement_persistence_main.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "adde3270a78724f58ed3eba2c57ea97e46a5a412",
+      "size_bytes": 7534,
+      "sha256": "771acb345f91faf2e13c0e61ac3c58a67a9b63e56c5dd5ed99e1ad47b5b4a475"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/06_hilbert_finite_channel_extension.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "33cba1329e92a47cea8bc059d79efad958cacf91",
+      "size_bytes": 3456,
+      "sha256": "1cfea967cf7b21e02dedc3d81cb1d92459fa816fd7e8ba2778a34ff72b34339a"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/06_native_flow_completion.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ab18bc7d24e15ec02b1f9690e04a2f2135937f11",
+      "size_bytes": 10513,
+      "sha256": "54faf162d6391d3b9cb10e1070778942eda91a1c3deaa4c81a6bd1e91ee0c587"
+    },
+    {
+      "path": "foundational_mathematics/invariant_gated_state_transitions/paper/sections/07_hilbert_covariance_corollary.tex",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a49ef7dedff1b1c1b814cd4538f099af17bcc585",
+      "size_bytes": 1515,
+      "sha256": "de9ebef2812a2c7b9b3955d0c2ad34790dd50c76dd76bbf6f0d30722c2ae0be6"
+    },
+    {
+      "path": "local_adversarial_baseline_comparison_v1.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "98156649bf6d7607654ac7b7b5eeb96b77397f2a",
+      "size_bytes": 3561,
+      "sha256": "5d8c1d15692a94afb76639da57ab4469e3ef0ed772171ce17000230d2b96aaf6"
+    },
+    {
+      "path": "local_adversarial_cases_v1.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "29753864b93d5728d2cae962e7bd6dba84a9264a",
+      "size_bytes": 6506,
+      "sha256": "0a790843ad8f38212aa3cfb2e9f8dee2fa572fe8eb7c7fec929f5bedc4645e0e"
+    },
+    {
+      "path": "local_baseline_comparison.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "12aebdc3680255ebea97aa1e8be11c99203290a7",
+      "size_bytes": 4694,
+      "sha256": "0d1dbb158a8dd8a9517c9d7f2d928996a944fff872b9476a0666965764e77fad"
+    },
+    {
+      "path": "local_benchmark_cases.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ca101b17bf45db8f0c7b3bcd10ddd6e3b9410864",
+      "size_bytes": 4268,
+      "sha256": "43419f9b1252af180874a321b70b53ba366128d9dfe37222963e98764d5c4a89"
+    },
+    {
+      "path": "local_contract_check.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "147eae4e221ece5a6a2534dc45da28340fb21838",
+      "size_bytes": 2374,
+      "sha256": "2edef2e92ac9ef8265fe34cbc0e8765f608638d4da3d87157795a0b973314d76"
+    },
+    {
+      "path": "local_final_closure_bundle_v2.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "7a37878d28ecd71b4311f2edcb9146fe8cee6ee8",
+      "size_bytes": 6092,
+      "sha256": "beb84f458d0b5f8f8b8deb7b8a78fb9f7036a1e22465586832abb6884c831d67"
+    },
+    {
+      "path": "local_full_stack_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "44c684f3584b479e0846bf9595182f705464b36d",
+      "size_bytes": 14003,
+      "sha256": "c69052345a5161a292864c551e57340341c6c75394cd9ea3d4bc9280f5e30eab"
+    },
+    {
+      "path": "local_integrity_probe_v1.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "2fcfcd96e249504b1f6e261adb0b6bb9e4d6a251",
+      "size_bytes": 37,
+      "sha256": "c2649adda88d140252e6ebc0b9d817eefd4b94487e890dbf82d63250bbb4b378"
+    },
+    {
+      "path": "local_release_api_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6a9c538c03e855a90c11cfdc8441aec7e2677d75",
+      "size_bytes": 7899,
+      "sha256": "fbf729caae0c978a858d6e98585816b2b1b1fee01cec03cd05b0f22b26411842"
+    },
+    {
+      "path": "local_release_controller_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "9a43e837426de8d2b081e8db30acba44afade6d7",
+      "size_bytes": 5992,
+      "sha256": "fecea181ee987110414621370eff5e532e32306070ed3e67e438d4910496976f"
+    },
+    {
+      "path": "local_repair_expectations.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "4a5394141b117f69dd2975b892bad7bb1294e8ae",
+      "size_bytes": 4736,
+      "sha256": "38cddb213ff4a7abee2755ba5f592b1dc1b3d1bbcbd0f084ceaf1a047b297985"
+    },
+    {
+      "path": "local_repair_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "10e458c440f4cafb447e1e61e88861e03312aede",
+      "size_bytes": 4497,
+      "sha256": "2122d3f889602e103d7382ee6d5744fe98b399cc92b2aa696e4d3d80acbe9269"
+    },
+    {
+      "path": "local_resolution_api_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "1d0d0dc24f5d3d5db853de565259c485c911e09f",
+      "size_bytes": 8428,
+      "sha256": "bda03c689846dd6aa437db2855791b6b28efb8378388eab9c8e62cdc416b8a35"
+    },
+    {
+      "path": "local_resolution_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "88618b9c5e6eda4e0a860684542662ea74f72b8a",
+      "size_bytes": 6293,
+      "sha256": "789ffc650ffc6caaa864bf71d199eec20d31ddba949763ade432691831246468"
+    },
+    {
+      "path": "local_rnke_closure_validator.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "d3b783ac739bc12a3c6579aed215024bc9a2a0c0",
+      "size_bytes": 4032,
+      "sha256": "edc58aabdcf19e9b93be07201187b0bc35c5da5851442c8e9753045c6cf901bb"
+    },
+    {
+      "path": "pyproject.toml",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "c2351bbe6d6899eb15ea9b753ac07d913fc4862c",
+      "size_bytes": 1014,
+      "sha256": "c6e2897e11e337c448124b58f5ab880205e558e2826df4b56cf1b1fd3638bcdf"
+    },
+    {
+      "path": "red_team_challenge/CHALLENGE_AUTHORIZATION.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "323216ec69631ac5ca35deb35bafe4f52607d31b",
+      "size_bytes": 4003,
+      "sha256": "f508f1f28c4114a48562123e2f66ec787fc330b989b98c35455a21c28b2a1f5c"
+    },
+    {
+      "path": "red_team_challenge/CHALLENGE_MANIFEST.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b572f0704cc219ea86442c71c93cd2990cf481f5",
+      "size_bytes": 2498,
+      "sha256": "e7396d758734de71e864ebc642630a7bee9ee6f5c459305a07de10190c1e2a81"
+    },
+    {
+      "path": "red_team_challenge/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "53186a62d4b91e00706fbe89b49c1ebf988643ca",
+      "size_bytes": 10000,
+      "sha256": "82584ce09f8b052ce7ec5c98914140fa5f8153557fe1e977aa866a0b72717341"
+    },
+    {
+      "path": "red_team_challenge/SELF_RED_TEAM_AUDIT.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "a6497b8df3985459420939ed0087fd2e0679a9a8",
+      "size_bytes": 11716,
+      "sha256": "1757b4bdd319e5ead844ca4f5b5c6c9f50f8810822c5082c20bc6bdf85e163d0"
+    },
+    {
+      "path": "red_team_challenge/SUBMISSION_SPEC.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "5449809e1353397d80bb7d374b1c96551602bcbb",
+      "size_bytes": 4585,
+      "sha256": "c92136b799a09dc7ef21cfa28e1d7ee44bfc40cf74e0aee32eb8aa1cd8ed72a9"
+    },
+    {
+      "path": "red_team_challenge/release_check.py",
+      "mode": "100755",
+      "git_object_type": "blob",
+      "git_object_sha1": "3afe1905de5a30b9b0f0defab4ee6c9d64957d4a",
+      "size_bytes": 10063,
+      "sha256": "328b62a8a6e55d0c17e85fee0ff07502bc5b8584ddb8beb065204f1291130aa3"
+    },
+    {
+      "path": "red_team_challenge/submission.schema.json",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "6b5fc77068b5143c6dcc78edf15d0aa245a16209",
+      "size_bytes": 3120,
+      "sha256": "685f6c0f3b38d7cc7b2eeb0edc7081cbfa6f02e42880a7ee957a19dcf5299073"
+    },
+    {
+      "path": "red_team_challenge/submissions/README.md",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "baaef5921656f90209a46cdd6b920e58341d28e7",
+      "size_bytes": 413,
+      "sha256": "3b3de74fe1788c285e2dbb5abec4763f21d1908110c7a9d6cb6353347916cfe0"
+    },
+    {
+      "path": "red_team_challenge/verify_submission.py",
+      "mode": "100755",
+      "git_object_type": "blob",
+      "git_object_sha1": "260b2cd1dbb370e802d85f9930f074d5153ec92c",
+      "size_bytes": 11342,
+      "sha256": "591917f1ab599242ece058a96a635272d57c81d65e680e073391b1a187470d86"
+    },
+    {
+      "path": "requirements.txt",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "e67574d981563d9b9af24d0c7b1e55ad0c7411f0",
+      "size_bytes": 96,
+      "sha256": "227eed33d8f0b0ef5d0c567f28ab2c837b5b4ccff0fef94ceb32605ee85d64ad"
+    },
+    {
+      "path": "tests/test_formal_proof_challenge.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "ddffeb4112b510273419cf1b4ef513bf90ed5096",
+      "size_bytes": 4059,
+      "sha256": "3cd615ac281c4096536b65e4c1bd16c814186739de21f59124ba46d4f3f91f01"
+    },
+    {
+      "path": "tests/test_formal_proof_finality.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "dd1ddd73a0f9a24d3961aa71a4267de0111de4f0",
+      "size_bytes": 7176,
+      "sha256": "4b4ad06302d44138e56a77b4f45de8420d6df7847abe0c8dd41bed9fb49b827a"
+    },
+    {
+      "path": "tests/test_fpg3_anchor.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "76d038689b8287c03f8928352f2794444fa4efda",
+      "size_bytes": 3475,
+      "sha256": "473fb53b54b3841407a71ce497ce8c904a556031847c56aaf3ce2c59b48c1c25"
+    },
+    {
+      "path": "tests/test_fpg3_deployment.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "b44c69baec73e8a55db6cfbdd971717beeb91094",
+      "size_bytes": 1460,
+      "sha256": "99d142559921ba521cc147e30f7eee41113a86aa9bd1c66be29ab0cd4f53f65a"
+    },
+    {
+      "path": "tests/test_paninian_elision_ledger.py",
+      "mode": "100644",
+      "git_object_type": "blob",
+      "git_object_sha1": "64c749e11851e9a2767af1226038c0cc41109aa5",
+      "size_bytes": 3563,
+      "sha256": "2d3a397abd73c648e309d43b9dcb7287887dd671490b85400641ec3822aae6c3"
+    }
+  ],
+  "published_releases": [
+    {
+      "tag": "v1.0.0",
+      "published_at": "2026-07-10T17:49:29Z",
+      "url": "https://github.com/Parveen117/Artificial-intelligence/releases/tag/v1.0.0",
+      "immutable": false,
+      "tag_object": {
+        "sha": "5762cd5f8109d18e367605d4b4ca34b58f5ad0b0",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Parveen117/Artificial-intelligence/git/commits/5762cd5f8109d18e367605d4b4ca34b58f5ad0b0"
+      }
+    },
+    {
+      "tag": "v1.0.1",
+      "published_at": "2026-07-10T18:00:31Z",
+      "url": "https://github.com/Parveen117/Artificial-intelligence/releases/tag/v1.0.1",
+      "immutable": false,
+      "tag_object": {
+        "sha": "28a0724d95bcc2dd4eff00d6e15ea5816f6a5ef2",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Parveen117/Artificial-intelligence/git/commits/28a0724d95bcc2dd4eff00d6e15ea5816f6a5ef2"
+      }
+    },
+    {
+      "tag": "v1.0.2",
+      "published_at": "2026-07-12T05:30:04Z",
+      "url": "https://github.com/Parveen117/Artificial-intelligence/releases/tag/v1.0.2",
+      "immutable": true,
+      "tag_object": {
+        "sha": "68e5a2acbccc51541450b894437d00a71d6aade9",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Parveen117/Artificial-intelligence/git/commits/68e5a2acbccc51541450b894437d00a71d6aade9"
+      }
+    },
+    {
+      "tag": "v1.0.3",
+      "published_at": "2026-08-20T03:14:53Z",
+      "url": "https://github.com/Parveen117/Artificial-intelligence/releases/tag/v1.0.3",
+      "immutable": false,
+      "tag_object": {
+        "sha": "7bb6fba989558fb055a812f1f72fa9b4e737b73c",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Parveen117/Artificial-intelligence/git/commits/7bb6fba989558fb055a812f1f72fa9b4e737b73c"
+      }
+    }
+  ],
+  "zenodo_archive": {
+    "repository": "Parveen117/Artificial-intelligence",
+    "record_id": 22020873,
+    "doi": "10.5281/zenodo.22020873",
+    "concept_doi": "10.5281/zenodo.21300178",
+    "version": "v1.0.3",
+    "record_created_at": "2026-08-20T03:14:57.098504+00:00",
+    "record_modified_at": "2026-08-20T03:14:57.286477+00:00",
+    "metadata_license": {
+      "id": "cc-by-4.0"
+    },
+    "record_url": "https://zenodo.org/records/22020873",
+    "metadata_url": "https://zenodo.org/api/records/22020873",
+    "archive_files": [
+      {
+        "filename": "Parveen117/Artificial-intelligence-v1.0.3.zip",
+        "size_bytes": 409404,
+        "download_url": "https://zenodo.org/api/records/22020873/files/Parveen117/Artificial-intelligence-v1.0.3.zip/content",
+        "zenodo_checksum": "md5:ab89cff017aa375ef52ecacf8c1304a8",
+        "sha256": "35739ce1100815de987d24e4f1657a3b532fb9b3548ebcf67203355d0917a0db",
+        "git_blob_comparison": {
+          "matched": true,
+          "files_checked": 184,
+          "missing": [],
+          "extra": [],
+          "changed": []
+        }
+      }
+    ],
+    "verification_time": "2026-10-26T14:20:50.800822+00:00",
+    "release_commit": "7bb6fba989558fb055a812f1f72fa9b4e737b73c",
+    "status": "verified"
+  }
+}
